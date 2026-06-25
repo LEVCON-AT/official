@@ -57,7 +57,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [`${baseUrl}/og-image.png`],
     },
     icons: {
-      icon: '/favicon-512.png',
+      icon: [
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+        { url: '/favicon-512.png', type: 'image/png', sizes: '512x512' },
+      ],
       apple: '/favicon-512.png',
     },
   };
