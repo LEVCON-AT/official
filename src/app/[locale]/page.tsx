@@ -88,7 +88,7 @@ export default async function LocalePage({ params }: Props) {
         founder: {
           '@type': 'Person',
           name: 'Mst. Enric-Bernard Sep-Albi, BA, MBA',
-          jobTitle: locale === 'de' ? 'KI-Berater und Trainer' : 'AI Consultant and Trainer',
+          jobTitle: locale === 'de' ? 'Organisationsentwickler und KI-Trainer' : 'Organisational Developer and AI Trainer',
         },
         address: {
           '@type': 'PostalAddress',
@@ -138,13 +138,7 @@ export default async function LocalePage({ params }: Props) {
       />
       <LevconPage locale={locale} />
       <noscript>
-        <div style={{
-          padding: '2rem',
-          textAlign: 'center',
-          background: '#F0EFEC',
-          color: '#1C1C1A',
-          fontFamily: 'system-ui, sans-serif',
-        }}>
+        <div className="noscript-msg">
           {locale === 'de'
             ? 'Diese Website benötigt JavaScript für die Navigation. Bitte aktivieren Sie JavaScript in Ihrem Browser.'
             : 'This website requires JavaScript for navigation. Please enable JavaScript in your browser.'}

@@ -177,6 +177,25 @@ export default function LevconPage({ locale }: { locale: string }) {
 
   return (
     <div className="levcon-body">
+      {/*
+      ╔══════════════════════════════════════════════════════════════════╗
+      ║                                                                  ║
+      ║   You're reading the source code. We appreciate that.            ║
+      ║                                                                  ║
+      ║   This website was crafted with care — and with the help of AI.  ║
+      ║   Every line was reviewed, refined, and approved by a human      ║
+      ║   who cares deeply about quality, accessibility and craft.       ║
+      ║                                                                  ║
+      ║   If you're the kind of person who inspects source code,         ║
+      ║   you're exactly the kind of person we'd love to work with.      ║
+      ║                                                                  ║
+      ║   Want a website like this — clean, fast, and built with         ║
+      ║   intention? Let's talk.                                         ║
+      ║                                                                  ║
+      ║   hello@levcon.ai · levcon.ai                                   ║
+      ║                                                                  ║
+      ╚══════════════════════════════════════════════════════════════════╝
+      */}
       {/* Skip Navigation */}
       <a href="#main-content" className="skip-nav">
         {locale === 'de' ? 'Zum Inhalt springen' : 'Skip to content'}
@@ -385,7 +404,7 @@ export default function LevconPage({ locale }: { locale: string }) {
                 </a>
               </li>
               <li>
-                <div className="contact-row" style={{ cursor: 'default' }}>
+                <div className="contact-row contact-row-static">
                   <span className="contact-lbl">{t('kontakt.email_label')}</span>
                   <span className="contact-val">{t('kontakt.email_value')}</span>
                   <button
@@ -461,7 +480,14 @@ export default function LevconPage({ locale }: { locale: string }) {
                     onChange={(e) => { setFormConsent(e.target.checked); setFormErrors(prev => ({ ...prev, consent: '' })); }}
                   />
                   <label className="form-checkbox-label" htmlFor="contact-consent">
-                    {t('kontakt.form_consent')}
+                    {locale === 'de' ? (
+                      <>Ich stimme der Verarbeitung meiner Daten gemäß{' '}
+                        <button type="button" className="inline-link" onClick={() => openPanel('datenschutz')}>Datenschutzerklärung</button>{' '}
+                        zu.</>
+                    ) : (
+                      <>I consent to the processing of my data in accordance with the{' '}
+                        <button type="button" className="inline-link" onClick={() => openPanel('datenschutz')}>Privacy Policy</button>.</>
+                    )}
                   </label>
                 </div>
                 {formErrors.consent && <div className="form-field-error">{formErrors.consent}</div>}
