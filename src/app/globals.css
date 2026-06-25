@@ -219,7 +219,7 @@
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--lc-ink);
-  opacity: 0.6;
+  opacity: 0.67;
 }
 
 .site-slogan {
@@ -366,7 +366,7 @@
   line-height: 1.82;
   font-weight: 300;
   color: var(--lc-ink);
-  opacity: 0.6;
+  opacity: 0.67;
 }
 
 .about-body p + p { margin-top: 0.9em; }
@@ -407,7 +407,7 @@
   font-size: clamp(0.87rem, 2.2vw, 1rem);
   line-height: 1.85;
   color: var(--lc-ink);
-  opacity: 0.62;
+  opacity: 0.67;
   margin-bottom: 2.25rem;
   font-weight: 300;
   max-width: 560px;
@@ -453,7 +453,7 @@
   line-height: 1.72;
   font-weight: 300;
   color: var(--lc-ink);
-  opacity: 0.62;
+  opacity: 0.67;
   margin-bottom: 0.55rem;
   max-width: 520px;
 }
@@ -510,7 +510,7 @@
 .step-body p {
   font-size: 0.88rem;
   line-height: 1.75;
-  opacity: 0.62;
+  opacity: 0.67;
   font-weight: 300;
 }
 
@@ -561,7 +561,7 @@
   line-height: 1;
 }
 
-.tier-desc { font-size: 0.82rem; line-height: 1.72; opacity: 0.62; font-weight: 300; }
+.tier-desc { font-size: 0.82rem; line-height: 1.72; opacity: 0.67; font-weight: 300; }
 
 /* ── FAQ ────────────────────────────────────── */
 .faq-list { list-style: none; }
@@ -587,7 +587,7 @@
   line-height: 1.78;
   font-weight: 300;
   color: var(--lc-ink);
-  opacity: 0.62;
+  opacity: 0.67;
   max-width: 540px;
 }
 

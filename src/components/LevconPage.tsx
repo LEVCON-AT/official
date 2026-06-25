@@ -30,6 +30,17 @@ export default function LevconPage({ locale }: { locale: string }) {
     };
   }, []);
 
+  // Handle browser back/forward — reset to home state
+  useEffect(() => {
+    const handlePopState = () => {
+      setActivePanel(null);
+      setIntroHiding(false);
+      setIntroGone(false);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const goHome = useCallback(() => {
     setActivePanel(null);
     setIntroHiding(false);
