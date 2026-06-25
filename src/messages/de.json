@@ -157,7 +157,7 @@
   "datenschutz": {
     "title": "Datenschutzerklärung",
     "title_shy": "Datenschutz&shy;erklärung",
-    "body": "<h3>Verantwortlicher</h3><p>Enric Bruns, Levcon.ai<br>[Adresse], Wien<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Erhebung personenbezogener Daten</h3><p>Diese Website erhebt personenbezogene Daten nur im erforderlichen Umfang. Eine Weitergabe an Dritte findet ohne ausdrückliche Einwilligung nicht statt.</p><h3>Cookies</h3><p>Diese Website verwendet keine Cookies.</p><h3>Ihre Rechte (DSGVO Art. 15–22)</h3><p>Auskunft, Berichtigung oder Löschung: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
+    "body": "<h3>Verantwortlicher</h3><p>Enric Bruns, Levcon.ai<br>[Adresse], Wien<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Erhebung personenbezogener Daten</h3><p>Diese Website erhebt personenbezogene Daten nur im erforderlichen Umfang. Eine Weitergabe an Dritte findet ohne ausdrückliche Einwilligung nicht statt.</p><h3>Schriftarten</h3><p>Diese Website verwendet die Schriftarten Cormorant Garamond und DM Sans. Die Schriftdateien werden vom eigenen Server ausgeliefert. Es findet keine Verbindung zu externen Servern (wie Google Fonts) statt.</p><h3>Cookies</h3><p>Diese Website verwendet keine Cookies.</p><h3>Ihre Rechte (DSGVO Art. 15–22)</h3><p>Auskunft, Berichtigung oder Löschung: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
   },
   "footer": {
     "impressum": "Impressum",

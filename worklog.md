@@ -8,9 +8,9 @@
 |---|-----------|-------|--------|
 | 1 | 🔴 Kritisch | Inhalte server-side im HTML ausliefern + i18n mit separaten URLs | ✅ done |
 | 2 | 🔴 Kritisch | OG-Image erstellen & einbinden | ✅ done |
-| 3 | 🟠 Wichtig | Google Fonts self-hosten (DSGVO) | pending |
+| 3 | 🟠 Wichtig | Google Fonts self-hosten (DSGVO) | ✅ done |
 | 4 | 🟠 Wichtig | Favicon + Apple-Touch-Icon erstellen & einbinden | ✅ done |
-| 5 | 🟠 Wichtig | sitemap.xml + robots.txt erstellen | pending |
+| 5 | 🟠 Wichtig | sitemap.xml + robots.txt erstellen | ✅ done |
 | 6 | 🟠 Wichtig | Impressum-Platzhalter mit echten Daten füllen | pending |
 | 7 | 🟡 Mittel | Skip-Navigation + Fokus-Management | ✅ done (in Punkt 1 integriert) |
 | 8 | 🟡 Mittel | Kontrast-Problem bei opacity 0.62 beheben | pending |
@@ -80,3 +80,23 @@ Stage Summary:
 - Twitter Card: summary_large_image mit Bild
 - theme-color: #F0EFEC, color-scheme: light
 - Punkt 4 (Favicon) und 13 (theme-color) als Mitnahmeeffekt erledigt
+
+---
+Task ID: 3
+Agent: Main
+Task: 🟠 Wichtig — Google Fonts self-hosten (DSGVO) + 🟠 sitemap.xml + robots.txt
+
+Work Log:
+- Verifiziert: next/font/google lädt Fonts bereits zur Build-Zeit herunter und liefert sie lokal aus
+- Agent Browser bestätigt: 0 Verbindungen zu fonts.googleapis.com / fonts.gstatic.com
+- Alle Fonts werden aus /_next/static/media/ (Cormorant Garamond, DM Sans) geladen
+- Datenschutzerklärung aktualisiert (DE + EN): Neuer Abschnitt "Schriftarten" ergänzt
+- sitemap.ts erstellt (Next.js MetadataRoute) — generiert sitemap.xml mit / und /en
+- robots.txt aktualisiert: Sitemap-Referenz auf https://levcon.ai/sitemap.xml hinzugefügt
+- Validiert: sitemap.xml korrekt generiert unter /sitemap.xml
+
+Stage Summary:
+- Fonts: DSGVO-konform, keine externe Verbindung zu Google
+- Datenschutzerklärung: Schriftarten-Abschnitt ergänzt (DE + EN)
+- Sitemap: https://levcon.ai/sitemap.xml (DE: priority 1.0, EN: priority 0.8)
+- robots.txt: Allow all + Sitemap-Referenz
