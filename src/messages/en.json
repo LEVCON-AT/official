@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "title": "Levcon.ai — AI Consulting & Training from Vienna",
+    "description": "Levcon.ai — AI consulting and training from Vienna. AI with Method, Impact with System. Enric Bruns helps companies deploy AI effectively, securely, and without the hype.",
+    "og_title": "Levcon.ai — AI Consulting & Training from Vienna",
+    "og_description": "AI with Method, Impact with System. AI consulting and training for companies in the Austrian and German-speaking market."
+  },
+  "header": {
+    "logo_aria_label": "Levcon.ai — Homepage",
+    "slogan_line1": "AI with Method",
+    "slogan_line2": "Impact with System",
+    "divider": "AI Consulting · Training · Vienna",
+    "nav_home": "Home",
+    "nav_schulungen": "AI Training",
+    "nav_framework": "Framework",
+    "nav_privacy": "Privacy Model",
+    "nav_faq": "FAQ",
+    "nav_kontakt": "Contact"
+  },
+  "about": {
+    "statement": "I am Enric Bruns\u00A0— AI consultant and trainer based in Vienna. I help companies deploy artificial intelligence effectively, securely, and without the hype.",
+    "body": [
+      "With over ten years of experience in IT consulting and enterprise environments, I understand how companies really work — and where AI makes a measurable difference. Not in presentations, but in the daily work of your employees.",
+      "My approach always starts with the goal, not the technology. Together we define what your company wants to achieve concretely. Only then do we select the right tools — while keeping data protection and governance firmly in focus.",
+      "In training sessions I focus on applied knowledge: your employees leave the workshop with skills they can use the very next morning. No lecture-style presentations, no buzzword bingo.",
+      "I don't sell software or platforms. Levcon.ai stands for clarity, structure and effectiveness — for companies in the Austrian and German-speaking market."
+    ]
+  },
+  "schulungen": {
+    "title": "AI Training",
+    "lead": "Every training is individually designed — tailored to your audience, your processes and your goal. No standard programme, no off-the-shelf slides.",
+    "items": [
+      {
+        "audience": "Executives & Decision-makers",
+        "format": "Half-day · Full-day",
+        "outcome": "Assess AI strategically, evaluate opportunities and risks, make informed decisions — without technical background.",
+        "topics": ["AI Fundamentals", "Risks & Governance", "Use-Case Evaluation", "Market Overview"]
+      },
+      {
+        "audience": "Operational Teams & Employees",
+        "format": "Full-day · Multiple Sessions",
+        "outcome": "Use AI tools confidently in daily work — from the first prompt to structured automation.",
+        "topics": ["Prompt Engineering", "Tool Selection", "Workflow Automation", "Quality Control"]
+      },
+      {
+        "audience": "IT & Technical Teams",
+        "format": "Advanced · Tailored",
+        "outcome": "Understand, evaluate and securely integrate AI infrastructure — from API access to local model deployment.",
+        "topics": ["API Integration", "Local Models", "Privacy Architecture", "Evaluation"]
+      },
+      {
+        "audience": "Industry-specific",
+        "format": "Fully customised",
+        "outcome": "Training that speaks your language — with examples, processes and tools from your industry.",
+        "topics": ["Finance & Compliance", "Healthcare & GDPR", "Industry & Production", "Others on request"]
+      }
+    ]
+  },
+  "framework": {
+    "title": "The Framework",
+    "lead": "Every engagement starts with a clear method. GOAL → LEVER → CONTROL is the structured way Levcon.ai thinks, plans and implements AI projects.",
+    "steps": [
+      {
+        "letter": "G",
+        "title": "Goal",
+        "paragraphs": [
+          "What should AI concretely achieve in your company? We start with the measurable outcome, not the technology. What problem are we solving — and for whom?"
+        ]
+      },
+      {
+        "letter": "L",
+        "title": "Lever",
+        "paragraphs": [
+          "Where does AI have the greatest leverage? We identify the right tools, processes and interfaces — separating hype from real value."
+        ]
+      },
+      {
+        "letter": "C",
+        "title": "Control",
+        "paragraphs": [
+          "How do you maintain oversight? AI projects need clear governance, measurable KPIs and an operating plan. Control is the foundation of lasting trust.",
+          "Success is measured concretely — not felt. Depending on the project, we track hours saved, reduced error rates, shorter throughput times or team adoption rates. Metrics are defined together before the project begins."
+        ]
+      }
+    ],
+    "metrics": ["Time saved", "Error rate", "Throughput time", "Adoption rate", "Cost per process", "Employee satisfaction"]
+  },
+  "privacy": {
+    "title": "Privacy Model",
+    "lead": "Three tiers. One promise: your data goes as far into the cloud as you want — and not one millimetre further.",
+    "tiers": [
+      {
+        "num": "Tier 01",
+        "name": "Classic",
+        "desc": "Commercial AI services with standard data protection terms. Ideal for general tasks without sensitive company data."
+      },
+      {
+        "num": "Tier 02",
+        "name": "Privacy",
+        "desc": "AI via business APIs, EU servers and data processing agreements (DPA). Your data is not used to train models."
+      },
+      {
+        "num": "Tier 03",
+        "name": "Local",
+        "desc": "Fully locally operated AI on your own infrastructure. Not a single byte leaves your servers."
+      }
+    ]
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "lead": "What I hear in almost every first conversation — answered directly.",
+    "items": [
+      {
+        "q": "Does our team need prior AI experience?",
+        "a": "No — and less prior knowledge is often actually better. We start where your team is, not where textbooks begin."
+      },
+      {
+        "q": "Are there fixed training packages?",
+        "a": "No. Every training starts with a conversation about your situation. Format, duration, content and examples are defined together — there is no off-the-shelf programme."
+      },
+      {
+        "q": "How is the success of a project measured?",
+        "a": "We define the metrics together before the project starts — for example hours saved per week, reduced error rates or team adoption rates. No project ends without a measurable baseline."
+      },
+      {
+        "q": "What does a training or consulting engagement cost?",
+        "a": "It depends on the scope. A first conversation is free — after that you get a concrete proposal, not a price menu."
+      },
+      {
+        "q": "Do you only work with large companies?",
+        "a": "No. I work with companies where AI can make a real difference — regardless of size. What matters is whether the goal is clear."
+      },
+      {
+        "q": "Do you sell software or tools?",
+        "a": "No. I am tool-independent. My recommendations are based on your goal — not on commissions or partnerships."
+      },
+      {
+        "q": "How does a first conversation work?",
+        "a": "30 minutes, non-binding, no agenda pressure. I listen, ask questions, and tell you honestly whether and how I can help."
+      }
+    ]
+  },
+  "kontakt": {
+    "title": "Contact",
+    "lead": "Let's talk about your project. An initial conversation is non-binding and free of charge.",
+    "email_label": "Email",
+    "email_value": "hello@levcon.ai",
+    "web_label": "Website",
+    "web_value": "levcon.at",
+    "loc_label": "Location",
+    "loc_value": "Vienna, Austria"
+  },
+  "impressum": {
+    "title": "Legal Notice",
+    "body": "<h3>Information pursuant to § 5 ECG</h3><p>Enric Bruns<br>Levcon.ai<br>[Street and number]<br>[Postcode] Vienna, Austria</p><h3>Contact</h3><p>Email: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Business activity</h3><p>AI consulting and training for companies.</p><h3>Disclaimer</h3><p>The contents of this website have been prepared with the utmost care. No guarantee can be given for accuracy or completeness.</p><h3>Copyright</h3><p>All content is subject to Austrian copyright law. Reproduction requires written consent.</p>"
+  },
+  "datenschutz": {
+    "title": "Privacy Policy",
+    "title_shy": "Privacy&shy;Policy",
+    "body": "<h3>Controller</h3><p>Enric Bruns, Levcon.ai<br>[Address], Vienna<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Collection of personal data</h3><p>This website collects personal data only to the extent necessary. Data is not passed on to third parties without explicit consent.</p><h3>Cookies</h3><p>This website does not use cookies.</p><h3>Your rights (GDPR Art. 15–22)</h3><p>You have the right to access, rectify or delete your stored data. Requests: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
+  },
+  "footer": {
+    "impressum": "Legal Notice",
+    "datenschutz": "Privacy Policy",
+    "quality": "Quality from Vienna",
+    "copyright": "© 2025 Levcon.ai",
+    "lang_aria_label": "Choose language"
+  }
+}
