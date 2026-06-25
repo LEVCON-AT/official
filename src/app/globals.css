@@ -624,6 +624,180 @@ a.contact-row:hover { opacity: 0.5; }
   font-weight: 400;
 }
 
+/* ── CONTACT FORM ─────────────────────────── */
+.contact-form-wrap {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.32s ease, margin-top 0.32s ease;
+  margin-top: 0;
+}
+
+.contact-form-wrap.open {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 2rem;
+}
+
+.contact-form {
+  max-width: 440px;
+}
+
+.form-group {
+  margin-bottom: 1.1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.54rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+  margin-bottom: 0.4rem;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  font-family: var(--lc-ff-b);
+  font-size: 0.88rem;
+  font-weight: 300;
+  color: var(--lc-ink);
+  background: transparent;
+  border: 1px solid var(--lc-rule);
+  padding: 0.65rem 0.75rem;
+  border-radius: 1px;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--lc-ink);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--lc-muted);
+  opacity: 0.5;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+.form-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1.4rem;
+}
+
+.form-checkbox {
+  width: 16px;
+  height: 16px;
+  margin-top: 0.15rem;
+  accent-color: var(--lc-red);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.form-checkbox-label {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--lc-ink);
+  opacity: 0.67;
+  cursor: pointer;
+}
+
+.form-checkbox-label a {
+  color: var(--lc-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.form-submit {
+  font-family: var(--lc-ff-b);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lc-bg);
+  background: var(--lc-ink);
+  border: none;
+  padding: 0.75rem 2rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  -webkit-appearance: none;
+  min-height: 44px;
+}
+
+.form-submit:hover { opacity: 0.8; }
+.form-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.form-submit:focus-visible {
+  outline: 1.5px solid var(--lc-red);
+  outline-offset: 2px;
+}
+
+.form-status {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.form-status.success { color: #2d7d46; }
+.form-status.error { color: var(--lc-red); }
+
+.form-field-error {
+  font-size: 0.7rem;
+  color: var(--lc-red);
+  margin-top: 0.25rem;
+}
+
+/* Honeypot - hidden from humans */
+.form-hp {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+/* ── FORM BUTTON (inline next to email) ────── */
+.form-toggle-btn {
+  font-family: var(--lc-ff-b);
+  font-size: 0.5rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lc-red);
+  background: none;
+  border: 1px solid var(--lc-rule);
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  -webkit-appearance: none;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.form-toggle-btn:hover {
+  background: var(--lc-ink);
+  color: var(--lc-bg);
+  border-color: var(--lc-ink);
+}
+
+.form-toggle-btn:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 2px;
+}
+
 /* ── LEGAL ──────────────────────────────────── */
 .legal-body {
   font-size: clamp(0.8rem, 1.8vw, 0.88rem);

@@ -13,6 +13,17 @@ export default function LevconPage({ locale }: { locale: string }) {
   const [introHiding, setIntroHiding] = useState(false);
   const [introGone, setIntroGone] = useState(false);
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const formLoadTime = useRef<number>(Date.now());
+
+  // Contact form state
+  const [showForm, setShowForm] = useState(false);
+  const [formName, setFormName] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formMessage, setFormMessage] = useState('');
+  const [formConsent, setFormConsent] = useState(false);
+  const [formSending, setFormSending] = useState(false);
+  const [formStatus, setFormStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; consent?: string }>({});
 
   const t = useTranslations();
   const messages = useMessages() as Record<string, unknown>;
@@ -40,6 +51,54 @@ export default function LevconPage({ locale }: { locale: string }) {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  const handleFormSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const errors: { name?: string; email?: string; consent?: string } = {};
+
+    // Honeypot check
+    const formData = new FormData(e.currentTarget);
+    if (formData.get('website')) return; // Bot filled the honeypot
+
+    // Time check — form submitted in under 2 seconds = likely bot
+    if (Date.now() - formLoadTime.current < 2000) return;
+
+    // Validation
+    if (!formName.trim()) errors.name = t('kontakt.form_name_required');
+    if (!formEmail.trim()) errors.email = t('kontakt.form_email_required');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)) errors.email = t('kontakt.form_email_invalid');
+    if (!formConsent) errors.consent = t('kontakt.form_consent_required');
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormSending(true);
+    setFormErrors({});
+
+    try {
+      const res = await fetch('/api/contact?XTransformPort=3000', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: formName.trim(), email: formEmail.trim(), message: formMessage.trim() }),
+      });
+
+      if (res.ok) {
+        setFormStatus({ type: 'success', message: t('kontakt.form_success') });
+        setFormName('');
+        setFormEmail('');
+        setFormMessage('');
+        setFormConsent(false);
+      } else {
+        setFormStatus({ type: 'error', message: t('kontakt.form_error') });
+      }
+    } catch {
+      setFormStatus({ type: 'error', message: t('kontakt.form_error') });
+    } finally {
+      setFormSending(false);
+    }
+  }, [formName, formEmail, formMessage, formConsent, t]);
 
   const goHome = useCallback(() => {
     setActivePanel(null);
@@ -320,24 +379,102 @@ export default function LevconPage({ locale }: { locale: string }) {
             <p className="panel-lead">{t('kontakt.lead')}</p>
             <ul className="contact-list">
               <li>
-                <a className="contact-row" href="mailto:hello@levcon.ai">
+                <a className="contact-row" href="tel:+4367761638817">
+                  <span className="contact-lbl">{t('kontakt.phone_label')}</span>
+                  <span className="contact-val">{t('kontakt.phone_value')}</span>
+                </a>
+              </li>
+              <li>
+                <div className="contact-row" style={{ cursor: 'default' }}>
                   <span className="contact-lbl">{t('kontakt.email_label')}</span>
                   <span className="contact-val">{t('kontakt.email_value')}</span>
-                </a>
-              </li>
-              <li>
-                <a className="contact-row" href="https://levcon.at" target="_blank" rel="noopener">
-                  <span className="contact-lbl">{t('kontakt.web_label')}</span>
-                  <span className="contact-val">{t('kontakt.web_value')}</span>
-                </a>
-              </li>
-              <li>
-                <div className="contact-row" style={{ cursor: 'default', pointerEvents: 'none' }}>
-                  <span className="contact-lbl">{t('kontakt.loc_label')}</span>
-                  <span className="contact-val">{t('kontakt.loc_value')}</span>
+                  <button
+                    className="form-toggle-btn"
+                    onClick={() => setShowForm(!showForm)}
+                    aria-expanded={showForm}
+                    type="button"
+                  >
+                    {t('kontakt.form_button')} →
+                  </button>
                 </div>
               </li>
             </ul>
+
+            <div className={`contact-form-wrap${showForm ? ' open' : ''}`}>
+              <form className="contact-form" onSubmit={handleFormSubmit} noValidate>
+                {/* Honeypot — bots fill this, humans don't */}
+                <div className="form-hp" aria-hidden="true">
+                  <label htmlFor="contact-website">Website</label>
+                  <input type="text" id="contact-website" name="website" tabIndex={-1} autoComplete="off" />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="contact-name">{t('kontakt.form_name')} *</label>
+                  <input
+                    className="form-input"
+                    type="text"
+                    id="contact-name"
+                    name="name"
+                    required
+                    autoComplete="name"
+                    value={formName}
+                    onChange={(e) => { setFormName(e.target.value); setFormErrors(prev => ({ ...prev, name: '' })); }}
+                  />
+                  {formErrors.name && <div className="form-field-error">{formErrors.name}</div>}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="contact-email">{t('kontakt.form_email')} *</label>
+                  <input
+                    className="form-input"
+                    type="email"
+                    id="contact-email"
+                    name="email"
+                    required
+                    autoComplete="email"
+                    value={formEmail}
+                    onChange={(e) => { setFormEmail(e.target.value); setFormErrors(prev => ({ ...prev, email: '' })); }}
+                  />
+                  {formErrors.email && <div className="form-field-error">{formErrors.email}</div>}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="contact-message">{t('kontakt.form_message')}</label>
+                  <textarea
+                    className="form-textarea"
+                    id="contact-message"
+                    name="message"
+                    rows={3}
+                    value={formMessage}
+                    onChange={(e) => setFormMessage(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-checkbox-row">
+                  <input
+                    className="form-checkbox"
+                    type="checkbox"
+                    id="contact-consent"
+                    name="consent"
+                    required
+                    checked={formConsent}
+                    onChange={(e) => { setFormConsent(e.target.checked); setFormErrors(prev => ({ ...prev, consent: '' })); }}
+                  />
+                  <label className="form-checkbox-label" htmlFor="contact-consent">
+                    {t('kontakt.form_consent')}
+                  </label>
+                </div>
+                {formErrors.consent && <div className="form-field-error">{formErrors.consent}</div>}
+
+                <button className="form-submit" type="submit" disabled={formSending}>
+                  {formSending ? t('kontakt.form_sending') : t('kontakt.form_submit')}
+                </button>
+
+                {formStatus && (
+                  <div className={`form-status ${formStatus.type}`}>{formStatus.message}</div>
+                )}
+              </form>
+            </div>
           </div></div>
         </section>
 

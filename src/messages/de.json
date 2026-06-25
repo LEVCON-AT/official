@@ -142,13 +142,24 @@
   },
   "kontakt": {
     "title": "Kontakt",
-    "lead": "Sprechen wir über Ihr Projekt. Ein erstes Gespräch ist unverbindlich und kostenlos.",
+    "lead": "Jedes gute Projekt beginnt mit einem Gespräch. Rufen Sie an oder schreiben Sie mir — Termine werden individuell vereinbart.",
+    "phone_label": "Direkt",
+    "phone_value": "+43 677 616 388 17",
     "email_label": "E-Mail",
     "email_value": "hello@levcon.ai",
-    "web_label": "Website",
-    "web_value": "levcon.at",
-    "loc_label": "Standort",
-    "loc_value": "Wien, Österreich"
+    "form_button": "Nachricht senden",
+    "form_name": "Name",
+    "form_email": "E-Mail",
+    "form_message": "Nachricht",
+    "form_consent": "Ich stimme der Verarbeitung meiner Daten gemäß Datenschutzerklärung zu.",
+    "form_submit": "Senden",
+    "form_sending": "Wird gesendet…",
+    "form_success": "Vielen Dank! Ihre Nachricht wurde gesendet.",
+    "form_error": "Fehler beim Senden. Bitte versuchen Sie es später erneut oder schreiben Sie direkt an hello@levcon.ai.",
+    "form_name_required": "Name ist erforderlich.",
+    "form_email_required": "E-Mail ist erforderlich.",
+    "form_email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "form_consent_required": "Bitte stimmen Sie der Datenschutzerklärung zu."
   },
   "impressum": {
     "title": "Impressum",
@@ -157,7 +168,7 @@
   "datenschutz": {
     "title": "Datenschutzerklärung",
     "title_shy": "Datenschutz&shy;erklärung",
-    "body": "<h3>Verantwortlicher</h3><p>Mst. Enric-Bernard Sep-Albi, BA, MBA<br>Levcon.ai<br>Pfalzgasse 37/2/4, 1220 Wien<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Erhebung personenbezogener Daten</h3><p>Diese Website erhebt personenbezogene Daten nur im erforderlichen Umfang. Eine Weitergabe an Dritte findet ohne ausdrückliche Einwilligung nicht statt.</p><h3>Schriftarten</h3><p>Diese Website verwendet die Schriftarten Cormorant Garamond und DM Sans. Die Schriftdateien werden vom eigenen Server ausgeliefert. Es findet keine Verbindung zu externen Servern (wie Google Fonts) statt.</p><h3>Cookies</h3><p>Diese Website verwendet keine Cookies.</p><h3>Ihre Rechte (DSGVO Art. 15–22)</h3><p>Auskunft, Berichtigung oder Löschung: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
+    "body": "<h3>Verantwortlicher</h3><p>Mst. Enric-Bernard Sep-Albi, BA, MBA<br>Levcon.ai<br>Pfalzgasse 37/2/4, 1220 Wien<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Erhebung personenbezogener Daten</h3><p>Diese Website erhebt personenbezogene Daten nur im erforderlichen Umfang. Eine Weitergabe an Dritte findet ohne ausdrückliche Einwilligung nicht statt.</p><h3>Kontaktformular</h3><p>Wenn Sie das Kontaktformular nutzen, werden Ihre Angaben (Name, E-Mail-Adresse, ggf. Nachricht) zum Zweck der Bearbeitung Ihrer Anfrage per E-Mail an hello@levcon.ai gesendet und dort im Posteingang gespeichert. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen). Die Daten werden gelöscht, sobald die Anfrage abschließend bearbeitet wurde und keine gesetzlichen Aufbewahrungsfristen entgegenstehen.</p><h3>Schriftarten</h3><p>Diese Website verwendet die Schriftarten Cormorant Garamond und DM Sans. Die Schriftdateien werden vom eigenen Server ausgeliefert. Es findet keine Verbindung zu externen Servern (wie Google Fonts) statt.</p><h3>Cookies</h3><p>Diese Website verwendet keine Cookies.</p><h3>Ihre Rechte (DSGVO Art. 15–22)</h3><p>Auskunft, Berichtigung oder Löschung: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
   },
   "footer": {
     "impressum": "Impressum",

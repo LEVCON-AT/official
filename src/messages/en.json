@@ -142,13 +142,24 @@
   },
   "kontakt": {
     "title": "Contact",
-    "lead": "Let's talk about your project. An initial conversation is non-binding and free of charge.",
+    "lead": "Every good project starts with a conversation. Call or write — appointments are arranged individually.",
+    "phone_label": "Direct",
+    "phone_value": "+43 677 616 388 17",
     "email_label": "Email",
     "email_value": "hello@levcon.ai",
-    "web_label": "Website",
-    "web_value": "levcon.at",
-    "loc_label": "Location",
-    "loc_value": "Vienna, Austria"
+    "form_button": "Send message",
+    "form_name": "Name",
+    "form_email": "Email",
+    "form_message": "Message",
+    "form_consent": "I consent to the processing of my data in accordance with the Privacy Policy.",
+    "form_submit": "Send",
+    "form_sending": "Sending…",
+    "form_success": "Thank you! Your message has been sent.",
+    "form_error": "Error sending message. Please try again later or write directly to hello@levcon.ai.",
+    "form_name_required": "Name is required.",
+    "form_email_required": "Email is required.",
+    "form_email_invalid": "Please enter a valid email address.",
+    "form_consent_required": "Please consent to the Privacy Policy."
   },
   "impressum": {
     "title": "Legal Notice",
@@ -157,7 +168,7 @@
   "datenschutz": {
     "title": "Privacy Policy",
     "title_shy": "Privacy&shy;Policy",
-    "body": "<h3>Controller</h3><p>Mst. Enric-Bernard Sep-Albi, BA, MBA<br>Levcon.ai<br>Pfalzgasse 37/2/4, 1220 Vienna<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Collection of personal data</h3><p>This website collects personal data only to the extent necessary. Data is not passed on to third parties without explicit consent.</p><h3>Fonts</h3><p>This website uses the fonts Cormorant Garamond and DM Sans. The font files are served from our own server. No connection to external servers (such as Google Fonts) is established.</p><h3>Cookies</h3><p>This website does not use cookies.</p><h3>Your rights (GDPR Art. 15–22)</h3><p>You have the right to access, rectify or delete your stored data. Requests: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
+    "body": "<h3>Controller</h3><p>Mst. Enric-Bernard Sep-Albi, BA, MBA<br>Levcon.ai<br>Pfalzgasse 37/2/4, 1220 Vienna<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Collection of personal data</h3><p>This website collects personal data only to the extent necessary. Data is not passed on to third parties without explicit consent.</p><h3>Contact form</h3><p>When you use the contact form, your details (name, email address, message if provided) are sent by email to hello@levcon.ai for the purpose of processing your enquiry and stored in the inbox. Processing is based on Art. 6(1)(b) GDPR (pre-contractual measures). The data will be deleted once the enquiry has been fully processed and no statutory retention periods apply.</p><h3>Fonts</h3><p>This website uses the fonts Cormorant Garamond and DM Sans. The font files are served from our own server. No connection to external servers (such as Google Fonts) is established.</p><h3>Cookies</h3><p>This website does not use cookies.</p><h3>Your rights (GDPR Art. 15–22)</h3><p>You have the right to access, rectify or delete your stored data. Requests: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
   },
   "footer": {
     "impressum": "Legal Notice",
