@@ -57,7 +57,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [`${baseUrl}/og-image.png`],
     },
     icons: {
-      icon: '/favicon-512.png',
+      icon: [
+        { url: '/brand/logo-icon.svg', type: 'image/svg+xml' },
+        { url: '/favicon-512.png', type: 'image/png', sizes: '512x512' },
+      ],
       apple: '/favicon-512.png',
     },
   };
@@ -88,7 +91,7 @@ export default async function LocalePage({ params }: Props) {
         founder: {
           '@type': 'Person',
           name: 'Mst. Enric-Bernard Sep-Albi, BA, MBA',
-          jobTitle: locale === 'de' ? 'Organisationsentwickler und KI-Trainer' : 'Organisational Developer and AI Trainer',
+          jobTitle: locale === 'de' ? 'KI-Trainer und Organisationsentwickler' : 'AI Trainer and Organisational Developer',
         },
         address: {
           '@type': 'PostalAddress',
