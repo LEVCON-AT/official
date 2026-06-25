@@ -194,7 +194,7 @@ export default function LevconPage({ locale }: { locale: string }) {
 ║   Want a website like this — clean, fast, and built with         ║
 ║   intention? Let's talk.                                         ║
 ║                                                                  ║
-║   hello@levcon.ai · levcon.ai                                   ║
+║   hello@levcon.ai · levcon.ai                                    ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 -->
