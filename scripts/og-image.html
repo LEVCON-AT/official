@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1344px;
+    height: 768px;
+    background: #F0EFEC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+
+  .card {
+    width: 1216px;
+    height: 640px;
+    border: 1px solid #D8D7D3;
+    background: #F0EFEC;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 100px;
+    position: relative;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .logo-box {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #1C1C1A;
+    opacity: 0.75;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-box span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1C1C1A;
+    line-height: 1;
+    padding-bottom: 0.05em;
+  }
+
+  .wordmark {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1C1C1A;
+    letter-spacing: 0.18em;
+    text-transform: lowercase;
+  }
+
+  .headline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4.5rem;
+    font-weight: 500;
+    color: #1C1C1A;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    max-width: 900px;
+  }
+
+  .headline .red {
+    color: #C8102E;
+  }
+
+  .tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #1C1C1A;
+    opacity: 0.67;
+    margin-top: 36px;
+    letter-spacing: 0.03em;
+  }
+
+  .url {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #1C1C1A;
+    opacity: 0.5;
+    letter-spacing: 0.15em;
+    text-transform: lowercase;
+    position: absolute;
+    bottom: 48px;
+    left: 100px;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-row">
+      <div class="logo-box"><span>L</span></div>
+      <span class="wordmark">levcon.ai</span>
+    </div>
+    <div class="headline">
+      KI mit Methode.<br>Wirkung mit <span class="red">System</span>.
+    </div>
+    <div class="tagline">KI-Beratung &amp; Schulungen aus Wien</div>
+    <div class="url">levcon.ai</div>
+  </div>
+</body>
+</html>
