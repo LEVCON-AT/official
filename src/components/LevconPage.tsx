@@ -388,7 +388,7 @@ export default function LevconPage({ locale }: { locale: string }) {
         </div>
 
         <div className="footer-center">
-          <span className="footer-coords">48°12&apos;N · 16°22&apos;E</span>
+          <span className="footer-coords">48°14&apos;N · 16°30&apos;E</span>
           <div className="footer-dot" aria-hidden="true" />
           <div className="at-badge">
             <svg className="at-flag" width="24" height="16" viewBox="0 0 3 3"
@@ -400,7 +400,7 @@ export default function LevconPage({ locale }: { locale: string }) {
             <span className="at-label">{t('footer.quality')}</span>
           </div>
           <div className="footer-dot" aria-hidden="true" />
-          <span className="footer-copy">{t('footer.copyright')}</span>
+          <span className="footer-copy">© {new Date().getFullYear()} Levcon.ai</span>
         </div>
 
         <div className="footer-right">
