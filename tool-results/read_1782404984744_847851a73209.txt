@@ -1,0 +1,1264 @@
+     1→     1→<!DOCTYPE html>
+     2→     2→<html lang="de">
+     3→     3→<head>
+     4→     4→  <meta charset="UTF-8">
+     5→     5→  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     6→     6→
+     7→     7→  <title>Levcon.ai — KI-Beratung & Schulungen aus Wien</title>
+     8→     8→  <meta name="description" content="Levcon.ai — KI-Beratung und Schulungen aus Wien. KI mit Methode, Wirkung mit System. Enric Bruns hilft Unternehmen, KI wirksam, sicher und ohne Hype einzusetzen.">
+     9→     9→  <meta name="author" content="Enric Bruns">
+    10→    10→  <meta name="robots" content="index, follow">
+    11→    11→  <link rel="canonical" href="https://levcon.ai/">
+    12→    12→
+    13→    13→  <link rel="alternate" hreflang="de" href="https://levcon.ai/">
+    14→    14→  <link rel="alternate" hreflang="en" href="https://levcon.ai/?lang=en">
+    15→    15→  <link rel="alternate" hreflang="x-default" href="https://levcon.ai/">
+    16→    16→
+    17→    17→  <meta property="og:type"        content="website">
+    18→    18→  <meta property="og:url"         content="https://levcon.ai/">
+    19→    19→  <meta property="og:title"       content="Levcon.ai — KI-Beratung & Schulungen aus Wien">
+    20→    20→  <meta property="og:description" content="KI mit Methode, Wirkung mit System. KI-Beratung und Schulungen für Unternehmen im österreichischen und deutschsprachigen Markt.">
+    21→    21→  <meta property="og:locale"      content="de_AT">
+    22→    22→  <meta property="og:locale:alternate" content="en_GB">
+    23→    23→  <meta property="og:site_name"   content="Levcon.ai">
+    24→    24→
+    25→    25→  <meta name="twitter:card"        content="summary">
+    26→    26→  <meta name="twitter:title"       content="Levcon.ai — KI-Beratung & Schulungen aus Wien">
+    27→    27→  <meta name="twitter:description" content="KI mit Methode, Wirkung mit System. KI-Beratung und Schulungen für Unternehmen im österreichischen und deutschsprachigen Markt.">
+    28→    28→
+    29→    29→  <script type="application/ld+json">
+    30→    30→  {
+    31→    31→    "@context": "https://schema.org",
+    32→    32→    "@type": "ProfessionalService",
+    33→    33→    "name": "Levcon.ai",
+    34→    34→    "description": "KI-Beratung und Schulungen für Unternehmen. KI mit Methode, Wirkung mit System.",
+    35→    35→    "url": "https://levcon.ai",
+    36→    36→    "founder": {
+    37→    37→      "@type": "Person",
+    38→    38→      "name": "Enric Bruns",
+    39→    39→      "jobTitle": "KI-Berater und Trainer"
+    40→    40→    },
+    41→    41→    "address": {
+    42→    42→      "@type": "PostalAddress",
+    43→    43→      "addressLocality": "Wien",
+    44→    44→      "addressCountry": "AT"
+    45→    45→    },
+    46→    46→    "areaServed": ["AT", "DE", "CH"],
+    47→    47→    "availableLanguage": ["de", "en"],
+    48→    48→    "email": "hello@levcon.ai",
+    49→    49→    "sameAs": ["https://levcon.at"],
+    50→    50→    "serviceType": [
+    51→    51→      "KI-Beratung",
+    52→    52→      "KI-Schulungen",
+    53→    53→      "Datenschutz-Beratung",
+    54→    54→      "Prozessautomatisierung"
+    55→    55→    ]
+    56→    56→  }
+    57→    57→  </script>
+    58→    58→
+    59→    59→  <link rel="preconnect" href="https://fonts.googleapis.com">
+    60→    60→  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    61→    61→  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+    62→    62→
+    63→    63→  <style>
+    64→    64→    /* ── TOKENS ─────────────────────────────────── */
+    65→    65→    :root {
+    66→    66→      --bg:      #F0EFEC;
+    67→    67→      --ink:     #1C1C1A;
+    68→    68→      --muted:   #8A8A85;
+    69→    69→      --red:     #C8102E;
+    70→    70→      --rule:    #D8D7D3;
+    71→    71→      --panel-bg:#ECEAE6;
+    72→    72→      --ff-d: 'Cormorant Garamond', Georgia, serif;
+    73→    73→      --ff-b: 'DM Sans', system-ui, sans-serif;
+    74→    74→    }
+    75→    75→
+    76→    76→    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    77→    77→    html { scroll-behavior: smooth; }
+    78→    78→
+    79→    79→    body {
+    80→    80→      background: var(--bg);
+    81→    81→      color: var(--ink);
+    82→    82→      font-family: var(--ff-b);
+    83→    83→      min-height: 100vh;
+    84→    84→      min-height: 100dvh;
+    85→    85→      display: flex;
+    86→    86→      flex-direction: column;
+    87→    87→      -webkit-font-smoothing: antialiased;
+    88→    88→    }
+    89→    89→
+    90→    90→    /* ── HEADER ─────────────────────────────────── */
+    91→    91→    header {
+    92→    92→      text-align: center;
+    93→    93→      padding: clamp(2rem, 6vw, 4rem) clamp(1.5rem, 5vw, 3rem) 2.75rem;
+    94→    94→    }
+    95→    95→
+    96→    96→    .logo-mark {
+    97→    97→      display: inline-flex;
+    98→    98→      align-items: center;
+    99→    99→      gap: 0.6rem;
+   100→   100→      margin-bottom: clamp(2rem, 6vw, 3.5rem);
+   101→   101→      text-decoration: none;
+   102→   102→      cursor: pointer;
+   103→   103→    }
+   104→   104→
+   105→   105→    .logo-placeholder {
+   106→   106→      width: 28px;
+   107→   107→      height: 28px;
+   108→   108→      border: 1px solid var(--ink);
+   109→   109→      display: flex;
+   110→   110→      align-items: center;
+   111→   111→      justify-content: center;
+   112→   112→      flex-shrink: 0;
+   113→   113→      opacity: 0.75;
+   114→   114→    }
+   115→   115→
+   116→   116→    .logo-placeholder span {
+   117→   117→      font-family: var(--ff-d);
+   118→   118→      font-size: 0.85rem;
+   119→   119→      font-weight: 500;
+   120→   120→      color: var(--ink);
+   121→   121→      line-height: 1;
+   122→   122→      padding-bottom: 0.05em;
+   123→   123→    }
+   124→   124→
+   125→   125→    .logo-wordmark {
+   126→   126→      font-family: var(--ff-b);
+   127→   127→      font-size: 0.62rem;
+   128→   128→      font-weight: 400;
+   129→   129→      letter-spacing: 0.26em;
+   130→   130→      text-transform: uppercase;
+   131→   131→      color: var(--ink);
+   132→   132→      opacity: 0.6;
+   133→   133→    }
+   134→   134→
+   135→   135→    .site-slogan {
+   136→   136→      font-family: var(--ff-d);
+   137→   137→      font-size: clamp(3rem, 11vw, 7rem);
+   138→   138→      font-weight: 300;
+   139→   139→      font-style: italic;
+   140→   140→      letter-spacing: -0.02em;
+   141→   141→      line-height: 1.0;
+   142→   142→      color: var(--ink);
+   143→   143→      margin-bottom: 2.25rem;
+   144→   144→    }
+   145→   145→
+   146→   146→    .site-slogan .red { color: var(--red); }
+   147→   147→
+   148→   148→    .divider-line {
+   149→   149→      display: flex;
+   150→   150→      align-items: center;
+   151→   151→      justify-content: center;
+   152→   152→      gap: 1.25rem;
+   153→   153→      margin-bottom: 2.75rem;
+   154→   154→    }
+   155→   155→
+   156→   156→    .divider-rule {
+   157→   157→      display: block;
+   158→   158→      width: clamp(2rem, 6vw, 3.5rem);
+   159→   159→      height: 1px;
+   160→   160→      background: var(--ink);
+   161→   161→      opacity: 0.28;
+   162→   162→      flex-shrink: 0;
+   163→   163→    }
+   164→   164→
+   165→   165→    .divider-text {
+   166→   166→      font-family: var(--ff-b);
+   167→   167→      font-size: clamp(0.52rem, 1.8vw, 0.65rem);
+   168→   168→      font-weight: 400;
+   169→   169→      letter-spacing: 0.32em;
+   170→   170→      color: var(--muted);
+   171→   171→      text-transform: uppercase;
+   172→   172→      white-space: nowrap;
+   173→   173→    }
+   174→   174→
+   175→   175→    /* ── NAV ────────────────────────────────────── */
+   176→   176→    nav {
+   177→   177→      display: flex;
+   178→   178→      flex-wrap: wrap;
+   179→   179→      justify-content: center;
+   180→   180→      align-items: center;
+   181→   181→      gap: 0;
+   182→   182→    }
+   183→   183→
+   184→   184→    .nav-btn {
+   185→   185→      font-family: var(--ff-b);
+   186→   186→      font-size: clamp(0.56rem, 1.8vw, 0.68rem);
+   187→   187→      font-weight: 400;
+   188→   188→      letter-spacing: 0.22em;
+   189→   189→      text-transform: uppercase;
+   190→   190→      color: var(--ink);
+   191→   191→      background: none;
+   192→   192→      border: none;
+   193→   193→      cursor: pointer;
+   194→   194→      padding: 0.7rem 0.9rem;
+   195→   195→      min-height: 44px;
+   196→   196→      display: inline-flex;
+   197→   197→      align-items: center;
+   198→   198→      position: relative;
+   199→   199→      transition: color 0.2s;
+   200→   200→      -webkit-appearance: none;
+   201→   201→    }
+   202→   202→
+   203→   203→    .nav-btn::after {
+   204→   204→      content: '';
+   205→   205→      position: absolute;
+   206→   206→      bottom: 0.4rem;
+   207→   207→      left: 0.9rem;
+   208→   208→      right: 0.9rem;
+   209→   209→      height: 1px;
+   210→   210→      background: var(--ink);
+   211→   211→      transform: scaleX(0);
+   212→   212→      transform-origin: left center;
+   213→   213→      transition: transform 0.25s ease;
+   214→   214→    }
+   215→   215→
+   216→   216→    .nav-btn:hover::after,
+   217→   217→    .nav-btn.active::after { transform: scaleX(1); }
+   218→   218→    .nav-btn.active { color: var(--ink); }
+   219→   219→
+   220→   220→    .nav-btn:focus-visible {
+   221→   221→      outline: 1.5px solid var(--ink);
+   222→   222→      outline-offset: 2px;
+   223→   223→    }
+   224→   224→
+   225→   225→    .nav-sep {
+   226→   226→      color: var(--muted);
+   227→   227→      font-size: 0.7rem;
+   228→   228→      opacity: 0.35;
+   229→   229→      pointer-events: none;
+   230→   230→      user-select: none;
+   231→   231→    }
+   232→   232→
+   233→   233→    /* ── MAIN ───────────────────────────────────── */
+   234→   234→    main { flex: 1; }
+   235→   235→
+   236→   236→    /* ── INTRO WRAP ─────────────────────────────── */
+   237→   237→    .intro-wrap {
+   238→   238→      transition: opacity 0.32s ease;
+   239→   239→      opacity: 1;
+   240→   240→    }
+   241→   241→
+   242→   242→    .intro-wrap.is-hiding {
+   243→   243→      opacity: 0;
+   244→   244→      pointer-events: none;
+   245→   245→    }
+   246→   246→
+   247→   247→    .intro-wrap.is-gone { display: none; }
+   248→   248→
+   249→   249→    /* ── ABOUT ──────────────────────────────────── */
+   250→   250→    .about {
+   251→   251→      border-top: 1px solid var(--rule);
+   252→   252→      padding: clamp(2.5rem, 7vw, 4.25rem) clamp(1.5rem, 5vw, 3rem);
+   253→   253→    }
+   254→   254→
+   255→   255→    .about-grid {
+   256→   256→      max-width: 860px;
+   257→   257→      margin: 0 auto;
+   258→   258→      display: grid;
+   259→   259→      grid-template-columns: 5fr 7fr;
+   260→   260→      gap: clamp(2rem, 5vw, 4rem);
+   261→   261→      align-items: start;
+   262→   262→    }
+   263→   263→
+   264→   264→    .about-statement {
+   265→   265→      font-family: var(--ff-d);
+   266→   266→      font-size: clamp(1.1rem, 2.6vw, 1.42rem);
+   267→   267→      font-weight: 400;
+   268→   268→      line-height: 1.48;
+   269→   269→      color: var(--ink);
+   270→   270→    }
+   271→   271→
+   272→   272→    .about-body {
+   273→   273→      column-count: 2;
+   274→   274→      column-gap: 2rem;
+   275→   275→      font-size: clamp(0.78rem, 1.6vw, 0.86rem);
+   276→   276→      line-height: 1.82;
+   277→   277→      font-weight: 300;
+   278→   278→      color: var(--ink);
+   279→   279→      opacity: 0.6;
+   280→   280→    }
+   281→   281→
+   282→   282→    .about-body p + p { margin-top: 0.9em; }
+   283→   283→    .about-body p { break-inside: avoid; orphans: 3; widows: 3; }
+   284→   284→
+   285→   285→    /* ── PANELS ─────────────────────────────────── */
+   286→   286→    .panel { display: none; opacity: 0; }
+   287→   287→
+   288→   288→    .panel.open {
+   289→   289→      display: block;
+   290→   290→      animation: fadePanel 0.32s ease forwards;
+   291→   291→    }
+   292→   292→
+   293→   293→    @keyframes fadePanel {
+   294→   294→      from { opacity: 0; }
+   295→   295→      to   { opacity: 1; }
+   296→   296→    }
+   297→   297→
+   298→   298→    .panel-inner {
+   299→   299→      border-top: 1px solid var(--rule);
+   300→   300→      background: linear-gradient(to bottom, var(--panel-bg) 0%, var(--bg) 80px);
+   301→   301→      padding: clamp(2.5rem, 7vw, 4.5rem) clamp(1.5rem, 5vw, 3rem);
+   302→   302→    }
+   303→   303→
+   304→   304→    .panel-content { max-width: 700px; margin: 0 auto; }
+   305→   305→
+   306→   306→    .panel-title {
+   307→   307→      font-family: var(--ff-d);
+   308→   308→      font-size: clamp(1.9rem, 5.5vw, 3.2rem);
+   309→   309→      font-weight: 400;
+   310→   310→      font-style: italic;
+   311→   311→      color: var(--ink);
+   312→   312→      margin-bottom: 1.4rem;
+   313→   313→      line-height: 1.1;
+   314→   314→    }
+   315→   315→
+   316→   316→    .panel-lead {
+   317→   317→      font-size: clamp(0.87rem, 2.2vw, 1rem);
+   318→   318→      line-height: 1.85;
+   319→   319→      color: var(--ink);
+   320→   320→      opacity: 0.62;
+   321→   321→      margin-bottom: 2.25rem;
+   322→   322→      font-weight: 300;
+   323→   323→      max-width: 560px;
+   324→   324→    }
+   325→   325→
+   326→   326→    /* ── SCHULUNGEN ─────────────────────────────── */
+   327→   327→    .schulung-list { list-style: none; }
+   328→   328→
+   329→   329→    .schulung-item {
+   330→   330→      padding: 1.75rem 0;
+   331→   331→      border-bottom: 1px solid var(--rule);
+   332→   332→    }
+   333→   333→
+   334→   334→    .schulung-item:first-child { border-top: 1px solid var(--rule); }
+   335→   335→
+   336→   336→    .schulung-header {
+   337→   337→      display: flex;
+   338→   338→      align-items: baseline;
+   339→   339→      gap: 1.25rem;
+   340→   340→      margin-bottom: 0.5rem;
+   341→   341→      flex-wrap: wrap;
+   342→   342→    }
+   343→   343→
+   344→   344→    .schulung-audience {
+   345→   345→      font-family: var(--ff-d);
+   346→   346→      font-size: clamp(1.1rem, 3vw, 1.5rem);
+   347→   347→      font-weight: 500;
+   348→   348→      color: var(--ink);
+   349→   349→      line-height: 1.1;
+   350→   350→    }
+   351→   351→
+   352→   352→    .schulung-format {
+   353→   353→      font-size: 0.52rem;
+   354→   354→      letter-spacing: 0.26em;
+   355→   355→      text-transform: uppercase;
+   356→   356→      color: var(--red);
+   357→   357→      font-weight: 500;
+   358→   358→      flex-shrink: 0;
+   359→   359→    }
+   360→   360→
+   361→   361→    .schulung-outcome {
+   362→   362→      font-size: 0.88rem;
+   363→   363→      line-height: 1.72;
+   364→   364→      font-weight: 300;
+   365→   365→      color: var(--ink);
+   366→   366→      opacity: 0.62;
+   367→   367→      margin-bottom: 0.55rem;
+   368→   368→      max-width: 520px;
+   369→   369→    }
+   370→   370→
+   371→   371→    .schulung-topics {
+   372→   372→      display: flex;
+   373→   373→      flex-wrap: wrap;
+   374→   374→      gap: 0.4rem;
+   375→   375→      margin-top: 0.65rem;
+   376→   376→    }
+   377→   377→
+   378→   378→    .schulung-tag {
+   379→   379→      font-size: 0.5rem;
+   380→   380→      letter-spacing: 0.2em;
+   381→   381→      text-transform: uppercase;
+   382→   382→      color: var(--muted);
+   383→   383→      border: 1px solid var(--rule);
+   384→   384→      padding: 0.25rem 0.55rem;
+   385→   385→      border-radius: 1px;
+   386→   386→    }
+   387→   387→
+   388→   388→    /* ── FRAMEWORK ──────────────────────────────── */
+   389→   389→    .framework-list { list-style: none; }
+   390→   390→
+   391→   391→    .framework-step {
+   392→   392→      display: flex;
+   393→   393→      align-items: flex-start;
+   394→   394→      gap: 1.75rem;
+   395→   395→      padding: 1.75rem 0;
+   396→   396→      border-bottom: 1px solid var(--rule);
+   397→   397→    }
+   398→   398→
+   399→   399→    .framework-step:first-child { border-top: 1px solid var(--rule); }
+   400→   400→
+   401→   401→    .step-letter {
+   402→   402→      font-family: var(--ff-d);
+   403→   403→      font-size: clamp(2rem, 5vw, 3rem);
+   404→   404→      font-weight: 400;
+   405→   405→      color: var(--red);
+   406→   406→      opacity: 0.22;
+   407→   407→      line-height: 1;
+   408→   408→      min-width: 2.25rem;
+   409→   409→      padding-top: 0.1rem;
+   410→   410→    }
+   411→   411→
+   412→   412→    .step-body h3 {
+   413→   413→      font-family: var(--ff-d);
+   414→   414→      font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+   415→   415→      font-weight: 500;
+   416→   416→      margin-bottom: 0.45rem;
+   417→   417→      line-height: 1.1;
+   418→   418→    }
+   419→   419→
+   420→   420→    .step-body p {
+   421→   421→      font-size: 0.88rem;
+   422→   422→      line-height: 1.75;
+   423→   423→      opacity: 0.62;
+   424→   424→      font-weight: 300;
+   425→   425→    }
+   426→   426→
+   427→   427→    .step-body p + p { margin-top: 0.7em; }
+   428→   428→
+   429→   429→    .metric-row {
+   430→   430→      display: flex;
+   431→   431→      flex-wrap: wrap;
+   432→   432→      gap: 0.5rem;
+   433→   433→      margin-top: 0.9rem;
+   434→   434→    }
+   435→   435→
+   436→   436→    .metric-chip {
+   437→   437→      font-size: 0.5rem;
+   438→   438→      letter-spacing: 0.2em;
+   439→   439→      text-transform: uppercase;
+   440→   440→      color: var(--muted);
+   441→   441→      border: 1px solid var(--rule);
+   442→   442→      padding: 0.28rem 0.6rem;
+   443→   443→      border-radius: 1px;
+   444→   444→    }
+   445→   445→
+   446→   446→    /* ── PRIVACY TIERS ──────────────────────────── */
+   447→   447→    .tier-grid {
+   448→   448→      display: grid;
+   449→   449→      grid-template-columns: repeat(3, 1fr);
+   450→   450→      gap: 1px;
+   451→   451→      background: var(--rule);
+   452→   452→      border: 1px solid var(--rule);
+   453→   453→    }
+   454→   454→
+   455→   455→    .tier-card { background: var(--bg); padding: 1.75rem 1.5rem; }
+   456→   456→
+   457→   457→    .tier-num {
+   458→   458→      font-size: 0.53rem;
+   459→   459→      letter-spacing: 0.3em;
+   460→   460→      text-transform: uppercase;
+   461→   461→      color: var(--red);
+   462→   462→      font-weight: 500;
+   463→   463→      margin-bottom: 0.55rem;
+   464→   464→    }
+   465→   465→
+   466→   466→    .tier-name {
+   467→   467→      font-family: var(--ff-d);
+   468→   468→      font-size: 1.5rem;
+   469→   469→      font-weight: 500;
+   470→   470→      margin-bottom: 0.7rem;
+   471→   471→      line-height: 1;
+   472→   472→    }
+   473→   473→
+   474→   474→    .tier-desc { font-size: 0.82rem; line-height: 1.72; opacity: 0.62; font-weight: 300; }
+   475→   475→
+   476→   476→    /* ── FAQ ────────────────────────────────────── */
+   477→   477→    .faq-list { list-style: none; }
+   478→   478→
+   479→   479→    .faq-item {
+   480→   480→      padding: 1.6rem 0;
+   481→   481→      border-bottom: 1px solid var(--rule);
+   482→   482→    }
+   483→   483→
+   484→   484→    .faq-item:first-child { border-top: 1px solid var(--rule); }
+   485→   485→
+   486→   486→    .faq-q {
+   487→   487→      font-family: var(--ff-d);
+   488→   488→      font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+   489→   489→      font-weight: 500;
+   490→   490→      color: var(--ink);
+   491→   491→      line-height: 1.2;
+   492→   492→      margin-bottom: 0.6rem;
+   493→   493→    }
+   494→   494→
+   495→   495→    .faq-a {
+   496→   496→      font-size: 0.88rem;
+   497→   497→      line-height: 1.78;
+   498→   498→      font-weight: 300;
+   499→   499→      color: var(--ink);
+   500→   500→      opacity: 0.62;
+   501→   501→      max-width: 540px;
+   502→   502→    }
+   503→   503→
+   504→   504→    /* ── CONTACT ────────────────────────────────── */
+   505→   505→    .contact-list { list-style: none; }
+   506→   506→
+   507→   507→    .contact-row {
+   508→   508→      display: flex;
+   509→   509→      align-items: center;
+   510→   510→      gap: 1.25rem;
+   511→   511→      padding: 1.1rem 0;
+   512→   512→      border-bottom: 1px solid var(--rule);
+   513→   513→      text-decoration: none;
+   514→   514→      color: var(--ink);
+   515→   515→      transition: opacity 0.2s;
+   516→   516→      cursor: pointer;
+   517→   517→    }
+   518→   518→
+   519→   519→    .contact-row:first-child { border-top: 1px solid var(--rule); }
+   520→   520→    a.contact-row:hover { opacity: 0.5; }
+   521→   521→
+   522→   522→    .contact-lbl {
+   523→   523→      font-size: 0.54rem;
+   524→   524→      letter-spacing: 0.28em;
+   525→   525→      text-transform: uppercase;
+   526→   526→      color: var(--muted);
+   527→   527→      min-width: 68px;
+   528→   528→      flex-shrink: 0;
+   529→   529→    }
+   530→   530→
+   531→   531→    .contact-val {
+   532→   532→      font-family: var(--ff-d);
+   533→   533→      font-size: clamp(1.1rem, 3vw, 1.55rem);
+   534→   534→      font-weight: 400;
+   535→   535→    }
+   536→   536→
+   537→   537→    /* ── LEGAL ──────────────────────────────────── */
+   538→   538→    .legal-body {
+   539→   539→      font-size: clamp(0.8rem, 1.8vw, 0.88rem);
+   540→   540→      line-height: 1.9;
+   541→   541→      font-weight: 300;
+   542→   542→      color: var(--ink);
+   543→   543→      opacity: 0.75;
+   544→   544→      max-width: 560px;
+   545→   545→    }
+   546→   546→
+   547→   547→    .legal-body h3 {
+   548→   548→      font-family: var(--ff-d);
+   549→   549→      font-size: clamp(1rem, 2.5vw, 1.3rem);
+   550→   550→      font-weight: 500;
+   551→   551→      font-style: italic;
+   552→   552→      opacity: 1;
+   553→   553→      margin-top: 2rem;
+   554→   554→      margin-bottom: 0.5rem;
+   555→   555→      line-height: 1.2;
+   556→   556→      color: var(--ink);
+   557→   557→    }
+   558→   558→
+   559→   559→    .legal-body h3:first-child { margin-top: 0; }
+   560→   560→    .legal-body p { margin-bottom: 0.6em; }
+   561→   561→    .legal-body a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+   562→   562→    .legal-body a:hover { opacity: 0.5; }
+   563→   563→
+   564→   564→    /* ── FOOTER ─────────────────────────────────── */
+   565→   565→    footer {
+   566→   566→      border-top: 1px solid var(--rule);
+   567→   567→      padding: 1.75rem clamp(1.5rem, 5vw, 3rem);
+   568→   568→      display: grid;
+   569→   569→      grid-template-columns: 1fr auto 1fr;
+   570→   570→      align-items: center;
+   571→   571→      gap: 1rem;
+   572→   572→    }
+   573→   573→
+   574→   574→    .footer-left  { display: flex; align-items: center; justify-content: flex-start; }
+   575→   575→    .footer-center { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; justify-content: center; }
+   576→   576→    .footer-right  { display: flex; align-items: center; justify-content: flex-end; }
+   577→   577→
+   578→   578→    .footer-coords { font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+   579→   579→    .footer-dot { width: 2.5px; height: 2.5px; border-radius: 50%; background: var(--rule); flex-shrink: 0; }
+   580→   580→    .at-badge { display: flex; align-items: center; gap: 0.55rem; }
+   581→   581→    .at-flag  { display: block; }
+   582→   582→    .at-label { font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+   583→   583→    .footer-copy { font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted); }
+   584→   584→
+   585→   585→    .footer-legal { display: flex; align-items: center; gap: 0.9rem; }
+   586→   586→
+   587→   587→    .footer-legal-btn {
+   588→   588→      font-family: var(--ff-b);
+   589→   589→      font-size: 0.55rem;
+   590→   590→      letter-spacing: 0.14em;
+   591→   591→      text-transform: uppercase;
+   592→   592→      color: var(--muted);
+   593→   593→      background: none;
+   594→   594→      border: none;
+   595→   595→      cursor: pointer;
+   596→   596→      padding: 0;
+   597→   597→      transition: color 0.2s;
+   598→   598→      -webkit-appearance: none;
+   599→   599→    }
+   600→   600→
+   601→   601→    .footer-legal-btn:hover,
+   602→   602→    .footer-legal-btn.active { color: var(--ink); }
+   603→   603→    .footer-legal-sep { font-size: 0.55rem; color: var(--rule); user-select: none; }
+   604→   604→
+   605→   605→    /* ── LANGUAGE SWITCHER ──────────────────────── */
+   606→   606→    .lang-switch {
+   607→   607→      display: flex;
+   608→   608→      align-items: center;
+   609→   609→      border: 1px solid var(--rule);
+   610→   610→      border-radius: 2px;
+   611→   611→      overflow: hidden;
+   612→   612→    }
+   613→   613→
+   614→   614→    .lang-btn {
+   615→   615→      font-family: var(--ff-b);
+   616→   616→      font-size: 0.52rem;
+   617→   617→      font-weight: 400;
+   618→   618→      letter-spacing: 0.18em;
+   619→   619→      text-transform: uppercase;
+   620→   620→      color: var(--muted);
+   621→   621→      background: none;
+   622→   622→      border: none;
+   623→   623→      cursor: pointer;
+   624→   624→      padding: 0.4rem 0.65rem;
+   625→   625→      transition: background 0.18s, color 0.18s;
+   626→   626→      -webkit-appearance: none;
+   627→   627→      line-height: 1;
+   628→   628→    }
+   629→   629→
+   630→   630→    .lang-btn:hover { color: var(--ink); }
+   631→   631→    .lang-btn.active { background: var(--ink); color: var(--bg); }
+   632→   632→    .lang-divider { width: 1px; height: 14px; background: var(--rule); flex-shrink: 0; }
+   633→   633→
+   634→   634→    /* ── RESPONSIVE ─────────────────────────────── */
+   635→   635→    @media (max-width: 720px) {
+   636→   636→      footer { grid-template-columns: 1fr; justify-items: center; gap: 0.85rem; }
+   637→   637→      .footer-left, .footer-center, .footer-right { justify-content: center; }
+   638→   638→    }
+   639→   639→
+   640→   640→    @media (max-width: 620px) {
+   641→   641→      .tier-grid  { grid-template-columns: 1fr; }
+   642→   642→      .about-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+   643→   643→      .about-body { column-count: 1; }
+   644→   644→    }
+   645→   645→
+   646→   646→    @media (max-width: 480px) {
+   647→   647→      .schulung-header { flex-direction: column; gap: 0.3rem; }
+   648→   648→      .framework-step  { gap: 1rem; }
+   649→   649→      .step-letter     { min-width: 1.8rem; font-size: 1.8rem; }
+   650→   650→    }
+   651→   651→
+   652→   652→    @media (prefers-reduced-motion: reduce) {
+   653→   653→      .intro-wrap     { transition: none; }
+   654→   654→      .panel.open     { animation: none; opacity: 1; }
+   655→   655→      .nav-btn::after { transition: none; }
+   656→   656→    }
+   657→   657→  </style>
+   658→   658→</head>
+   659→   659→<body>
+   660→   660→
+   661→   661→<!-- ── HEADER ────────────────────────────────── -->
+   662→   662→<header>
+   663→   663→  <a class="logo-mark" href="#" aria-label="Levcon.ai — Startseite">
+   664→   664→    <div class="logo-placeholder" aria-hidden="true"><span>L</span></div>
+   665→   665→    <span class="logo-wordmark">Levcon.ai</span>
+   666→   666→  </a>
+   667→   667→
+   668→   668→  <h1 class="site-slogan">
+   669→   669→    <span data-i18n="slogan_line1">KI mit Methode</span><span class="red">.</span><br>
+   670→   670→    <span data-i18n="slogan_line2">Wirkung mit System</span><span class="red">.</span>
+   671→   671→  </h1>
+   672→   672→
+   673→   673→  <p class="divider-line">
+   674→   674→    <span class="divider-rule" aria-hidden="true"></span>
+   675→   675→    <span class="divider-text" data-i18n="divider">KI-Beratung · Schulungen · Wien</span>
+   676→   676→    <span class="divider-rule" aria-hidden="true"></span>
+   677→   677→  </p>
+   678→   678→
+   679→   679→  <nav aria-label="Seitennavigation">
+   680→   680→    <button class="nav-btn active" data-target="home" data-i18n="nav_home">Home</button>
+   681→   681→    <span class="nav-sep" aria-hidden="true">/</span>
+   682→   682→    <button class="nav-btn" data-target="schulungen" aria-expanded="false" aria-controls="schulungen" data-i18n="nav_schulungen">KI Schulungen</button>
+   683→   683→    <span class="nav-sep" aria-hidden="true">/</span>
+   684→   684→    <button class="nav-btn" data-target="framework" aria-expanded="false" aria-controls="framework" data-i18n="nav_framework">Framework</button>
+   685→   685→    <span class="nav-sep" aria-hidden="true">/</span>
+   686→   686→    <button class="nav-btn" data-target="privacy" aria-expanded="false" aria-controls="privacy" data-i18n="nav_privacy">Datenschutz-Modell</button>
+   687→   687→    <span class="nav-sep" aria-hidden="true">/</span>
+   688→   688→    <button class="nav-btn" data-target="faq" aria-expanded="false" aria-controls="faq" data-i18n="nav_faq">FAQ</button>
+   689→   689→    <span class="nav-sep" aria-hidden="true">/</span>
+   690→   690→    <button class="nav-btn" data-target="kontakt" aria-expanded="false" aria-controls="kontakt" data-i18n="nav_kontakt">Kontakt</button>
+   691→   691→  </nav>
+   692→   692→</header>
+   693→   693→
+   694→   694→<!-- ── MAIN ──────────────────────────────────── -->
+   695→   695→<main>
+   696→   696→
+   697→   697→  <!-- Intro -->
+   698→   698→  <div class="intro-wrap" id="intro-wrap">
+   699→   699→    <section class="about" aria-label="Über Levcon.ai">
+   700→   700→      <div class="about-grid">
+   701→   701→        <div class="about-statement" data-i18n="about_statement">
+   702→   702→          Ich bin Enric Bruns — KI-Berater und Trainer aus Wien. Ich helfe Unternehmen, künstliche Intelligenz wirksam, sicher und ohne Hype einzusetzen.
+   703→   703→        </div>
+   704→   704→        <div class="about-body" data-i18n-html="about_body">
+   705→   705→          <p>Mit über zehn Jahren Erfahrung in IT-Beratung und Enterprise-Umgebungen verstehe ich, wie Unternehmen wirklich funktionieren — und wo KI einen messbaren Unterschied macht. Nicht in Präsentationen, sondern im Alltag Ihrer Mitarbeitenden.</p>
+   706→   706→          <p>Mein Ansatz beginnt immer mit dem Ziel, nicht mit der Technologie. Gemeinsam definieren wir, was Ihr Unternehmen konkret erreichen soll. Erst dann wählen wir die richtigen Werkzeuge — und behalten Datenschutz und Governance konsequent im Blick.</p>
+   707→   707→          <p>In Schulungen setze ich auf angewandtes Wissen: Ihre Mitarbeitenden verlassen den Workshop mit Fähigkeiten, die sie am nächsten Morgen einsetzen können. Kein Frontalvortrag, kein Buzzword-Bingo.</p>
+   708→   708→          <p>Ich verkaufe keine Software und keine Plattformen. Levcon.ai steht für Klarheit, Struktur und Wirksamkeit — für Unternehmen im österreichischen und deutschsprachigen Markt.</p>
+   709→   709→        </div>
+   710→   710→      </div>
+   711→   711→    </section>
+   712→   712→  </div>
+   713→   713→
+   714→   714→  <!-- KI Schulungen -->
+   715→   715→  <section class="panel" id="schulungen" aria-hidden="true">
+   716→   716→    <div class="panel-inner"><div class="panel-content">
+   717→   717→      <h2 class="panel-title" data-i18n="schulungen_title">KI Schulungen</h2>
+   718→   718→      <p class="panel-lead" data-i18n="schulungen_lead">Jede Schulung wird individuell zusammengestellt — nach Ihrer Zielgruppe, Ihren Prozessen und Ihrem Ziel. Kein Standardprogramm, keine Folien von der Stange.</p>
+   719→   719→      <ul class="schulung-list" id="schulung-list"></ul>
+   720→   720→    </div></div>
+   721→   721→  </section>
+   722→   722→
+   723→   723→  <!-- Framework -->
+   724→   724→  <section class="panel" id="framework" aria-hidden="true">
+   725→   725→    <div class="panel-inner"><div class="panel-content">
+   726→   726→      <h2 class="panel-title" data-i18n="framework_title">Das Framework</h2>
+   727→   727→      <p class="panel-lead" data-i18n="framework_lead">Jede Beratung beginnt mit einer klaren Methode. ZIEL → HEBEL → KONTROLLE ist der strukturierte Weg, wie Levcon.ai KI-Projekte denkt, plant und umsetzt.</p>
+   728→   728→      <ul class="framework-list" data-i18n-html="framework_list"></ul>
+   729→   729→    </div></div>
+   730→   730→  </section>
+   731→   731→
+   732→   732→  <!-- Datenschutz-Modell -->
+   733→   733→  <section class="panel" id="privacy" aria-hidden="true">
+   734→   734→    <div class="panel-inner"><div class="panel-content">
+   735→   735→      <h2 class="panel-title" data-i18n="privacy_title">Datenschutz-Modell</h2>
+   736→   736→      <p class="panel-lead" data-i18n="privacy_lead">Drei Stufen. Ein Versprechen: Ihre Daten gehen so weit in die Cloud, wie Sie es wollen — und keinen Millimeter weiter.</p>
+   737→   737→      <div class="tier-grid" data-i18n-html="privacy_tiers"></div>
+   738→   738→    </div></div>
+   739→   739→  </section>
+   740→   740→
+   741→   741→  <!-- FAQ -->
+   742→   742→  <section class="panel" id="faq" aria-hidden="true">
+   743→   743→    <div class="panel-inner"><div class="panel-content">
+   744→   744→      <h2 class="panel-title" data-i18n="faq_title">Häufige Fragen</h2>
+   745→   745→      <p class="panel-lead" data-i18n="faq_lead">Was ich in Erstgesprächen immer wieder höre — direkt beantwortet.</p>
+   746→   746→      <ul class="faq-list" id="faq-list"></ul>
+   747→   747→    </div></div>
+   748→   748→  </section>
+   749→   749→
+   750→   750→  <!-- Kontakt -->
+   751→   751→  <section class="panel" id="kontakt" aria-hidden="true">
+   752→   752→    <div class="panel-inner"><div class="panel-content">
+   753→   753→      <h2 class="panel-title" data-i18n="kontakt_title">Kontakt</h2>
+   754→   754→      <p class="panel-lead" data-i18n="kontakt_lead">Sprechen wir über Ihr Projekt. Ein erstes Gespräch ist unverbindlich und kostenlos.</p>
+   755→   755→      <ul class="contact-list">
+   756→   756→        <li><a class="contact-row" href="mailto:hello@levcon.ai"><span class="contact-lbl" data-i18n="kontakt_email_lbl">E-Mail</span><span class="contact-val">hello@levcon.ai</span></a></li>
+   757→   757→        <li><a class="contact-row" href="https://levcon.at" target="_blank" rel="noopener"><span class="contact-lbl" data-i18n="kontakt_web_lbl">Website</span><span class="contact-val">levcon.at</span></a></li>
+   758→   758→        <li><div class="contact-row" style="cursor:default;pointer-events:none;"><span class="contact-lbl" data-i18n="kontakt_loc_lbl">Standort</span><span class="contact-val" data-i18n="kontakt_loc_val">Wien, Österreich</span></div></li>
+   759→   759→      </ul>
+   760→   760→    </div></div>
+   761→   761→  </section>
+   762→   762→
+   763→   763→  <!-- Impressum -->
+   764→   764→  <section class="panel" id="impressum" aria-hidden="true">
+   765→   765→    <div class="panel-inner"><div class="panel-content">
+   766→   766→      <h2 class="panel-title" data-i18n="impressum_title">Impressum</h2>
+   767→   767→      <div class="legal-body" data-i18n-html="impressum_body"></div>
+   768→   768→    </div></div>
+   769→   769→  </section>
+   770→   770→
+   771→   771→  <!-- Datenschutzerklärung -->
+   772→   772→  <section class="panel" id="datenschutz" aria-hidden="true">
+   773→   773→    <div class="panel-inner"><div class="panel-content">
+   774→   774→      <h2 class="panel-title" data-i18n="datenschutz_title">Datenschutz&shy;erklärung</h2>
+   775→   775→      <div class="legal-body" data-i18n-html="datenschutz_body"></div>
+   776→   776→    </div></div>
+   777→   777→  </section>
+   778→   778→
+   779→   779→</main>
+   780→   780→
+   781→   781→<!-- ── FOOTER ────────────────────────────────── -->
+   782→   782→<footer>
+   783→   783→  <div class="footer-left">
+   784→   784→    <div class="footer-legal">
+   785→   785→      <button class="footer-legal-btn" data-target="impressum" data-i18n="footer_impressum">Impressum</button>
+   786→   786→      <span class="footer-legal-sep" aria-hidden="true">/</span>
+   787→   787→      <button class="footer-legal-btn" data-target="datenschutz" data-i18n="footer_datenschutz">Datenschutz</button>
+   788→   788→    </div>
+   789→   789→  </div>
+   790→   790→
+   791→   791→  <div class="footer-center">
+   792→   792→    <span class="footer-coords">48°12'N · 16°22'E</span>
+   793→   793→    <div class="footer-dot" aria-hidden="true"></div>
+   794→   794→    <div class="at-badge">
+   795→   795→      <svg class="at-flag" width="24" height="16" viewBox="0 0 3 3"
+   796→   796→           xmlns="http://www.w3.org/2000/svg" aria-label="Österreichische Flagge">
+   797→   797→        <rect width="3" height="1" fill="#C8102E"/>
+   798→   798→        <rect y="1" width="3" height="1" fill="#FFFFFF"/>
+   799→   799→        <rect y="2" width="3" height="1" fill="#C8102E"/>
+   800→   800→      </svg>
+   801→   801→      <span class="at-label" data-i18n="footer_quality">Qualität aus Wien</span>
+   802→   802→    </div>
+   803→   803→    <div class="footer-dot" aria-hidden="true"></div>
+   804→   804→    <span class="footer-copy">© 2025 Levcon.ai</span>
+   805→   805→  </div>
+   806→   806→
+   807→   807→  <div class="footer-right">
+   808→   808→    <div class="lang-switch" role="group" aria-label="Sprache wählen">
+   809→   809→      <button class="lang-btn active" data-lang="de" aria-pressed="true">DE</button>
+   810→   810→      <div class="lang-divider" aria-hidden="true"></div>
+   811→   811→      <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+   812→   812→    </div>
+   813→   813→  </div>
+   814→   814→</footer>
+   815→   815→
+   816→   816→<!-- ── TRANSLATIONS ───────────────────────────── -->
+   817→   817→<script>
+   818→   818→const TRANSLATIONS = {
+   819→   819→  de: {
+   820→   820→    lang_attr: "de",
+   821→   821→    page_title: "Levcon.ai — KI-Beratung & Schulungen aus Wien",
+   822→   822→    slogan_line1: "KI mit Methode",
+   823→   823→    slogan_line2: "Wirkung mit System",
+   824→   824→    divider: "KI-Beratung · Schulungen · Wien",
+   825→   825→    nav_home: "Home",
+   826→   826→    nav_schulungen: "KI Schulungen",
+   827→   827→    nav_framework: "Framework",
+   828→   828→    nav_privacy: "Datenschutz-Modell",
+   829→   829→    nav_faq: "FAQ",
+   830→   830→    nav_kontakt: "Kontakt",
+   831→   831→    about_statement: "Ich bin Enric Bruns\u00A0— KI-Berater und Trainer aus Wien. Ich helfe Unternehmen, künstliche Intelligenz wirksam, sicher und ohne Hype einzusetzen.",
+   832→   832→    about_body: `<p>Mit über zehn Jahren Erfahrung in IT-Beratung und Enterprise-Umgebungen verstehe ich, wie Unternehmen wirklich funktionieren — und wo KI einen messbaren Unterschied macht. Nicht in Präsentationen, sondern im Alltag Ihrer Mitarbeitenden.</p><p>Mein Ansatz beginnt immer mit dem Ziel, nicht mit der Technologie. Gemeinsam definieren wir, was Ihr Unternehmen konkret erreichen soll. Erst dann wählen wir die richtigen Werkzeuge — und behalten Datenschutz und Governance konsequent im Blick.</p><p>In Schulungen setze ich auf angewandtes Wissen: Ihre Mitarbeitenden verlassen den Workshop mit Fähigkeiten, die sie am nächsten Morgen einsetzen können. Kein Frontalvortrag, kein Buzzword-Bingo.</p><p>Ich verkaufe keine Software und keine Plattformen. Levcon.ai steht für Klarheit, Struktur und Wirksamkeit — für Unternehmen im österreichischen und deutschsprachigen Markt.</p>`,
+   833→   833→
+   834→   834→    schulungen_title: "KI Schulungen",
+   835→   835→    schulungen_lead: "Jede Schulung wird individuell zusammengestellt — nach Ihrer Zielgruppe, Ihren Prozessen und Ihrem Ziel. Kein Standardprogramm, keine Folien von der Stange.",
+   836→   836→    schulung_items: [
+   837→   837→      {
+   838→   838→        audience: "Führungskräfte & Entscheider",
+   839→   839→        format: "Halbtag · Ganztag",
+   840→   840→        outcome: "KI strategisch einschätzen, Chancen und Risiken bewerten, fundierte Entscheidungen treffen — ohne technisches Vorwissen.",
+   841→   841→        topics: ["KI-Grundlagen", "Risiken & Governance", "Use-Case-Bewertung", "Marktüberblick"]
+   842→   842→      },
+   843→   843→      {
+   844→   844→        audience: "Operative Teams & Mitarbeitende",
+   845→   845→        format: "Ganztag · Mehrere Einheiten",
+   846→   846→        outcome: "KI-Tools souverän im Arbeitsalltag einsetzen — von der ersten Anfrage bis zur strukturierten Automatisierung.",
+   847→   847→        topics: ["Prompt Engineering", "Tool-Auswahl", "Workflows automatisieren", "Qualitätskontrolle"]
+   848→   848→      },
+   849→   849→      {
+   850→   850→        audience: "IT & Technik",
+   851→   851→        format: "Vertiefung · Maßarbeit",
+   852→   852→        outcome: "KI-Infrastruktur verstehen, bewerten und sicher integrieren — vom API-Zugang bis zur lokalen Modellinstallation.",
+   853→   853→        topics: ["API-Integration", "Lokale Modelle", "Datenschutz-Architektur", "Evaluierung"]
+   854→   854→      },
+   855→   855→      {
+   856→   856→        audience: "Branchenspezifisch",
+   857→   857→        format: "Vollständig individuell",
+   858→   858→        outcome: "Schulungen, die in Ihrer Sprache sprechen — mit Beispielen, Prozessen und Werkzeugen aus Ihrer Branche.",
+   859→   859→        topics: ["Finanz & Compliance", "Gesundheit & DSGVO", "Industrie & Produktion", "Weitere auf Anfrage"]
+   860→   860→      }
+   861→   861→    ],
+   862→   862→
+   863→   863→    framework_title: "Das Framework",
+   864→   864→    framework_lead: "Jede Beratung beginnt mit einer klaren Methode. ZIEL → HEBEL → KONTROLLE ist der strukturierte Weg, wie Levcon.ai KI-Projekte denkt, plant und umsetzt.",
+   865→   865→    framework_list: `
+   866→   866→      <li class="framework-step">
+   867→   867→        <span class="step-letter">Z</span>
+   868→   868→        <div class="step-body">
+   869→   869→          <h3>Ziel</h3>
+   870→   870→          <p>Was soll KI in Ihrem Unternehmen konkret erreichen? Wir beginnen mit dem messbaren Ergebnis, nicht mit der Technologie. Welches Problem lösen wir — und für wen?</p>
+   871→   871→        </div>
+   872→   872→      </li>
+   873→   873→      <li class="framework-step">
+   874→   874→        <span class="step-letter">H</span>
+   875→   875→        <div class="step-body">
+   876→   876→          <h3>Hebel</h3>
+   877→   877→          <p>Wo hat KI den größten Hebeleffekt? Wir identifizieren die richtigen Werkzeuge, Prozesse und Schnittstellen — und trennen Hype von echtem Mehrwert.</p>
+   878→   878→        </div>
+   879→   879→      </li>
+   880→   880→      <li class="framework-step">
+   881→   881→        <span class="step-letter">K</span>
+   882→   882→        <div class="step-body">
+   883→   883→          <h3>Kontrolle</h3>
+   884→   884→          <p>Wie behalten Sie die Übersicht? KI-Projekte brauchen klare Governance, messbare KPIs und einen Betriebsplan. Kontrolle ist die Voraussetzung für nachhaltiges Vertrauen.</p>
+   885→   885→          <p>Erfolg wird konkret gemessen — nicht gefühlt. Je nach Projekt zählen wir eingesparte Stunden, gesunkene Fehlerquoten, verkürzte Durchlaufzeiten oder die Adoptionsrate im Team. Die Metriken werden vor Projektstart gemeinsam definiert.</p>
+   886→   886→          <div class="metric-row" id="metric-row"></div>
+   887→   887→        </div>
+   888→   888→      </li>`,
+   889→   889→    metrics: ["Zeitersparnis", "Fehlerquote", "Durchlaufzeit", "Adoptionsrate", "Kosten pro Prozess", "Mitarbeiterzufriedenheit"],
+   890→   890→
+   891→   891→    privacy_title: "Datenschutz-Modell",
+   892→   892→    privacy_lead: "Drei Stufen. Ein Versprechen: Ihre Daten gehen so weit in die Cloud, wie Sie es wollen — und keinen Millimeter weiter.",
+   893→   893→    privacy_tiers: `
+   894→   894→      <div class="tier-card">
+   895→   895→        <div class="tier-num">Stufe 01</div>
+   896→   896→        <div class="tier-name">Classic</div>
+   897→   897→        <div class="tier-desc">Kommerzielle KI-Dienste mit Standard-Datenschutzbedingungen. Ideal für allgemeine Aufgaben ohne sensible Unternehmensdaten.</div>
+   898→   898→      </div>
+   899→   899→      <div class="tier-card">
+   900→   900→        <div class="tier-num">Stufe 02</div>
+   901→   901→        <div class="tier-name">Privacy</div>
+   902→   902→        <div class="tier-desc">KI über Business-APIs, EU-Server und Datenschutzverträge (DPA). Ihre Daten werden nicht für das Training von Modellen verwendet.</div>
+   903→   903→      </div>
+   904→   904→      <div class="tier-card">
+   905→   905→        <div class="tier-num">Stufe 03</div>
+   906→   906→        <div class="tier-name">Local</div>
+   907→   907→        <div class="tier-desc">Vollständig lokal betriebene KI auf Ihrer eigenen Infrastruktur. Kein Byte verlässt Ihre Server.</div>
+   908→   908→      </div>`,
+   909→   909→
+   910→   910→    faq_title: "Häufige Fragen",
+   911→   911→    faq_lead: "Was ich in Erstgesprächen immer wieder höre — direkt beantwortet.",
+   912→   912→    faq_items: [
+   913→   913→      {
+   914→   914→        q: "Brauchen wir schon KI-Erfahrung im Team?",
+   915→   915→        a: "Nein — und oft ist weniger Vorwissen sogar hilfreicher. Wir beginnen dort, wo Ihr Team steht, nicht dort, wo Lehrbücher anfangen."
+   916→   916→      },
+   917→   917→      {
+   918→   918→        q: "Gibt es fixe Schulungspakete?",
+   919→   919→        a: "Nein. Jede Schulung beginnt mit einem Gespräch über Ihre Situation. Format, Dauer, Inhalt und Beispiele werden gemeinsam definiert — es gibt keine Schulung von der Stange."
+   920→   920→      },
+   921→   921→      {
+   922→   922→        q: "Wie wird der Erfolg eines Projekts gemessen?",
+   923→   923→        a: "Die Metriken legen wir vor Projektstart gemeinsam fest — zum Beispiel eingesparte Stunden pro Woche, gesunkene Fehlerquoten oder die Adoptionsrate im Team. Kein Projekt endet ohne messbare Baseline."
+   924→   924→      },
+   925→   925→      {
+   926→   926→        q: "Was kostet eine Schulung oder Beratung?",
+   927→   927→        a: "Das hängt vom Umfang ab. Ein erstes Gespräch ist kostenlos — danach erhalten Sie ein konkretes Angebot, kein Preismenü."
+   928→   928→      },
+   929→   929→      {
+   930→   930→        q: "Arbeiten Sie nur mit großen Unternehmen?",
+   931→   931→        a: "Nein. Ich arbeite mit Unternehmen, bei denen KI einen echten Unterschied machen kann — unabhängig von der Größe. Entscheidend ist, ob das Ziel klar ist."
+   932→   932→      },
+   933→   933→      {
+   934→   934→        q: "Verkaufen Sie auch Software oder Tools?",
+   935→   935→        a: "Nein. Ich bin werkzeugunabhängig. Meine Empfehlungen basieren auf Ihrem Ziel — nicht auf Provisionen oder Partnerschaften."
+   936→   936→      },
+   937→   937→      {
+   938→   938→        q: "Wie läuft ein erstes Gespräch ab?",
+   939→   939→        a: "30 Minuten, unverbindlich, ohne Agenda-Zwang. Ich höre zu, stelle Fragen und sage Ihnen ehrlich, ob und wie ich helfen kann."
+   940→   940→      }
+   941→   941→    ],
+   942→   942→
+   943→   943→    kontakt_title: "Kontakt",
+   944→   944→    kontakt_lead: "Sprechen wir über Ihr Projekt. Ein erstes Gespräch ist unverbindlich und kostenlos.",
+   945→   945→    kontakt_email_lbl: "E-Mail",
+   946→   946→    kontakt_web_lbl: "Website",
+   947→   947→    kontakt_loc_lbl: "Standort",
+   948→   948→    kontakt_loc_val: "Wien, Österreich",
+   949→   949→    impressum_title: "Impressum",
+   950→   950→    impressum_body: `<h3>Angaben gemäß § 5 ECG</h3><p>Enric Bruns<br>Levcon.ai<br>[Straße und Hausnummer]<br>[PLZ] Wien, Österreich</p><h3>Kontakt</h3><p>E-Mail: <a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p><h3>Unternehmensgegenstand</h3><p>KI-Beratung und Schulungen für Unternehmen.</p><h3>Haftungsausschluss</h3><p>Die Inhalte dieser Website wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit kann keine Gewähr übernommen werden.</p><h3>Urheberrecht</h3><p>Die Inhalte unterliegen dem österreichischen Urheberrecht. Vervielfältigung bedarf der schriftlichen Zustimmung.</p>`,
+   951→   951→    datenschutz_title: "Datenschutzerklärung",
+   952→   952→    datenschutz_body: `<h3>Verantwortlicher</h3><p>Enric Bruns, Levcon.ai<br>[Adresse], Wien<br><a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p><h3>Erhebung personenbezogener Daten</h3><p>Diese Website erhebt personenbezogene Daten nur im erforderlichen Umfang. Eine Weitergabe an Dritte findet ohne ausdrückliche Einwilligung nicht statt.</p><h3>Cookies</h3><p>Diese Website verwendet keine Cookies.</p><h3>Ihre Rechte (DSGVO Art. 15–22)</h3><p>Auskunft, Berichtigung oder Löschung: <a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p>`,
+   953→   953→    footer_impressum: "Impressum",
+   954→   954→    footer_datenschutz: "Datenschutz",
+   955→   955→    footer_quality: "Qualität aus Wien"
+   956→   956→  },
+   957→   957→
+   958→   958→  en: {
+   959→   959→    lang_attr: "en",
+   960→   960→    page_title: "Levcon.ai — AI Consulting & Training from Vienna",
+   961→   961→    slogan_line1: "AI with Method",
+   962→   962→    slogan_line2: "Impact with System",
+   963→   963→    divider: "AI Consulting · Training · Vienna",
+   964→   964→    nav_home: "Home",
+   965→   965→    nav_schulungen: "AI Training",
+   966→   966→    nav_framework: "Framework",
+   967→   967→    nav_privacy: "Privacy Model",
+   968→   968→    nav_faq: "FAQ",
+   969→   969→    nav_kontakt: "Contact",
+   970→   970→    about_statement: "I am Enric Bruns\u00A0— AI consultant and trainer based in Vienna. I help companies deploy artificial intelligence effectively, securely, and without the hype.",
+   971→   971→    about_body: `<p>With over ten years of experience in IT consulting and enterprise environments, I understand how companies really work — and where AI makes a measurable difference. Not in presentations, but in the daily work of your employees.</p><p>My approach always starts with the goal, not the technology. Together we define what your company wants to achieve concretely. Only then do we select the right tools — while keeping data protection and governance firmly in focus.</p><p>In training sessions I focus on applied knowledge: your employees leave the workshop with skills they can use the very next morning. No lecture-style presentations, no buzzword bingo.</p><p>I don't sell software or platforms. Levcon.ai stands for clarity, structure and effectiveness — for companies in the Austrian and German-speaking market.</p>`,
+   972→   972→
+   973→   973→    schulungen_title: "AI Training",
+   974→   974→    schulungen_lead: "Every training is individually designed — tailored to your audience, your processes and your goal. No standard programme, no off-the-shelf slides.",
+   975→   975→    schulung_items: [
+   976→   976→      {
+   977→   977→        audience: "Executives & Decision-makers",
+   978→   978→        format: "Half-day · Full-day",
+   979→   979→        outcome: "Assess AI strategically, evaluate opportunities and risks, make informed decisions — without technical background.",
+   980→   980→        topics: ["AI Fundamentals", "Risks & Governance", "Use-Case Evaluation", "Market Overview"]
+   981→   981→      },
+   982→   982→      {
+   983→   983→        audience: "Operational Teams & Employees",
+   984→   984→        format: "Full-day · Multiple Sessions",
+   985→   985→        outcome: "Use AI tools confidently in daily work — from the first prompt to structured automation.",
+   986→   986→        topics: ["Prompt Engineering", "Tool Selection", "Workflow Automation", "Quality Control"]
+   987→   987→      },
+   988→   988→      {
+   989→   989→        audience: "IT & Technical Teams",
+   990→   990→        format: "Advanced · Tailored",
+   991→   991→        outcome: "Understand, evaluate and securely integrate AI infrastructure — from API access to local model deployment.",
+   992→   992→        topics: ["API Integration", "Local Models", "Privacy Architecture", "Evaluation"]
+   993→   993→      },
+   994→   994→      {
+   995→   995→        audience: "Industry-specific",
+   996→   996→        format: "Fully customised",
+   997→   997→        outcome: "Training that speaks your language — with examples, processes and tools from your industry.",
+   998→   998→        topics: ["Finance & Compliance", "Healthcare & GDPR", "Industry & Production", "Others on request"]
+   999→   999→      }
+  1000→  1000→    ],
+  1001→  1001→
+  1002→  1002→    framework_title: "The Framework",
+  1003→  1003→    framework_lead: "Every engagement starts with a clear method. GOAL → LEVER → CONTROL is the structured way Levcon.ai thinks, plans and implements AI projects.",
+  1004→  1004→    framework_list: `
+  1005→  1005→      <li class="framework-step">
+  1006→  1006→        <span class="step-letter">G</span>
+  1007→  1007→        <div class="step-body">
+  1008→  1008→          <h3>Goal</h3>
+  1009→  1009→          <p>What should AI concretely achieve in your company? We start with the measurable outcome, not the technology. What problem are we solving — and for whom?</p>
+  1010→  1010→        </div>
+  1011→  1011→      </li>
+  1012→  1012→      <li class="framework-step">
+  1013→  1013→        <span class="step-letter">L</span>
+  1014→  1014→        <div class="step-body">
+  1015→  1015→          <h3>Lever</h3>
+  1016→  1016→          <p>Where does AI have the greatest leverage? We identify the right tools, processes and interfaces — separating hype from real value.</p>
+  1017→  1017→        </div>
+  1018→  1018→      </li>
+  1019→  1019→      <li class="framework-step">
+  1020→  1020→        <span class="step-letter">C</span>
+  1021→  1021→        <div class="step-body">
+  1022→  1022→          <h3>Control</h3>
+  1023→  1023→          <p>How do you maintain oversight? AI projects need clear governance, measurable KPIs and an operating plan. Control is the foundation of lasting trust.</p>
+  1024→  1024→          <p>Success is measured concretely — not felt. Depending on the project, we track hours saved, reduced error rates, shorter throughput times or team adoption rates. Metrics are defined together before the project begins.</p>
+  1025→  1025→          <div class="metric-row" id="metric-row"></div>
+  1026→  1026→        </div>
+  1027→  1027→      </li>`,
+  1028→  1028→    metrics: ["Time saved", "Error rate", "Throughput time", "Adoption rate", "Cost per process", "Employee satisfaction"],
+  1029→  1029→
+  1030→  1030→    privacy_title: "Privacy Model",
+  1031→  1031→    privacy_lead: "Three tiers. One promise: your data goes as far into the cloud as you want — and not one millimetre further.",
+  1032→  1032→    privacy_tiers: `
+  1033→  1033→      <div class="tier-card">
+  1034→  1034→        <div class="tier-num">Tier 01</div>
+  1035→  1035→        <div class="tier-name">Classic</div>
+  1036→  1036→        <div class="tier-desc">Commercial AI services with standard data protection terms. Ideal for general tasks without sensitive company data.</div>
+  1037→  1037→      </div>
+  1038→  1038→      <div class="tier-card">
+  1039→  1039→        <div class="tier-num">Tier 02</div>
+  1040→  1040→        <div class="tier-name">Privacy</div>
+  1041→  1041→        <div class="tier-desc">AI via business APIs, EU servers and data processing agreements (DPA). Your data is not used to train models.</div>
+  1042→  1042→      </div>
+  1043→  1043→      <div class="tier-card">
+  1044→  1044→        <div class="tier-num">Tier 03</div>
+  1045→  1045→        <div class="tier-name">Local</div>
+  1046→  1046→        <div class="tier-desc">Fully locally operated AI on your own infrastructure. Not a single byte leaves your servers.</div>
+  1047→  1047→      </div>`,
+  1048→  1048→
+  1049→  1049→    faq_title: "Frequently Asked Questions",
+  1050→  1050→    faq_lead: "What I hear in almost every first conversation — answered directly.",
+  1051→  1051→    faq_items: [
+  1052→  1052→      {
+  1053→  1053→        q: "Does our team need prior AI experience?",
+  1054→  1054→        a: "No — and less prior knowledge is often actually better. We start where your team is, not where textbooks begin."
+  1055→  1055→      },
+  1056→  1056→      {
+  1057→  1057→        q: "Are there fixed training packages?",
+  1058→  1058→        a: "No. Every training starts with a conversation about your situation. Format, duration, content and examples are defined together — there is no off-the-shelf programme."
+  1059→  1059→      },
+  1060→  1060→      {
+  1061→  1061→        q: "How is the success of a project measured?",
+  1062→  1062→        a: "We define the metrics together before the project starts — for example hours saved per week, reduced error rates or team adoption rates. No project ends without a measurable baseline."
+  1063→  1063→      },
+  1064→  1064→      {
+  1065→  1065→        q: "What does a training or consulting engagement cost?",
+  1066→  1066→        a: "It depends on the scope. A first conversation is free — after that you get a concrete proposal, not a price menu."
+  1067→  1067→      },
+  1068→  1068→      {
+  1069→  1069→        q: "Do you only work with large companies?",
+  1070→  1070→        a: "No. I work with companies where AI can make a real difference — regardless of size. What matters is whether the goal is clear."
+  1071→  1071→      },
+  1072→  1072→      {
+  1073→  1073→        q: "Do you sell software or tools?",
+  1074→  1074→        a: "No. I am tool-independent. My recommendations are based on your goal — not on commissions or partnerships."
+  1075→  1075→      },
+  1076→  1076→      {
+  1077→  1077→        q: "How does a first conversation work?",
+  1078→  1078→        a: "30 minutes, non-binding, no agenda pressure. I listen, ask questions, and tell you honestly whether and how I can help."
+  1079→  1079→      }
+  1080→  1080→    ],
+  1081→  1081→
+  1082→  1082→    kontakt_title: "Contact",
+  1083→  1083→    kontakt_lead: "Let's talk about your project. An initial conversation is non-binding and free of charge.",
+  1084→  1084→    kontakt_email_lbl: "Email",
+  1085→  1085→    kontakt_web_lbl: "Website",
+  1086→  1086→    kontakt_loc_lbl: "Location",
+  1087→  1087→    kontakt_loc_val: "Vienna, Austria",
+  1088→  1088→    impressum_title: "Legal Notice",
+  1089→  1089→    impressum_body: `<h3>Information pursuant to § 5 ECG</h3><p>Enric Bruns<br>Levcon.ai<br>[Street and number]<br>[Postcode] Vienna, Austria</p><h3>Contact</h3><p>Email: <a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p><h3>Business activity</h3><p>AI consulting and training for companies.</p><h3>Disclaimer</h3><p>The contents of this website have been prepared with the utmost care. No guarantee can be given for accuracy or completeness.</p><h3>Copyright</h3><p>All content is subject to Austrian copyright law. Reproduction requires written consent.</p>`,
+  1090→  1090→    datenschutz_title: "Privacy Policy",
+  1091→  1091→    datenschutz_body: `<h3>Controller</h3><p>Enric Bruns, Levcon.ai<br>[Address], Vienna<br><a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p><h3>Collection of personal data</h3><p>This website collects personal data only to the extent necessary. Data is not passed on to third parties without explicit consent.</p><h3>Cookies</h3><p>This website does not use cookies.</p><h3>Your rights (GDPR Art. 15–22)</h3><p>You have the right to access, rectify or delete your stored data. Requests: <a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p>`,
+  1092→  1092→    footer_impressum: "Legal Notice",
+  1093→  1093→    footer_datenschutz: "Privacy Policy",
+  1094→  1094→    footer_quality: "Quality from Vienna"
+  1095→  1095→  }
+  1096→  1096→};
+  1097→  1097→</script>
+  1098→  1098→
+  1099→  1099→<!-- ── APP LOGIC ───────────────────────────────── -->
+  1100→  1100→<script>
+  1101→  1101→(function () {
+  1102→  1102→  const FADE_MS   = 320;
+  1103→  1103→  let currentLang = 'de';
+  1104→  1104→
+  1105→  1105→  const navBtns   = document.querySelectorAll('.nav-btn');
+  1106→  1106→  const legalBtns = document.querySelectorAll('.footer-legal-btn');
+  1107→  1107→  const langBtns  = document.querySelectorAll('.lang-btn');
+  1108→  1108→  const panels    = document.querySelectorAll('.panel');
+  1109→  1109→  const introWrap = document.getElementById('intro-wrap');
+  1110→  1110→  const logoMark  = document.querySelector('.logo-mark');
+  1111→  1111→
+  1112→  1112→  /* ── Render: Schulungen ─────────────────────── */
+  1113→  1113→  function renderSchulungen(lang) {
+  1114→  1114→    const list  = document.getElementById('schulung-list');
+  1115→  1115→    const items = TRANSLATIONS[lang].schulung_items;
+  1116→  1116→    if (!list || !items) return;
+  1117→  1117→    list.innerHTML = items.map(item => `
+  1118→  1118→      <li class="schulung-item">
+  1119→  1119→        <div class="schulung-header">
+  1120→  1120→          <span class="schulung-audience">${item.audience}</span>
+  1121→  1121→          <span class="schulung-format">${item.format}</span>
+  1122→  1122→        </div>
+  1123→  1123→        <div class="schulung-outcome">${item.outcome}</div>
+  1124→  1124→        <div class="schulung-topics">
+  1125→  1125→          ${item.topics.map(t => `<span class="schulung-tag">${t}</span>`).join('')}
+  1126→  1126→        </div>
+  1127→  1127→      </li>
+  1128→  1128→    `).join('');
+  1129→  1129→  }
+  1130→  1130→
+  1131→  1131→  /* ── Render: Metrics ────────────────────────── */
+  1132→  1132→  function renderMetrics(lang) {
+  1133→  1133→    const row     = document.getElementById('metric-row');
+  1134→  1134→    const metrics = TRANSLATIONS[lang].metrics;
+  1135→  1135→    if (!row || !metrics) return;
+  1136→  1136→    row.innerHTML = metrics.map(m => `<span class="metric-chip">${m}</span>`).join('');
+  1137→  1137→  }
+  1138→  1138→
+  1139→  1139→  /* ── Render: FAQ ────────────────────────────── */
+  1140→  1140→  function renderFaq(lang) {
+  1141→  1141→    const list  = document.getElementById('faq-list');
+  1142→  1142→    const items = TRANSLATIONS[lang].faq_items;
+  1143→  1143→    if (!list || !items) return;
+  1144→  1144→    list.innerHTML = items.map(item => `
+  1145→  1145→      <li class="faq-item">
+  1146→  1146→        <div class="faq-q">${item.q}</div>
+  1147→  1147→        <div class="faq-a">${item.a}</div>
+  1148→  1148→      </li>
+  1149→  1149→    `).join('');
+  1150→  1150→  }
+  1151→  1151→
+  1152→  1152→  /* ── i18n ───────────────────────────────────── */
+  1153→  1153→  function applyTranslations(lang) {
+  1154→  1154→    const t = TRANSLATIONS[lang];
+  1155→  1155→    if (!t) return;
+  1156→  1156→    document.documentElement.lang = t.lang_attr;
+  1157→  1157→    document.title = t.page_title;
+  1158→  1158→    const canonical = document.querySelector('link[rel="canonical"]');
+  1159→  1159→    if (canonical) canonical.href = lang === 'en' ? 'https://levcon.ai/?lang=en' : 'https://levcon.ai/';
+  1160→  1160→    document.querySelectorAll('[data-i18n]').forEach(el => {
+  1161→  1161→      const v = t[el.getAttribute('data-i18n')];
+  1162→  1162→      if (v !== undefined) el.textContent = v;
+  1163→  1163→    });
+  1164→  1164→    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+  1165→  1165→      const v = t[el.getAttribute('data-i18n-html')];
+  1166→  1166→      if (v !== undefined) el.innerHTML = v;
+  1167→  1167→    });
+  1168→  1168→    renderSchulungen(lang);
+  1169→  1169→    renderMetrics(lang);
+  1170→  1170→    renderFaq(lang);
+  1171→  1171→  }
+  1172→  1172→
+  1173→  1173→  /* ── Language detection ─────────────────────── */
+  1174→  1174→  (function detectLang() {
+  1175→  1175→    const p = new URLSearchParams(window.location.search).get('lang');
+  1176→  1176→    if (p && TRANSLATIONS[p]) currentLang = p;
+  1177→  1177→    applyTranslations(currentLang);
+  1178→  1178→    updateLangBtns(currentLang);
+  1179→  1179→  })();
+  1180→  1180→
+  1181→  1181→  function updateLangBtns(lang) {
+  1182→  1182→    langBtns.forEach(b => {
+  1183→  1183→      const on = b.dataset.lang === lang;
+  1184→  1184→      b.classList.toggle('active', on);
+  1185→  1185→      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  1186→  1186→    });
+  1187→  1187→  }
+  1188→  1188→
+  1189→  1189→  langBtns.forEach(btn => {
+  1190→  1190→    btn.addEventListener('click', () => {
+  1191→  1191→      const lang = btn.dataset.lang;
+  1192→  1192→      if (lang === currentLang) return;
+  1193→  1193→      currentLang = lang;
+  1194→  1194→      const url = new URL(window.location);
+  1195→  1195→      lang === 'de' ? url.searchParams.delete('lang') : url.searchParams.set('lang', lang);
+  1196→  1196→      window.history.replaceState({}, '', url);
+  1197→  1197→      applyTranslations(lang);
+  1198→  1198→      updateLangBtns(lang);
+  1199→  1199→    });
+  1200→  1200→  });
+  1201→  1201→
+  1202→  1202→  /* ── Intro fade ─────────────────────────────── */
+  1203→  1203→  function hideIntro(cb) {
+  1204→  1204→    if (introWrap.classList.contains('is-gone')) { cb && cb(); return; }
+  1205→  1205→    introWrap.classList.add('is-hiding');
+  1206→  1206→    setTimeout(() => { introWrap.classList.add('is-gone'); cb && cb(); }, FADE_MS);
+  1207→  1207→  }
+  1208→  1208→
+  1209→  1209→  function showIntro() {
+  1210→  1210→    introWrap.classList.remove('is-gone');
+  1211→  1211→    void introWrap.offsetHeight;
+  1212→  1212→    introWrap.classList.remove('is-hiding');
+  1213→  1213→  }
+  1214→  1214→
+  1215→  1215→  /* ── Panel logic ────────────────────────────── */
+  1216→  1216→  function resetNav() {
+  1217→  1217→    panels.forEach(p => { p.classList.remove('open'); p.setAttribute('aria-hidden', 'true'); });
+  1218→  1218→    navBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-expanded', 'false'); });
+  1219→  1219→    legalBtns.forEach(b => b.classList.remove('active'));
+  1220→  1220→  }
+  1221→  1221→
+  1222→  1222→  function goHome() {
+  1223→  1223→    resetNav();
+  1224→  1224→    document.querySelector('[data-target="home"]').classList.add('active');
+  1225→  1225→    showIntro();
+  1226→  1226→    window.scrollTo({ top: 0, behavior: 'smooth' });
+  1227→  1227→  }
+  1228→  1228→
+  1229→  1229→  function openPanel(targetId, triggerBtn, isNavBtn) {
+  1230→  1230→    hideIntro(() => {
+  1231→  1231→      resetNav();
+  1232→  1232→      const panel = document.getElementById(targetId);
+  1233→  1233→      panel.classList.add('open');
+  1234→  1234→      panel.setAttribute('aria-hidden', 'false');
+  1235→  1235→      triggerBtn.classList.add('active');
+  1236→  1236→      if (isNavBtn) triggerBtn.setAttribute('aria-expanded', 'true');
+  1237→  1237→      window.scrollTo({ top: 0, behavior: 'smooth' });
+  1238→  1238→    });
+  1239→  1239→  }
+  1240→  1240→
+  1241→  1241→  navBtns.forEach(btn => {
+  1242→  1242→    btn.addEventListener('click', () => {
+  1243→  1243→      const target = btn.dataset.target;
+  1244→  1244→      if (target === 'home') { goHome(); return; }
+  1245→  1245→      const panel = document.getElementById(target);
+  1246→  1246→      panel.classList.contains('open') ? goHome() : openPanel(target, btn, true);
+  1247→  1247→    });
+  1248→  1248→  });
+  1249→  1249→
+  1250→  1250→  if (logoMark) logoMark.addEventListener('click', e => { e.preventDefault(); goHome(); });
+  1251→  1251→
+  1252→  1252→  legalBtns.forEach(btn => {
+  1253→  1253→    btn.addEventListener('click', () => {
+  1254→  1254→      const target = btn.dataset.target;
+  1255→  1255→      const panel  = document.getElementById(target);
+  1256→  1256→      panel.classList.contains('open') ? goHome() : openPanel(target, btn, false);
+  1257→  1257→    });
+  1258→  1258→  });
+  1259→  1259→
+  1260→  1260→})();
+  1261→  1261→</script>
+  1262→  1262→
+  1263→  1263→</body>
+  1264→  1264→</html>

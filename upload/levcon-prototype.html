@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Levcon.ai — KI-Beratung & Schulungen aus Wien</title>
+  <meta name="description" content="Levcon.ai — KI-Beratung und Schulungen aus Wien. KI mit Methode, Wirkung mit System. Enric Bruns hilft Unternehmen, KI wirksam, sicher und ohne Hype einzusetzen.">
+  <meta name="author" content="Enric Bruns">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://levcon.ai/">
+
+  <link rel="alternate" hreflang="de" href="https://levcon.ai/">
+  <link rel="alternate" hreflang="en" href="https://levcon.ai/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://levcon.ai/">
+
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://levcon.ai/">
+  <meta property="og:title"       content="Levcon.ai — KI-Beratung & Schulungen aus Wien">
+  <meta property="og:description" content="KI mit Methode, Wirkung mit System. KI-Beratung und Schulungen für Unternehmen im österreichischen und deutschsprachigen Markt.">
+  <meta property="og:locale"      content="de_AT">
+  <meta property="og:locale:alternate" content="en_GB">
+  <meta property="og:site_name"   content="Levcon.ai">
+
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="Levcon.ai — KI-Beratung & Schulungen aus Wien">
+  <meta name="twitter:description" content="KI mit Methode, Wirkung mit System. KI-Beratung und Schulungen für Unternehmen im österreichischen und deutschsprachigen Markt.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "Levcon.ai",
+    "description": "KI-Beratung und Schulungen für Unternehmen. KI mit Methode, Wirkung mit System.",
+    "url": "https://levcon.ai",
+    "founder": {
+      "@type": "Person",
+      "name": "Enric Bruns",
+      "jobTitle": "KI-Berater und Trainer"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Wien",
+      "addressCountry": "AT"
+    },
+    "areaServed": ["AT", "DE", "CH"],
+    "availableLanguage": ["de", "en"],
+    "email": "hello@levcon.ai",
+    "sameAs": ["https://levcon.at"],
+    "serviceType": [
+      "KI-Beratung",
+      "KI-Schulungen",
+      "Datenschutz-Beratung",
+      "Prozessautomatisierung"
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── TOKENS ─────────────────────────────────── */
+    :root {
+      --bg:      #F0EFEC;
+      --ink:     #1C1C1A;
+      --muted:   #8A8A85;
+      --red:     #C8102E;
+      --rule:    #D8D7D3;
+      --panel-bg:#ECEAE6;
+      --ff-d: 'Cormorant Garamond', Georgia, serif;
+      --ff-b: 'DM Sans', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--ff-b);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ─────────────────────────────────── */
+    header {
+      text-align: center;
+      padding: clamp(2rem, 6vw, 4rem) clamp(1.5rem, 5vw, 3rem) 2.75rem;
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: clamp(2rem, 6vw, 3.5rem);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .logo-placeholder {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      opacity: 0.75;
+    }
+
+    .logo-placeholder span {
+      font-family: var(--ff-d);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1;
+      padding-bottom: 0.05em;
+    }
+
+    .logo-wordmark {
+      font-family: var(--ff-b);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.6;
+    }
+
+    .site-slogan {
+      font-family: var(--ff-d);
+      font-size: clamp(3rem, 11vw, 7rem);
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: -0.02em;
+      line-height: 1.0;
+      color: var(--ink);
+      margin-bottom: 2.25rem;
+    }
+
+    .site-slogan .red { color: var(--red); }
+
+    .divider-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      margin-bottom: 2.75rem;
+    }
+
+    .divider-rule {
+      display: block;
+      width: clamp(2rem, 6vw, 3.5rem);
+      height: 1px;
+      background: var(--ink);
+      opacity: 0.28;
+      flex-shrink: 0;
+    }
+
+    .divider-text {
+      font-family: var(--ff-b);
+      font-size: clamp(0.52rem, 1.8vw, 0.65rem);
+      font-weight: 400;
+      letter-spacing: 0.32em;
+      color: var(--muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ── NAV ────────────────────────────────────── */
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+    }
+
+    .nav-btn {
+      font-family: var(--ff-b);
+      font-size: clamp(0.56rem, 1.8vw, 0.68rem);
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.7rem 0.9rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+      transition: color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .nav-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0.4rem;
+      left: 0.9rem;
+      right: 0.9rem;
+      height: 1px;
+      background: var(--ink);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.25s ease;
+    }
+
+    .nav-btn:hover::after,
+    .nav-btn.active::after { transform: scaleX(1); }
+    .nav-btn.active { color: var(--ink); }
+
+    .nav-btn:focus-visible {
+      outline: 1.5px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .nav-sep {
+      color: var(--muted);
+      font-size: 0.7rem;
+      opacity: 0.35;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* ── MAIN ───────────────────────────────────── */
+    main { flex: 1; }
+
+    /* ── INTRO WRAP ─────────────────────────────── */
+    .intro-wrap {
+      transition: opacity 0.32s ease;
+      opacity: 1;
+    }
+
+    .intro-wrap.is-hiding {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-wrap.is-gone { display: none; }
+
+    /* ── ABOUT ──────────────────────────────────── */
+    .about {
+      border-top: 1px solid var(--rule);
+      padding: clamp(2.5rem, 7vw, 4.25rem) clamp(1.5rem, 5vw, 3rem);
+    }
+
+    .about-grid {
+      max-width: 860px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: start;
+    }
+
+    .about-statement {
+      font-family: var(--ff-d);
+      font-size: clamp(1.1rem, 2.6vw, 1.42rem);
+      font-weight: 400;
+      line-height: 1.48;
+      color: var(--ink);
+    }
+
+    .about-body {
+      column-count: 2;
+      column-gap: 2rem;
+      font-size: clamp(0.78rem, 1.6vw, 0.86rem);
+      line-height: 1.82;
+      font-weight: 300;
+      color: var(--ink);
+      opacity: 0.6;
+    }
+
+    .about-body p + p { margin-top: 0.9em; }
+    .about-body p { break-inside: avoid; orphans: 3; widows: 3; }
+
+    /* ── PANELS ─────────────────────────────────── */
+    .panel { display: none; opacity: 0; }
+
+    .panel.open {
+      display: block;
+      animation: fadePanel 0.32s ease forwards;
+    }
+
+    @keyframes fadePanel {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .panel-inner {
+      border-top: 1px solid var(--rule);
+      background: linear-gradient(to bottom, var(--panel-bg) 0%, var(--bg) 80px);
+      padding: clamp(2.5rem, 7vw, 4.5rem) clamp(1.5rem, 5vw, 3rem);
+    }
+
+    .panel-content { max-width: 700px; margin: 0 auto; }
+
+    .panel-title {
+      font-family: var(--ff-d);
+      font-size: clamp(1.9rem, 5.5vw, 3.2rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 1.4rem;
+      line-height: 1.1;
+    }
+
+    .panel-lead {
+      font-size: clamp(0.87rem, 2.2vw, 1rem);
+      line-height: 1.85;
+      color: var(--ink);
+      opacity: 0.62;
+      margin-bottom: 2.25rem;
+      font-weight: 300;
+      max-width: 560px;
+    }
+
+    /* ── SCHULUNGEN ─────────────────────────────── */
+    .schulung-list { list-style: none; }
+
+    .schulung-item {
+      padding: 1.75rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .schulung-item:first-child { border-top: 1px solid var(--rule); }
+
+    .schulung-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1.25rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .schulung-audience {
+      font-family: var(--ff-d);
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .schulung-format {
+      font-size: 0.52rem;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--red);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .schulung-outcome {
+      font-size: 0.88rem;
+      line-height: 1.72;
+      font-weight: 300;
+      color: var(--ink);
+      opacity: 0.62;
+      margin-bottom: 0.55rem;
+      max-width: 520px;
+    }
+
+    .schulung-topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.65rem;
+    }
+
+    .schulung-tag {
+      font-size: 0.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--rule);
+      padding: 0.25rem 0.55rem;
+      border-radius: 1px;
+    }
+
+    /* ── FRAMEWORK ──────────────────────────────── */
+    .framework-list { list-style: none; }
+
+    .framework-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.75rem;
+      padding: 1.75rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .framework-step:first-child { border-top: 1px solid var(--rule); }
+
+    .step-letter {
+      font-family: var(--ff-d);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      color: var(--red);
+      opacity: 0.22;
+      line-height: 1;
+      min-width: 2.25rem;
+      padding-top: 0.1rem;
+    }
+
+    .step-body h3 {
+      font-family: var(--ff-d);
+      font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+      font-weight: 500;
+      margin-bottom: 0.45rem;
+      line-height: 1.1;
+    }
+
+    .step-body p {
+      font-size: 0.88rem;
+      line-height: 1.75;
+      opacity: 0.62;
+      font-weight: 300;
+    }
+
+    .step-body p + p { margin-top: 0.7em; }
+
+    .metric-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.9rem;
+    }
+
+    .metric-chip {
+      font-size: 0.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--rule);
+      padding: 0.28rem 0.6rem;
+      border-radius: 1px;
+    }
+
+    /* ── PRIVACY TIERS ──────────────────────────── */
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+    }
+
+    .tier-card { background: var(--bg); padding: 1.75rem 1.5rem; }
+
+    .tier-num {
+      font-size: 0.53rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--red);
+      font-weight: 500;
+      margin-bottom: 0.55rem;
+    }
+
+    .tier-name {
+      font-family: var(--ff-d);
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 0.7rem;
+      line-height: 1;
+    }
+
+    .tier-desc { font-size: 0.82rem; line-height: 1.72; opacity: 0.62; font-weight: 300; }
+
+    /* ── FAQ ────────────────────────────────────── */
+    .faq-list { list-style: none; }
+
+    .faq-item {
+      padding: 1.6rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .faq-item:first-child { border-top: 1px solid var(--rule); }
+
+    .faq-q {
+      font-family: var(--ff-d);
+      font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.2;
+      margin-bottom: 0.6rem;
+    }
+
+    .faq-a {
+      font-size: 0.88rem;
+      line-height: 1.78;
+      font-weight: 300;
+      color: var(--ink);
+      opacity: 0.62;
+      max-width: 540px;
+    }
+
+    /* ── CONTACT ────────────────────────────────── */
+    .contact-list { list-style: none; }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 1.1rem 0;
+      border-bottom: 1px solid var(--rule);
+      text-decoration: none;
+      color: var(--ink);
+      transition: opacity 0.2s;
+      cursor: pointer;
+    }
+
+    .contact-row:first-child { border-top: 1px solid var(--rule); }
+    a.contact-row:hover { opacity: 0.5; }
+
+    .contact-lbl {
+      font-size: 0.54rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--muted);
+      min-width: 68px;
+      flex-shrink: 0;
+    }
+
+    .contact-val {
+      font-family: var(--ff-d);
+      font-size: clamp(1.1rem, 3vw, 1.55rem);
+      font-weight: 400;
+    }
+
+    /* ── LEGAL ──────────────────────────────────── */
+    .legal-body {
+      font-size: clamp(0.8rem, 1.8vw, 0.88rem);
+      line-height: 1.9;
+      font-weight: 300;
+      color: var(--ink);
+      opacity: 0.75;
+      max-width: 560px;
+    }
+
+    .legal-body h3 {
+      font-family: var(--ff-d);
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 500;
+      font-style: italic;
+      opacity: 1;
+      margin-top: 2rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    .legal-body h3:first-child { margin-top: 0; }
+    .legal-body p { margin-bottom: 0.6em; }
+    .legal-body a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+    .legal-body a:hover { opacity: 0.5; }
+
+    /* ── FOOTER ─────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 1.75rem clamp(1.5rem, 5vw, 3rem);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .footer-left  { display: flex; align-items: center; justify-content: flex-start; }
+    .footer-center { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; justify-content: center; }
+    .footer-right  { display: flex; align-items: center; justify-content: flex-end; }
+
+    .footer-coords { font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+    .footer-dot { width: 2.5px; height: 2.5px; border-radius: 50%; background: var(--rule); flex-shrink: 0; }
+    .at-badge { display: flex; align-items: center; gap: 0.55rem; }
+    .at-flag  { display: block; }
+    .at-label { font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+    .footer-copy { font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted); }
+
+    .footer-legal { display: flex; align-items: center; gap: 0.9rem; }
+
+    .footer-legal-btn {
+      font-family: var(--ff-b);
+      font-size: 0.55rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .footer-legal-btn:hover,
+    .footer-legal-btn.active { color: var(--ink); }
+    .footer-legal-sep { font-size: 0.55rem; color: var(--rule); user-select: none; }
+
+    /* ── LANGUAGE SWITCHER ──────────────────────── */
+    .lang-switch {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .lang-btn {
+      font-family: var(--ff-b);
+      font-size: 0.52rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.4rem 0.65rem;
+      transition: background 0.18s, color 0.18s;
+      -webkit-appearance: none;
+      line-height: 1;
+    }
+
+    .lang-btn:hover { color: var(--ink); }
+    .lang-btn.active { background: var(--ink); color: var(--bg); }
+    .lang-divider { width: 1px; height: 14px; background: var(--rule); flex-shrink: 0; }
+
+    /* ── RESPONSIVE ─────────────────────────────── */
+    @media (max-width: 720px) {
+      footer { grid-template-columns: 1fr; justify-items: center; gap: 0.85rem; }
+      .footer-left, .footer-center, .footer-right { justify-content: center; }
+    }
+
+    @media (max-width: 620px) {
+      .tier-grid  { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+      .about-body { column-count: 1; }
+    }
+
+    @media (max-width: 480px) {
+      .schulung-header { flex-direction: column; gap: 0.3rem; }
+      .framework-step  { gap: 1rem; }
+      .step-letter     { min-width: 1.8rem; font-size: 1.8rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .intro-wrap     { transition: none; }
+      .panel.open     { animation: none; opacity: 1; }
+      .nav-btn::after { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ────────────────────────────────── -->
+<header>
+  <a class="logo-mark" href="#" aria-label="Levcon.ai — Startseite">
+    <div class="logo-placeholder" aria-hidden="true"><span>L</span></div>
+    <span class="logo-wordmark">Levcon.ai</span>
+  </a>
+
+  <h1 class="site-slogan">
+    <span data-i18n="slogan_line1">KI mit Methode</span><span class="red">.</span><br>
+    <span data-i18n="slogan_line2">Wirkung mit System</span><span class="red">.</span>
+  </h1>
+
+  <p class="divider-line">
+    <span class="divider-rule" aria-hidden="true"></span>
+    <span class="divider-text" data-i18n="divider">KI-Beratung · Schulungen · Wien</span>
+    <span class="divider-rule" aria-hidden="true"></span>
+  </p>
+
+  <nav aria-label="Seitennavigation">
+    <button class="nav-btn active" data-target="home" data-i18n="nav_home">Home</button>
+    <span class="nav-sep" aria-hidden="true">/</span>
+    <button class="nav-btn" data-target="schulungen" aria-expanded="false" aria-controls="schulungen" data-i18n="nav_schulungen">KI Schulungen</button>
+    <span class="nav-sep" aria-hidden="true">/</span>
+    <button class="nav-btn" data-target="framework" aria-expanded="false" aria-controls="framework" data-i18n="nav_framework">Framework</button>
+    <span class="nav-sep" aria-hidden="true">/</span>
+    <button class="nav-btn" data-target="privacy" aria-expanded="false" aria-controls="privacy" data-i18n="nav_privacy">Datenschutz-Modell</button>
+    <span class="nav-sep" aria-hidden="true">/</span>
+    <button class="nav-btn" data-target="faq" aria-expanded="false" aria-controls="faq" data-i18n="nav_faq">FAQ</button>
+    <span class="nav-sep" aria-hidden="true">/</span>
+    <button class="nav-btn" data-target="kontakt" aria-expanded="false" aria-controls="kontakt" data-i18n="nav_kontakt">Kontakt</button>
+  </nav>
+</header>
+
+<!-- ── MAIN ──────────────────────────────────── -->
+<main>
+
+  <!-- Intro -->
+  <div class="intro-wrap" id="intro-wrap">
+    <section class="about" aria-label="Über Levcon.ai">
+      <div class="about-grid">
+        <div class="about-statement" data-i18n="about_statement">
+          Ich bin Enric Bruns — KI-Berater und Trainer aus Wien. Ich helfe Unternehmen, künstliche Intelligenz wirksam, sicher und ohne Hype einzusetzen.
+        </div>
+        <div class="about-body" data-i18n-html="about_body">
+          <p>Mit über zehn Jahren Erfahrung in IT-Beratung und Enterprise-Umgebungen verstehe ich, wie Unternehmen wirklich funktionieren — und wo KI einen messbaren Unterschied macht. Nicht in Präsentationen, sondern im Alltag Ihrer Mitarbeitenden.</p>
+          <p>Mein Ansatz beginnt immer mit dem Ziel, nicht mit der Technologie. Gemeinsam definieren wir, was Ihr Unternehmen konkret erreichen soll. Erst dann wählen wir die richtigen Werkzeuge — und behalten Datenschutz und Governance konsequent im Blick.</p>
+          <p>In Schulungen setze ich auf angewandtes Wissen: Ihre Mitarbeitenden verlassen den Workshop mit Fähigkeiten, die sie am nächsten Morgen einsetzen können. Kein Frontalvortrag, kein Buzzword-Bingo.</p>
+          <p>Ich verkaufe keine Software und keine Plattformen. Levcon.ai steht für Klarheit, Struktur und Wirksamkeit — für Unternehmen im österreichischen und deutschsprachigen Markt.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- KI Schulungen -->
+  <section class="panel" id="schulungen" aria-hidden="true">
+    <div class="panel-inner"><div class="panel-content">
+      <h2 class="panel-title" data-i18n="schulungen_title">KI Schulungen</h2>
+      <p class="panel-lead" data-i18n="schulungen_lead">Jede Schulung wird individuell zusammengestellt — nach Ihrer Zielgruppe, Ihren Prozessen und Ihrem Ziel. Kein Standardprogramm, keine Folien von der Stange.</p>
+      <ul class="schulung-list" id="schulung-list"></ul>
+    </div></div>
+  </section>
+
+  <!-- Framework -->
+  <section class="panel" id="framework" aria-hidden="true">
+    <div class="panel-inner"><div class="panel-content">
+      <h2 class="panel-title" data-i18n="framework_title">Das Framework</h2>
+      <p class="panel-lead" data-i18n="framework_lead">Jede Beratung beginnt mit einer klaren Methode. ZIEL → HEBEL → KONTROLLE ist der strukturierte Weg, wie Levcon.ai KI-Projekte denkt, plant und umsetzt.</p>
+      <ul class="framework-list" data-i18n-html="framework_list"></ul>
+    </div></div>
+  </section>
+
+  <!-- Datenschutz-Modell -->
+  <section class="panel" id="privacy" aria-hidden="true">
+    <div class="panel-inner"><div class="panel-content">
+      <h2 class="panel-title" data-i18n="privacy_title">Datenschutz-Modell</h2>
+      <p class="panel-lead" data-i18n="privacy_lead">Drei Stufen. Ein Versprechen: Ihre Daten gehen so weit in die Cloud, wie Sie es wollen — und keinen Millimeter weiter.</p>
+      <div class="tier-grid" data-i18n-html="privacy_tiers"></div>
+    </div></div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="panel" id="faq" aria-hidden="true">
+    <div class="panel-inner"><div class="panel-content">
+      <h2 class="panel-title" data-i18n="faq_title">Häufige Fragen</h2>
+      <p class="panel-lead" data-i18n="faq_lead">Was ich in Erstgesprächen immer wieder höre — direkt beantwortet.</p>
+      <ul class="faq-list" id="faq-list"></ul>
+    </div></div>
+  </section>
+
+  <!-- Kontakt -->
+  <section class="panel" id="kontakt" aria-hidden="true">
+    <div class="panel-inner"><div class="panel-content">
+      <h2 class="panel-title" data-i18n="kontakt_title">Kontakt</h2>
+      <p class="panel-lead" data-i18n="kontakt_lead">Sprechen wir über Ihr Projekt. Ein erstes Gespräch ist unverbindlich und kostenlos.</p>
+      <ul class="contact-list">
+        <li><a class="contact-row" href="mailto:hello@levcon.ai"><span class="contact-lbl" data-i18n="kontakt_email_lbl">E-Mail</span><span class="contact-val">hello@levcon.ai</span></a></li>
+        <li><a class="contact-row" href="https://levcon.at" target="_blank" rel="noopener"><span class="contact-lbl" data-i18n="kontakt_web_lbl">Website</span><span class="contact-val">levcon.at</span></a></li>
+        <li><div class="contact-row" style="cursor:default;pointer-events:none;"><span class="contact-lbl" data-i18n="kontakt_loc_lbl">Standort</span><span class="contact-val" data-i18n="kontakt_loc_val">Wien, Österreich</span></div></li>
+      </ul>
+    </div></div>
+  </section>
+
+  <!-- Impressum -->
+  <section class="panel" id="impressum" aria-hidden="true">
+    <div class="panel-inner"><div class="panel-content">
+      <h2 class="panel-title" data-i18n="impressum_title">Impressum</h2>
+      <div class="legal-body" data-i18n-html="impressum_body"></div>
+    </div></div>
+  </section>
+
+  <!-- Datenschutzerklärung -->
+  <section class="panel" id="datenschutz" aria-hidden="true">
+    <div class="panel-inner"><div class="panel-content">
+      <h2 class="panel-title" data-i18n="datenschutz_title">Datenschutz&shy;erklärung</h2>
+      <div class="legal-body" data-i18n-html="datenschutz_body"></div>
+    </div></div>
+  </section>
+
+</main>
+
+<!-- ── FOOTER ────────────────────────────────── -->
+<footer>
+  <div class="footer-left">
+    <div class="footer-legal">
+      <button class="footer-legal-btn" data-target="impressum" data-i18n="footer_impressum">Impressum</button>
+      <span class="footer-legal-sep" aria-hidden="true">/</span>
+      <button class="footer-legal-btn" data-target="datenschutz" data-i18n="footer_datenschutz">Datenschutz</button>
+    </div>
+  </div>
+
+  <div class="footer-center">
+    <span class="footer-coords">48°12'N · 16°22'E</span>
+    <div class="footer-dot" aria-hidden="true"></div>
+    <div class="at-badge">
+      <svg class="at-flag" width="24" height="16" viewBox="0 0 3 3"
+           xmlns="http://www.w3.org/2000/svg" aria-label="Österreichische Flagge">
+        <rect width="3" height="1" fill="#C8102E"/>
+        <rect y="1" width="3" height="1" fill="#FFFFFF"/>
+        <rect y="2" width="3" height="1" fill="#C8102E"/>
+      </svg>
+      <span class="at-label" data-i18n="footer_quality">Qualität aus Wien</span>
+    </div>
+    <div class="footer-dot" aria-hidden="true"></div>
+    <span class="footer-copy">© 2025 Levcon.ai</span>
+  </div>
+
+  <div class="footer-right">
+    <div class="lang-switch" role="group" aria-label="Sprache wählen">
+      <button class="lang-btn active" data-lang="de" aria-pressed="true">DE</button>
+      <div class="lang-divider" aria-hidden="true"></div>
+      <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</footer>
+
+<!-- ── TRANSLATIONS ───────────────────────────── -->
+<script>
+const TRANSLATIONS = {
+  de: {
+    lang_attr: "de",
+    page_title: "Levcon.ai — KI-Beratung & Schulungen aus Wien",
+    slogan_line1: "KI mit Methode",
+    slogan_line2: "Wirkung mit System",
+    divider: "KI-Beratung · Schulungen · Wien",
+    nav_home: "Home",
+    nav_schulungen: "KI Schulungen",
+    nav_framework: "Framework",
+    nav_privacy: "Datenschutz-Modell",
+    nav_faq: "FAQ",
+    nav_kontakt: "Kontakt",
+    about_statement: "Ich bin Enric Bruns\u00A0— KI-Berater und Trainer aus Wien. Ich helfe Unternehmen, künstliche Intelligenz wirksam, sicher und ohne Hype einzusetzen.",
+    about_body: `<p>Mit über zehn Jahren Erfahrung in IT-Beratung und Enterprise-Umgebungen verstehe ich, wie Unternehmen wirklich funktionieren — und wo KI einen messbaren Unterschied macht. Nicht in Präsentationen, sondern im Alltag Ihrer Mitarbeitenden.</p><p>Mein Ansatz beginnt immer mit dem Ziel, nicht mit der Technologie. Gemeinsam definieren wir, was Ihr Unternehmen konkret erreichen soll. Erst dann wählen wir die richtigen Werkzeuge — und behalten Datenschutz und Governance konsequent im Blick.</p><p>In Schulungen setze ich auf angewandtes Wissen: Ihre Mitarbeitenden verlassen den Workshop mit Fähigkeiten, die sie am nächsten Morgen einsetzen können. Kein Frontalvortrag, kein Buzzword-Bingo.</p><p>Ich verkaufe keine Software und keine Plattformen. Levcon.ai steht für Klarheit, Struktur und Wirksamkeit — für Unternehmen im österreichischen und deutschsprachigen Markt.</p>`,
+
+    schulungen_title: "KI Schulungen",
+    schulungen_lead: "Jede Schulung wird individuell zusammengestellt — nach Ihrer Zielgruppe, Ihren Prozessen und Ihrem Ziel. Kein Standardprogramm, keine Folien von der Stange.",
+    schulung_items: [
+      {
+        audience: "Führungskräfte & Entscheider",
+        format: "Halbtag · Ganztag",
+        outcome: "KI strategisch einschätzen, Chancen und Risiken bewerten, fundierte Entscheidungen treffen — ohne technisches Vorwissen.",
+        topics: ["KI-Grundlagen", "Risiken & Governance", "Use-Case-Bewertung", "Marktüberblick"]
+      },
+      {
+        audience: "Operative Teams & Mitarbeitende",
+        format: "Ganztag · Mehrere Einheiten",
+        outcome: "KI-Tools souverän im Arbeitsalltag einsetzen — von der ersten Anfrage bis zur strukturierten Automatisierung.",
+        topics: ["Prompt Engineering", "Tool-Auswahl", "Workflows automatisieren", "Qualitätskontrolle"]
+      },
+      {
+        audience: "IT & Technik",
+        format: "Vertiefung · Maßarbeit",
+        outcome: "KI-Infrastruktur verstehen, bewerten und sicher integrieren — vom API-Zugang bis zur lokalen Modellinstallation.",
+        topics: ["API-Integration", "Lokale Modelle", "Datenschutz-Architektur", "Evaluierung"]
+      },
+      {
+        audience: "Branchenspezifisch",
+        format: "Vollständig individuell",
+        outcome: "Schulungen, die in Ihrer Sprache sprechen — mit Beispielen, Prozessen und Werkzeugen aus Ihrer Branche.",
+        topics: ["Finanz & Compliance", "Gesundheit & DSGVO", "Industrie & Produktion", "Weitere auf Anfrage"]
+      }
+    ],
+
+    framework_title: "Das Framework",
+    framework_lead: "Jede Beratung beginnt mit einer klaren Methode. ZIEL → HEBEL → KONTROLLE ist der strukturierte Weg, wie Levcon.ai KI-Projekte denkt, plant und umsetzt.",
+    framework_list: `
+      <li class="framework-step">
+        <span class="step-letter">Z</span>
+        <div class="step-body">
+          <h3>Ziel</h3>
+          <p>Was soll KI in Ihrem Unternehmen konkret erreichen? Wir beginnen mit dem messbaren Ergebnis, nicht mit der Technologie. Welches Problem lösen wir — und für wen?</p>
+        </div>
+      </li>
+      <li class="framework-step">
+        <span class="step-letter">H</span>
+        <div class="step-body">
+          <h3>Hebel</h3>
+          <p>Wo hat KI den größten Hebeleffekt? Wir identifizieren die richtigen Werkzeuge, Prozesse und Schnittstellen — und trennen Hype von echtem Mehrwert.</p>
+        </div>
+      </li>
+      <li class="framework-step">
+        <span class="step-letter">K</span>
+        <div class="step-body">
+          <h3>Kontrolle</h3>
+          <p>Wie behalten Sie die Übersicht? KI-Projekte brauchen klare Governance, messbare KPIs und einen Betriebsplan. Kontrolle ist die Voraussetzung für nachhaltiges Vertrauen.</p>
+          <p>Erfolg wird konkret gemessen — nicht gefühlt. Je nach Projekt zählen wir eingesparte Stunden, gesunkene Fehlerquoten, verkürzte Durchlaufzeiten oder die Adoptionsrate im Team. Die Metriken werden vor Projektstart gemeinsam definiert.</p>
+          <div class="metric-row" id="metric-row"></div>
+        </div>
+      </li>`,
+    metrics: ["Zeitersparnis", "Fehlerquote", "Durchlaufzeit", "Adoptionsrate", "Kosten pro Prozess", "Mitarbeiterzufriedenheit"],
+
+    privacy_title: "Datenschutz-Modell",
+    privacy_lead: "Drei Stufen. Ein Versprechen: Ihre Daten gehen so weit in die Cloud, wie Sie es wollen — und keinen Millimeter weiter.",
+    privacy_tiers: `
+      <div class="tier-card">
+        <div class="tier-num">Stufe 01</div>
+        <div class="tier-name">Classic</div>
+        <div class="tier-desc">Kommerzielle KI-Dienste mit Standard-Datenschutzbedingungen. Ideal für allgemeine Aufgaben ohne sensible Unternehmensdaten.</div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">Stufe 02</div>
+        <div class="tier-name">Privacy</div>
+        <div class="tier-desc">KI über Business-APIs, EU-Server und Datenschutzverträge (DPA). Ihre Daten werden nicht für das Training von Modellen verwendet.</div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">Stufe 03</div>
+        <div class="tier-name">Local</div>
+        <div class="tier-desc">Vollständig lokal betriebene KI auf Ihrer eigenen Infrastruktur. Kein Byte verlässt Ihre Server.</div>
+      </div>`,
+
+    faq_title: "Häufige Fragen",
+    faq_lead: "Was ich in Erstgesprächen immer wieder höre — direkt beantwortet.",
+    faq_items: [
+      {
+        q: "Brauchen wir schon KI-Erfahrung im Team?",
+        a: "Nein — und oft ist weniger Vorwissen sogar hilfreicher. Wir beginnen dort, wo Ihr Team steht, nicht dort, wo Lehrbücher anfangen."
+      },
+      {
+        q: "Gibt es fixe Schulungspakete?",
+        a: "Nein. Jede Schulung beginnt mit einem Gespräch über Ihre Situation. Format, Dauer, Inhalt und Beispiele werden gemeinsam definiert — es gibt keine Schulung von der Stange."
+      },
+      {
+        q: "Wie wird der Erfolg eines Projekts gemessen?",
+        a: "Die Metriken legen wir vor Projektstart gemeinsam fest — zum Beispiel eingesparte Stunden pro Woche, gesunkene Fehlerquoten oder die Adoptionsrate im Team. Kein Projekt endet ohne messbare Baseline."
+      },
+      {
+        q: "Was kostet eine Schulung oder Beratung?",
+        a: "Das hängt vom Umfang ab. Ein erstes Gespräch ist kostenlos — danach erhalten Sie ein konkretes Angebot, kein Preismenü."
+      },
+      {
+        q: "Arbeiten Sie nur mit großen Unternehmen?",
+        a: "Nein. Ich arbeite mit Unternehmen, bei denen KI einen echten Unterschied machen kann — unabhängig von der Größe. Entscheidend ist, ob das Ziel klar ist."
+      },
+      {
+        q: "Verkaufen Sie auch Software oder Tools?",
+        a: "Nein. Ich bin werkzeugunabhängig. Meine Empfehlungen basieren auf Ihrem Ziel — nicht auf Provisionen oder Partnerschaften."
+      },
+      {
+        q: "Wie läuft ein erstes Gespräch ab?",
+        a: "30 Minuten, unverbindlich, ohne Agenda-Zwang. Ich höre zu, stelle Fragen und sage Ihnen ehrlich, ob und wie ich helfen kann."
+      }
+    ],
+
+    kontakt_title: "Kontakt",
+    kontakt_lead: "Sprechen wir über Ihr Projekt. Ein erstes Gespräch ist unverbindlich und kostenlos.",
+    kontakt_email_lbl: "E-Mail",
+    kontakt_web_lbl: "Website",
+    kontakt_loc_lbl: "Standort",
+    kontakt_loc_val: "Wien, Österreich",
+    impressum_title: "Impressum",
+    impressum_body: `<h3>Angaben gemäß § 5 ECG</h3><p>Enric Bruns<br>Levcon.ai<br>[Straße und Hausnummer]<br>[PLZ] Wien, Österreich</p><h3>Kontakt</h3><p>E-Mail: <a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p><h3>Unternehmensgegenstand</h3><p>KI-Beratung und Schulungen für Unternehmen.</p><h3>Haftungsausschluss</h3><p>Die Inhalte dieser Website wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit kann keine Gewähr übernommen werden.</p><h3>Urheberrecht</h3><p>Die Inhalte unterliegen dem österreichischen Urheberrecht. Vervielfältigung bedarf der schriftlichen Zustimmung.</p>`,
+    datenschutz_title: "Datenschutzerklärung",
+    datenschutz_body: `<h3>Verantwortlicher</h3><p>Enric Bruns, Levcon.ai<br>[Adresse], Wien<br><a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p><h3>Erhebung personenbezogener Daten</h3><p>Diese Website erhebt personenbezogene Daten nur im erforderlichen Umfang. Eine Weitergabe an Dritte findet ohne ausdrückliche Einwilligung nicht statt.</p><h3>Cookies</h3><p>Diese Website verwendet keine Cookies.</p><h3>Ihre Rechte (DSGVO Art. 15–22)</h3><p>Auskunft, Berichtigung oder Löschung: <a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p>`,
+    footer_impressum: "Impressum",
+    footer_datenschutz: "Datenschutz",
+    footer_quality: "Qualität aus Wien"
+  },
+
+  en: {
+    lang_attr: "en",
+    page_title: "Levcon.ai — AI Consulting & Training from Vienna",
+    slogan_line1: "AI with Method",
+    slogan_line2: "Impact with System",
+    divider: "AI Consulting · Training · Vienna",
+    nav_home: "Home",
+    nav_schulungen: "AI Training",
+    nav_framework: "Framework",
+    nav_privacy: "Privacy Model",
+    nav_faq: "FAQ",
+    nav_kontakt: "Contact",
+    about_statement: "I am Enric Bruns\u00A0— AI consultant and trainer based in Vienna. I help companies deploy artificial intelligence effectively, securely, and without the hype.",
+    about_body: `<p>With over ten years of experience in IT consulting and enterprise environments, I understand how companies really work — and where AI makes a measurable difference. Not in presentations, but in the daily work of your employees.</p><p>My approach always starts with the goal, not the technology. Together we define what your company wants to achieve concretely. Only then do we select the right tools — while keeping data protection and governance firmly in focus.</p><p>In training sessions I focus on applied knowledge: your employees leave the workshop with skills they can use the very next morning. No lecture-style presentations, no buzzword bingo.</p><p>I don't sell software or platforms. Levcon.ai stands for clarity, structure and effectiveness — for companies in the Austrian and German-speaking market.</p>`,
+
+    schulungen_title: "AI Training",
+    schulungen_lead: "Every training is individually designed — tailored to your audience, your processes and your goal. No standard programme, no off-the-shelf slides.",
+    schulung_items: [
+      {
+        audience: "Executives & Decision-makers",
+        format: "Half-day · Full-day",
+        outcome: "Assess AI strategically, evaluate opportunities and risks, make informed decisions — without technical background.",
+        topics: ["AI Fundamentals", "Risks & Governance", "Use-Case Evaluation", "Market Overview"]
+      },
+      {
+        audience: "Operational Teams & Employees",
+        format: "Full-day · Multiple Sessions",
+        outcome: "Use AI tools confidently in daily work — from the first prompt to structured automation.",
+        topics: ["Prompt Engineering", "Tool Selection", "Workflow Automation", "Quality Control"]
+      },
+      {
+        audience: "IT & Technical Teams",
+        format: "Advanced · Tailored",
+        outcome: "Understand, evaluate and securely integrate AI infrastructure — from API access to local model deployment.",
+        topics: ["API Integration", "Local Models", "Privacy Architecture", "Evaluation"]
+      },
+      {
+        audience: "Industry-specific",
+        format: "Fully customised",
+        outcome: "Training that speaks your language — with examples, processes and tools from your industry.",
+        topics: ["Finance & Compliance", "Healthcare & GDPR", "Industry & Production", "Others on request"]
+      }
+    ],
+
+    framework_title: "The Framework",
+    framework_lead: "Every engagement starts with a clear method. GOAL → LEVER → CONTROL is the structured way Levcon.ai thinks, plans and implements AI projects.",
+    framework_list: `
+      <li class="framework-step">
+        <span class="step-letter">G</span>
+        <div class="step-body">
+          <h3>Goal</h3>
+          <p>What should AI concretely achieve in your company? We start with the measurable outcome, not the technology. What problem are we solving — and for whom?</p>
+        </div>
+      </li>
+      <li class="framework-step">
+        <span class="step-letter">L</span>
+        <div class="step-body">
+          <h3>Lever</h3>
+          <p>Where does AI have the greatest leverage? We identify the right tools, processes and interfaces — separating hype from real value.</p>
+        </div>
+      </li>
+      <li class="framework-step">
+        <span class="step-letter">C</span>
+        <div class="step-body">
+          <h3>Control</h3>
+          <p>How do you maintain oversight? AI projects need clear governance, measurable KPIs and an operating plan. Control is the foundation of lasting trust.</p>
+          <p>Success is measured concretely — not felt. Depending on the project, we track hours saved, reduced error rates, shorter throughput times or team adoption rates. Metrics are defined together before the project begins.</p>
+          <div class="metric-row" id="metric-row"></div>
+        </div>
+      </li>`,
+    metrics: ["Time saved", "Error rate", "Throughput time", "Adoption rate", "Cost per process", "Employee satisfaction"],
+
+    privacy_title: "Privacy Model",
+    privacy_lead: "Three tiers. One promise: your data goes as far into the cloud as you want — and not one millimetre further.",
+    privacy_tiers: `
+      <div class="tier-card">
+        <div class="tier-num">Tier 01</div>
+        <div class="tier-name">Classic</div>
+        <div class="tier-desc">Commercial AI services with standard data protection terms. Ideal for general tasks without sensitive company data.</div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">Tier 02</div>
+        <div class="tier-name">Privacy</div>
+        <div class="tier-desc">AI via business APIs, EU servers and data processing agreements (DPA). Your data is not used to train models.</div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">Tier 03</div>
+        <div class="tier-name">Local</div>
+        <div class="tier-desc">Fully locally operated AI on your own infrastructure. Not a single byte leaves your servers.</div>
+      </div>`,
+
+    faq_title: "Frequently Asked Questions",
+    faq_lead: "What I hear in almost every first conversation — answered directly.",
+    faq_items: [
+      {
+        q: "Does our team need prior AI experience?",
+        a: "No — and less prior knowledge is often actually better. We start where your team is, not where textbooks begin."
+      },
+      {
+        q: "Are there fixed training packages?",
+        a: "No. Every training starts with a conversation about your situation. Format, duration, content and examples are defined together — there is no off-the-shelf programme."
+      },
+      {
+        q: "How is the success of a project measured?",
+        a: "We define the metrics together before the project starts — for example hours saved per week, reduced error rates or team adoption rates. No project ends without a measurable baseline."
+      },
+      {
+        q: "What does a training or consulting engagement cost?",
+        a: "It depends on the scope. A first conversation is free — after that you get a concrete proposal, not a price menu."
+      },
+      {
+        q: "Do you only work with large companies?",
+        a: "No. I work with companies where AI can make a real difference — regardless of size. What matters is whether the goal is clear."
+      },
+      {
+        q: "Do you sell software or tools?",
+        a: "No. I am tool-independent. My recommendations are based on your goal — not on commissions or partnerships."
+      },
+      {
+        q: "How does a first conversation work?",
+        a: "30 minutes, non-binding, no agenda pressure. I listen, ask questions, and tell you honestly whether and how I can help."
+      }
+    ],
+
+    kontakt_title: "Contact",
+    kontakt_lead: "Let's talk about your project. An initial conversation is non-binding and free of charge.",
+    kontakt_email_lbl: "Email",
+    kontakt_web_lbl: "Website",
+    kontakt_loc_lbl: "Location",
+    kontakt_loc_val: "Vienna, Austria",
+    impressum_title: "Legal Notice",
+    impressum_body: `<h3>Information pursuant to § 5 ECG</h3><p>Enric Bruns<br>Levcon.ai<br>[Street and number]<br>[Postcode] Vienna, Austria</p><h3>Contact</h3><p>Email: <a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p><h3>Business activity</h3><p>AI consulting and training for companies.</p><h3>Disclaimer</h3><p>The contents of this website have been prepared with the utmost care. No guarantee can be given for accuracy or completeness.</p><h3>Copyright</h3><p>All content is subject to Austrian copyright law. Reproduction requires written consent.</p>`,
+    datenschutz_title: "Privacy Policy",
+    datenschutz_body: `<h3>Controller</h3><p>Enric Bruns, Levcon.ai<br>[Address], Vienna<br><a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p><h3>Collection of personal data</h3><p>This website collects personal data only to the extent necessary. Data is not passed on to third parties without explicit consent.</p><h3>Cookies</h3><p>This website does not use cookies.</p><h3>Your rights (GDPR Art. 15–22)</h3><p>You have the right to access, rectify or delete your stored data. Requests: <a href="mailto:hello@levcon.ai">hello@levcon.ai</a></p>`,
+    footer_impressum: "Legal Notice",
+    footer_datenschutz: "Privacy Policy",
+    footer_quality: "Quality from Vienna"
+  }
+};
+</script>
+
+<!-- ── APP LOGIC ───────────────────────────────── -->
+<script>
+(function () {
+  const FADE_MS   = 320;
+  let currentLang = 'de';
+
+  const navBtns   = document.querySelectorAll('.nav-btn');
+  const legalBtns = document.querySelectorAll('.footer-legal-btn');
+  const langBtns  = document.querySelectorAll('.lang-btn');
+  const panels    = document.querySelectorAll('.panel');
+  const introWrap = document.getElementById('intro-wrap');
+  const logoMark  = document.querySelector('.logo-mark');
+
+  /* ── Render: Schulungen ─────────────────────── */
+  function renderSchulungen(lang) {
+    const list  = document.getElementById('schulung-list');
+    const items = TRANSLATIONS[lang].schulung_items;
+    if (!list || !items) return;
+    list.innerHTML = items.map(item => `
+      <li class="schulung-item">
+        <div class="schulung-header">
+          <span class="schulung-audience">${item.audience}</span>
+          <span class="schulung-format">${item.format}</span>
+        </div>
+        <div class="schulung-outcome">${item.outcome}</div>
+        <div class="schulung-topics">
+          ${item.topics.map(t => `<span class="schulung-tag">${t}</span>`).join('')}
+        </div>
+      </li>
+    `).join('');
+  }
+
+  /* ── Render: Metrics ────────────────────────── */
+  function renderMetrics(lang) {
+    const row     = document.getElementById('metric-row');
+    const metrics = TRANSLATIONS[lang].metrics;
+    if (!row || !metrics) return;
+    row.innerHTML = metrics.map(m => `<span class="metric-chip">${m}</span>`).join('');
+  }
+
+  /* ── Render: FAQ ────────────────────────────── */
+  function renderFaq(lang) {
+    const list  = document.getElementById('faq-list');
+    const items = TRANSLATIONS[lang].faq_items;
+    if (!list || !items) return;
+    list.innerHTML = items.map(item => `
+      <li class="faq-item">
+        <div class="faq-q">${item.q}</div>
+        <div class="faq-a">${item.a}</div>
+      </li>
+    `).join('');
+  }
+
+  /* ── i18n ───────────────────────────────────── */
+  function applyTranslations(lang) {
+    const t = TRANSLATIONS[lang];
+    if (!t) return;
+    document.documentElement.lang = t.lang_attr;
+    document.title = t.page_title;
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.href = lang === 'en' ? 'https://levcon.ai/?lang=en' : 'https://levcon.ai/';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const v = t[el.getAttribute('data-i18n')];
+      if (v !== undefined) el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const v = t[el.getAttribute('data-i18n-html')];
+      if (v !== undefined) el.innerHTML = v;
+    });
+    renderSchulungen(lang);
+    renderMetrics(lang);
+    renderFaq(lang);
+  }
+
+  /* ── Language detection ─────────────────────── */
+  (function detectLang() {
+    const p = new URLSearchParams(window.location.search).get('lang');
+    if (p && TRANSLATIONS[p]) currentLang = p;
+    applyTranslations(currentLang);
+    updateLangBtns(currentLang);
+  })();
+
+  function updateLangBtns(lang) {
+    langBtns.forEach(b => {
+      const on = b.dataset.lang === lang;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  langBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = btn.dataset.lang;
+      if (lang === currentLang) return;
+      currentLang = lang;
+      const url = new URL(window.location);
+      lang === 'de' ? url.searchParams.delete('lang') : url.searchParams.set('lang', lang);
+      window.history.replaceState({}, '', url);
+      applyTranslations(lang);
+      updateLangBtns(lang);
+    });
+  });
+
+  /* ── Intro fade ─────────────────────────────── */
+  function hideIntro(cb) {
+    if (introWrap.classList.contains('is-gone')) { cb && cb(); return; }
+    introWrap.classList.add('is-hiding');
+    setTimeout(() => { introWrap.classList.add('is-gone'); cb && cb(); }, FADE_MS);
+  }
+
+  function showIntro() {
+    introWrap.classList.remove('is-gone');
+    void introWrap.offsetHeight;
+    introWrap.classList.remove('is-hiding');
+  }
+
+  /* ── Panel logic ────────────────────────────── */
+  function resetNav() {
+    panels.forEach(p => { p.classList.remove('open'); p.setAttribute('aria-hidden', 'true'); });
+    navBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-expanded', 'false'); });
+    legalBtns.forEach(b => b.classList.remove('active'));
+  }
+
+  function goHome() {
+    resetNav();
+    document.querySelector('[data-target="home"]').classList.add('active');
+    showIntro();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function openPanel(targetId, triggerBtn, isNavBtn) {
+    hideIntro(() => {
+      resetNav();
+      const panel = document.getElementById(targetId);
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+      triggerBtn.classList.add('active');
+      if (isNavBtn) triggerBtn.setAttribute('aria-expanded', 'true');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      if (target === 'home') { goHome(); return; }
+      const panel = document.getElementById(target);
+      panel.classList.contains('open') ? goHome() : openPanel(target, btn, true);
+    });
+  });
+
+  if (logoMark) logoMark.addEventListener('click', e => { e.preventDefault(); goHome(); });
+
+  legalBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      const panel  = document.getElementById(target);
+      panel.classList.contains('open') ? goHome() : openPanel(target, btn, false);
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
