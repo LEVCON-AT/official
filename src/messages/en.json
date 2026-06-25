@@ -1,7 +1,7 @@
 {
   "metadata": {
     "title": "Levcon.ai — AI Consulting & Training from Vienna",
-    "description": "Levcon.ai — AI consulting and training from Vienna. AI with Method, Impact with System. Enric Bruns helps companies deploy AI effectively, securely, and without the hype.",
+    "description": "Levcon.ai — AI consulting and training from Vienna. AI with Method, Impact with System. Mst. Enric-Bernard Sep-Albi helps companies deploy AI effectively, securely, and without the hype.",
     "og_title": "Levcon.ai — AI Consulting & Training from Vienna",
     "og_description": "AI with Method, Impact with System. AI consulting and training for companies in the Austrian and German-speaking market."
   },
@@ -18,7 +18,7 @@
     "nav_kontakt": "Contact"
   },
   "about": {
-    "statement": "I am Enric Bruns\u00A0— AI consultant and trainer based in Vienna. I help companies deploy artificial intelligence effectively, securely, and without the hype.",
+    "statement": "I am Mst. Enric-Bernard Sep-Albi, BA, MBA\u00A0— AI consultant and trainer based in Vienna. I help companies deploy artificial intelligence effectively, securely, and without the hype.",
     "body": [
       "With over ten years of experience in IT consulting and enterprise environments, I understand how companies really work — and where AI makes a measurable difference. Not in presentations, but in the daily work of your employees.",
       "My approach always starts with the goal, not the technology. Together we define what your company wants to achieve concretely. Only then do we select the right tools — while keeping data protection and governance firmly in focus.",
@@ -152,12 +152,12 @@
   },
   "impressum": {
     "title": "Legal Notice",
-    "body": "<h3>Information pursuant to § 5 ECG</h3><p>Enric Bruns<br>Levcon.ai<br>[Street and number]<br>[Postcode] Vienna, Austria</p><h3>Contact</h3><p>Email: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Business activity</h3><p>AI consulting and training for companies.</p><h3>Disclaimer</h3><p>The contents of this website have been prepared with the utmost care. No guarantee can be given for accuracy or completeness.</p><h3>Copyright</h3><p>All content is subject to Austrian copyright law. Reproduction requires written consent.</p>"
+    "body": "<h3>Information pursuant to § 5 ECG</h3><p>Mst. Enric-Bernard Sep-Albi, BA, MBA<br>Levcon.ai<br>Pfalzgasse 37/2/4<br>1220 Vienna, Austria</p><h3>Contact</h3><p>Email: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Business activity</h3><p>AI consulting and training for companies.</p><h3>Disclaimer</h3><p>The contents of this website have been prepared with the utmost care. No guarantee can be given for accuracy or completeness.</p><h3>Copyright</h3><p>All content is subject to Austrian copyright law. Reproduction requires written consent.</p>"
   },
   "datenschutz": {
     "title": "Privacy Policy",
     "title_shy": "Privacy&shy;Policy",
-    "body": "<h3>Controller</h3><p>Enric Bruns, Levcon.ai<br>[Address], Vienna<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Collection of personal data</h3><p>This website collects personal data only to the extent necessary. Data is not passed on to third parties without explicit consent.</p><h3>Fonts</h3><p>This website uses the fonts Cormorant Garamond and DM Sans. The font files are served from our own server. No connection to external servers (such as Google Fonts) is established.</p><h3>Cookies</h3><p>This website does not use cookies.</p><h3>Your rights (GDPR Art. 15–22)</h3><p>You have the right to access, rectify or delete your stored data. Requests: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
+    "body": "<h3>Controller</h3><p>Mst. Enric-Bernard Sep-Albi, BA, MBA<br>Levcon.ai<br>Pfalzgasse 37/2/4, 1220 Vienna<br><a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p><h3>Collection of personal data</h3><p>This website collects personal data only to the extent necessary. Data is not passed on to third parties without explicit consent.</p><h3>Fonts</h3><p>This website uses the fonts Cormorant Garamond and DM Sans. The font files are served from our own server. No connection to external servers (such as Google Fonts) is established.</p><h3>Cookies</h3><p>This website does not use cookies.</p><h3>Your rights (GDPR Art. 15–22)</h3><p>You have the right to access, rectify or delete your stored data. Requests: <a href=\"mailto:hello@levcon.ai\">hello@levcon.ai</a></p>"
   },
   "footer": {
     "impressum": "Legal Notice",

@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: t('title'),
     description: t('description'),
-    authors: [{ name: 'Enric Bruns' }],
+    authors: [{ name: 'Mst. Enric-Bernard Sep-Albi, BA, MBA' }],
     robots: 'index, follow',
     alternates: {
       canonical: localeUrl,

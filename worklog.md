@@ -11,7 +11,7 @@
 | 3 | 🟠 Wichtig | Google Fonts self-hosten (DSGVO) | ✅ done |
 | 4 | 🟠 Wichtig | Favicon + Apple-Touch-Icon erstellen & einbinden | ✅ done |
 | 5 | 🟠 Wichtig | sitemap.xml + robots.txt erstellen | ✅ done |
-| 6 | 🟠 Wichtig | Impressum-Platzhalter mit echten Daten füllen | pending |
+| 6 | 🟠 Wichtig | Impressum-Platzhalter mit echten Daten füllen | ✅ done |
 | 7 | 🟡 Mittel | Skip-Navigation + Fokus-Management | ✅ done (in Punkt 1 integriert) |
 | 8 | 🟡 Mittel | Kontrast-Problem bei opacity 0.62 beheben | pending |
 | 9 | 🟡 Mittel | Schema.org erweitern (FAQPage, Course) | pending |
@@ -100,3 +100,22 @@ Stage Summary:
 - Datenschutzerklärung: Schriftarten-Abschnitt ergänzt (DE + EN)
 - Sitemap: https://levcon.ai/sitemap.xml (DE: priority 1.0, EN: priority 0.8)
 - robots.txt: Allow all + Sitemap-Referenz
+
+---
+Task ID: 6
+Agent: Main
+Task: 🟠 Wichtig — Impressum-Platzhalter mit echten Daten füllen
+
+Work Log:
+- Impressum DE: Name + Adresse aktualisiert (Mst. Enric-Bernard Sep-Albi, BA, MBA, Pfalzgasse 37/2/4, 1220 Wien)
+- Impressum EN: Entsprechende englische Übersetzung
+- Datenschutzerklärung DE + EN: Verantwortlicher aktualisiert
+- About-Statement DE + EN: Name aktualisiert
+- Meta Description DE + EN: Name aktualisiert
+- Metadata authors in [locale]/page.tsx: Name aktualisiert
+- Verifiziert: Keine "Enric Bruns"-Referenzen mehr im Codebase
+
+Stage Summary:
+- Alle Platzhalter ersetzt mit: Mst. Enric-Bernard Sep-Albi, BA, MBA
+- Adresse: Pfalzgasse 37/2/4, 1220 Wien
+- § 5 ECG-konform: Vollständige Offenlegung
