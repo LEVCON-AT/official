@@ -7,9 +7,9 @@
 | # | Priorität | Thema | Status |
 |---|-----------|-------|--------|
 | 1 | 🔴 Kritisch | Inhalte server-side im HTML ausliefern + i18n mit separaten URLs | ✅ done |
-| 2 | 🔴 Kritisch | OG-Image erstellen & einbinden | pending |
+| 2 | 🔴 Kritisch | OG-Image erstellen & einbinden | ✅ done |
 | 3 | 🟠 Wichtig | Google Fonts self-hosten (DSGVO) | pending |
-| 4 | 🟠 Wichtig | Favicon + Apple-Touch-Icon erstellen & einbinden | pending |
+| 4 | 🟠 Wichtig | Favicon + Apple-Touch-Icon erstellen & einbinden | ✅ done |
 | 5 | 🟠 Wichtig | sitemap.xml + robots.txt erstellen | pending |
 | 6 | 🟠 Wichtig | Impressum-Platzhalter mit echten Daten füllen | pending |
 | 7 | 🟡 Mittel | Skip-Navigation + Fokus-Management | ✅ done (in Punkt 1 integriert) |
@@ -18,7 +18,7 @@
 | 10 | 🟡 Mittel | Doppelte id="metric-row" fixen | ✅ done (in Punkt 1 integriert — Metrics werden per React gerendert, keine doppelte ID mehr) |
 | 11 | 🟡 Mittel | Fehlende focus-visible Styles ergänzen | ✅ done (in Punkt 1 integriert — nav-btn, lang-btn, footer-legal-btn haben focus-visible) |
 | 12 | 🟡 Mittel | noscript-Fallback hinzufügen | pending |
-| 13 | 🟡 Mittel | meta theme-color + meta color-scheme ergänzen | pending |
+| 13 | 🟡 Mittel | meta theme-color + meta color-scheme ergänzen | ✅ done (in Punkt 2 integriert) |
 | 14 | 🟡 Mittel | popstate-Handler für Browser-Zurück-Button | pending |
 | 15 | 🟡 Mittel | CSP-Meta-Tag ergänzen | pending |
 | 16 | 🟢 Optional | CSS/JS minifizieren für Produktion | pending |
@@ -56,3 +56,27 @@ Stage Summary:
 - Canonical: DE → levcon.ai, EN → levcon.ai/en
 - <html lang> korrekt: "de" bzw. "en"
 - Punkt 7 (Skip-Nav), 10 (doppelte ID), 11 (focus-visible) als Mitnahmeeffekt erledigt
+
+---
+Task ID: 2
+Agent: Main
+Task: 🔴 Kritisch — OG-Image erstellen & einbinden + 🟠 Favicon/Apple-Touch-Icon + 🟡 theme-color/color-scheme
+
+Work Log:
+- OG-Image generiert via z-ai-web-dev-sdk CLI (1344×768, Levcon-Design)
+- Favicon generiert via z-ai-web-dev-sdk CLI (1024×1024, "L" Logo)
+- Beide Bilder in /public/ abgelegt (og-image.png, favicon-512.png)
+- generateMetadata in [locale]/page.tsx erweitert:
+  - og:image + og:image:width + og:image:height + og:image:alt
+  - twitter:image + twitter:card = "summary_large_image"
+  - icons.icon + icons.apple
+- Viewport-Export hinzugefügt (themeColor: '#F0EFEC', colorScheme: 'light')
+- Next.js 16 korrekt: themeColor/colorScheme im viewport-Export, nicht metadata
+- Validiert: Alle 7 Meta-Tag-Checks bestanden (Agent Browser)
+
+Stage Summary:
+- OG-Image: https://levcon.ai/og-image.png (1344×768)
+- Favicon: /favicon-512.png (1024×1024)
+- Twitter Card: summary_large_image mit Bild
+- theme-color: #F0EFEC, color-scheme: light
+- Punkt 4 (Favicon) und 13 (theme-color) als Mitnahmeeffekt erledigt

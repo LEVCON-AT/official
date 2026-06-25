@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import LevconPage from '@/components/LevconPage';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -41,14 +41,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: locale === 'de' ? 'de_AT' : 'en_GB',
       alternateLocale: locale === 'de' ? 'en_GB' : 'de_AT',
       siteName: 'Levcon.ai',
+      images: [
+        {
+          url: `${baseUrl}/og-image.png`,
+          width: 1344,
+          height: 768,
+          alt: locale === 'de' ? 'Levcon.ai — KI-Beratung & Schulungen aus Wien' : 'Levcon.ai — AI Consulting & Training from Vienna',
+        },
+      ],
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title: t('og_title'),
       description: t('og_description'),
+      images: [`${baseUrl}/og-image.png`],
+    },
+    icons: {
+      icon: '/favicon-512.png',
+      apple: '/favicon-512.png',
     },
   };
 }
+
+export const viewport: Viewport = {
+  themeColor: '#F0EFEC',
+  colorScheme: 'light',
+};
 
 export default async function LocalePage({ params }: Props) {
   const { locale } = await params;
