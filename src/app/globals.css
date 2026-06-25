@@ -693,7 +693,7 @@ a.contact-row:hover { opacity: 0.5; }
 .form-input::placeholder,
 .form-textarea::placeholder {
   color: var(--lc-muted);
-  opacity: 0.5;
+  opacity: 0.62;
 }
 
 .form-textarea {
@@ -704,22 +704,22 @@ a.contact-row:hover { opacity: 0.5; }
 
 .form-checkbox-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.6rem;
   margin-bottom: 1.4rem;
 }
 
 .form-checkbox {
-  width: 16px;
-  height: 16px;
-  margin-top: 0.15rem;
+  width: 18px;
+  height: 18px;
   accent-color: var(--lc-red);
   flex-shrink: 0;
   cursor: pointer;
+  border: 1px solid var(--lc-rule);
 }
 
 .form-checkbox-label {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   line-height: 1.5;
   color: var(--lc-ink);
   opacity: var(--lc-muted-text);
