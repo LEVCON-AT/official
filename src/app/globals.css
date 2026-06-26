@@ -962,6 +962,8 @@ a.contact-row:hover { opacity: 0.5; }
   .tier-grid  { grid-template-columns: 1fr; }
   .about-grid { grid-template-columns: 1fr; gap: 1.5rem; }
   .about-body { column-count: 1; }
+  .contact-form { max-width: 100%; }
+  .form-submit { width: 100%; }
 }
 
 @media (max-width: 480px) {
