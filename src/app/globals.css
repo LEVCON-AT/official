@@ -616,6 +616,7 @@
   color: var(--lc-ink);
   transition: opacity 0.2s;
   cursor: pointer;
+  flex-wrap: wrap;
 }
 
 li:first-child > .contact-row { border-top: 1px solid var(--lc-rule); }
@@ -964,6 +965,7 @@ a.contact-row:hover { opacity: 0.5; }
   .about-body { column-count: 1; }
   .contact-form { max-width: 100%; }
   .form-submit { width: 100%; }
+  .form-toggle-btn { flex-basis: 100% !important; margin-left: 0; margin-top: 0.4rem; }
 }
 
 @media (max-width: 480px) {
