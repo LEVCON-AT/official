@@ -358,6 +358,7 @@ export default function LevconPage({ locale }: { locale: string }) {
           <div className="panel-inner"><div className="panel-content">
             <h2 className="panel-title">{t('privacy.title')}</h2>
             <p className="panel-lead">{t('privacy.lead')}</p>
+            <p className="panel-lead tier-closing">{t('privacy.closing')}</p>
             <div className="tier-grid">
               {privacyTiers.map((tier, i) => (
                 <div key={i} className="tier-card">
@@ -367,7 +368,6 @@ export default function LevconPage({ locale }: { locale: string }) {
                 </div>
               ))}
             </div>
-            <p className="panel-lead tier-closing">{t('privacy.closing')}</p>
           </div></div>
         </section>
 

@@ -97,15 +97,15 @@
       {
         "num": "Tier 02",
         "name": "Privacy",
-        "desc": "AI via business APIs, EU servers and data processing agreements (DPA). Data is not used for model training — the default tier when regulatory requirements or industry rules demand a conscious decision."
+        "desc": "AI via business APIs, EU servers and data processing agreements (DPA) — the default tier when regulatory requirements or industry rules demand a conscious decision."
       },
       {
         "num": "Tier 03",
         "name": "Local",
-        "desc": "Locally operated AI. Together we explore whether and how locally operated models or other AI solutions are viable for your use case — for data that must never leave the building."
+        "desc": "Together we explore whether and how locally operated models are viable for your use case — for data that must never leave the building."
       }
     ],
-    "closing": "The tier doesn't determine the project — the data strategy determines the tier. We develop it together, before any tool is deployed."
+    "closing": "At the centre: the tier doesn't determine the project — the data strategy determines the tier. We develop it together, before any tool is deployed."
   },
   "faq": {
     "title": "Frequently Asked Questions",

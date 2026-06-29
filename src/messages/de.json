@@ -97,15 +97,15 @@
       {
         "num": "Stufe 02",
         "name": "Privacy",
-        "desc": "KI über Business-APIs, EU-Server und Datenschutzverträge (DPA). Daten werden nicht für Modelltraining verwendet — die Regelstufe, wenn regulatorische Anforderungen oder Branchenregeln eine bewusste Entscheidung verlangen."
+        "desc": "KI über Business-APIs, EU-Server und Datenschutzverträge (DPA) — die Regelstufe, wenn regulatorische Anforderungen oder Branchenregeln eine bewusste Entscheidung verlangen."
       },
       {
         "num": "Stufe 03",
         "name": "Local",
-        "desc": "Lokal betriebene KI. Gemeinsam loten wir aus, ob und wie lokal betriebene Modelle oder andere KI-Lösungen für Ihren Anwendungsfall tragfähig sind — für Daten, die das Haus nie verlassen dürfen."
+        "desc": "Gemeinsam loten wir aus, ob und wie lokal betriebene Modelle für Ihren Anwendungsfall tragfähig sind — für Daten, die das Haus nie verlassen dürfen."
       }
     ],
-    "closing": "Nicht die Stufe bestimmt das Projekt — die Datenstrategie bestimmt die Stufe. Wir erarbeiten sie gemeinsam, bevor das erste Tool zum Einsatz kommt."
+    "closing": "Im Mittelpunkt steht: Nicht die Stufe bestimmt das Projekt — die Datenstrategie bestimmt die Stufe. Wir erarbeiten sie gemeinsam, bevor das erste Tool zum Einsatz kommt."
   },
   "faq": {
     "title": "Häufige Fragen",
