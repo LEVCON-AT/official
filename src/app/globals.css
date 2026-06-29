@@ -205,12 +205,12 @@
 
 .logo-wordmark {
   font-family: var(--lc-ff-b);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-weight: 400;
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--lc-ink);
-  opacity: var(--lc-muted-text);
+  opacity: 0.8;
 }
 
 .logo-ai {
