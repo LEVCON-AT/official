@@ -112,7 +112,7 @@ export default async function LocalePage({ params }: Props) {
         '@type': 'FAQPage',
         mainEntity: locale === 'de'
           ? [
-              { '@type': 'Question', name: 'Brauchen wir schon KI-Erfahrung im Team?', acceptedAnswer: { '@type': 'Answer', text: 'Nein — und oft ist weniger Vorwissen sogar hilfreicher. Wir beginnen dort, wo Ihr Team steht, nicht dort, wo Lehrbücher anfangen.' } },
+              { '@type': 'Question', name: 'Brauchen wir schon KI-Erfahrung im Team?', acceptedAnswer: { '@type': 'Answer', text: 'Nein — und oft ist weniger Vorwissen sogar hilfreicher. Wir beginnen dort, wo Ihr Team steht, nicht dort, wo die Theorie anfängt.' } },
               { '@type': 'Question', name: 'Gibt es fixe Schulungspakete?', acceptedAnswer: { '@type': 'Answer', text: 'Nein. Jede Schulung beginnt mit einem Gespräch über Ihre Situation. Format, Dauer, Inhalt und Beispiele werden gemeinsam definiert.' } },
               { '@type': 'Question', name: 'Wie wird der Erfolg eines Projekts gemessen?', acceptedAnswer: { '@type': 'Answer', text: 'Die Metriken legen wir vor Projektstart gemeinsam fest. Kein Projekt endet ohne messbare Baseline.' } },
               { '@type': 'Question', name: 'Was kostet eine Schulung oder Beratung?', acceptedAnswer: { '@type': 'Answer', text: 'Ein erstes Gespräch ist kostenlos — danach erhalten Sie ein konkretes Angebot.' } },
@@ -121,7 +121,7 @@ export default async function LocalePage({ params }: Props) {
               { '@type': 'Question', name: 'Wie läuft ein erstes Gespräch ab?', acceptedAnswer: { '@type': 'Answer', text: '30 Minuten, unverbindlich, ohne Agenda-Zwang.' } },
             ]
           : [
-              { '@type': 'Question', name: 'Does our team need prior AI experience?', acceptedAnswer: { '@type': 'Answer', text: 'No — less prior knowledge is often actually better. We start where your team is.' } },
+              { '@type': 'Question', name: 'Does our team need prior AI experience?', acceptedAnswer: { '@type': 'Answer', text: 'No — and less prior knowledge is often actually better. We start where your team is, not where theory begins.' } },
               { '@type': 'Question', name: 'Are there fixed training packages?', acceptedAnswer: { '@type': 'Answer', text: 'No. Every training is individually designed.' } },
               { '@type': 'Question', name: 'How is the success of a project measured?', acceptedAnswer: { '@type': 'Answer', text: 'We define the metrics together before the project starts.' } },
               { '@type': 'Question', name: 'What does a training or consulting engagement cost?', acceptedAnswer: { '@type': 'Answer', text: 'A first conversation is free — after that you get a concrete proposal.' } },
