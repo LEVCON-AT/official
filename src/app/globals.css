@@ -575,6 +575,16 @@
 
 .tier-desc { font-size: 0.82rem; line-height: 1.72; opacity: var(--lc-muted-text); font-weight: 300; }
 
+.tier-closing {
+  margin-top: 2rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--lc-rule);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  font-weight: 400;
+  opacity: 1;
+}
+
 /* ── FAQ ────────────────────────────────────── */
 .faq-list { list-style: none; }
 

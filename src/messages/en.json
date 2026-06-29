@@ -13,7 +13,7 @@
     "nav_home": "Home",
     "nav_schulungen": "AI Training",
     "nav_framework": "Framework",
-    "nav_privacy": "Privacy Model",
+    "nav_privacy": "Data Strategy",
     "nav_faq": "FAQ",
     "nav_kontakt": "Contact"
   },
@@ -86,25 +86,26 @@
     "metrics": ["Time saved", "Error rate", "Throughput time", "Adoption rate", "Cost per process", "Employee satisfaction"]
   },
   "privacy": {
-    "title": "Privacy Model",
-    "lead": "Three tiers. One promise: your data goes as far into the cloud as you want — and not one millimetre further.",
+    "title": "Data Strategy",
+    "lead": "Three tiers, one strategy: together we determine where your data belongs — and align every project and every training consistently with it.",
     "tiers": [
       {
         "num": "Tier 01",
         "name": "Classic",
-        "desc": "Commercial AI services with standard data protection terms. Ideal for general tasks without sensitive company data."
+        "desc": "Commercial AI services with standard data protection terms. Suitable for general tasks without sensitive company data — jointly identified and properly trained."
       },
       {
         "num": "Tier 02",
         "name": "Privacy",
-        "desc": "AI via business APIs, EU servers and data processing agreements (DPA). Your data is not used to train models."
+        "desc": "AI via business APIs, EU servers and data processing agreements (DPA). Data is not used for model training — the default tier when regulatory requirements or industry rules demand a conscious decision."
       },
       {
         "num": "Tier 03",
         "name": "Local",
-        "desc": "Fully locally operated AI on your own infrastructure. Not a single byte leaves your servers."
+        "desc": "Locally operated AI. Together we explore whether and how locally operated models or other AI solutions are viable for your use case — for data that must never leave the building."
       }
-    ]
+    ],
+    "closing": "The tier doesn't determine the project — the data strategy determines the tier. We develop it together, before any tool is deployed."
   },
   "faq": {
     "title": "Frequently Asked Questions",

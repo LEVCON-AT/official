@@ -367,6 +367,7 @@ export default function LevconPage({ locale }: { locale: string }) {
                 </div>
               ))}
             </div>
+            <p className="panel-lead tier-closing">{t('privacy.closing')}</p>
           </div></div>
         </section>
 
