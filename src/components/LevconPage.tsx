@@ -207,8 +207,7 @@ export default function LevconPage({ locale }: { locale: string }) {
       {/* ── HEADER ────────────────────────────── */}
       <header className="levcon-header">
         <a className="logo-mark" href="/" onClick={handleLogoClick} aria-label={t('header.logo_aria_label')}>
-          <div className="logo-placeholder" aria-hidden="true"><span>L</span></div>
-          <span className="logo-wordmark">Levcon.ai</span>
+          <span className="logo-wordmark">Levcon<span className="logo-ai">.AI</span></span>
         </a>
 
         <h1 className="site-slogan">
