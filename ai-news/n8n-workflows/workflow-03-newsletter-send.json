@@ -1,0 +1,407 @@
+{
+  "name": "AI News — 03 Newsletter Send",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "newsletter-daily",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000001",
+      "name": "Webhook: Newsletter Daily",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -600,
+        400
+      ],
+      "webhookId": "newsletter-daily-unique-placeholder",
+      "notes": "Webhook-Trigger für Daily-Versand.\nWird von Workflow 01 aufgerufen.\nPath: newsletter-daily"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set frequency = 'daily' for the downstream subscriber fetch\nreturn [{\n  json: {\n    frequency: 'daily',\n    date: ($json.body && $json.body.date) || new Date().toISOString().substring(0, 10),\n    source: 'webhook'\n  }\n}];"
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000002",
+      "name": "Set Frequency: Daily",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        400
+      ],
+      "notes": "Markiert diesen Lauf als 'daily'. Wird im Fetch Subscribers als Query-Param verwendet."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 0"
+            }
+          ]
+        }
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000003",
+      "name": "Cron Weekly Sunday 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -600,
+        700
+      ],
+      "notes": "Cron: jeden Sonntag 08:00 Europe/Vienna.\nTriggert Weekly-Newsletter-Versand."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set frequency = 'weekly' for the downstream subscriber fetch\nreturn [{\n  json: {\n    frequency: 'weekly',\n    date: new Date().toISOString().substring(0, 10),\n    source: 'cron-weekly'\n  }\n}];"
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000004",
+      "name": "Set Frequency: Weekly",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        700
+      ],
+      "notes": "Markiert diesen Lauf als 'weekly'."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 1 * *"
+            }
+          ]
+        }
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000005",
+      "name": "Cron Digest 1st of Month 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -600,
+        1000
+      ],
+      "notes": "Cron: 1. des Monats 08:00 Europe/Vienna.\nTriggert Digest-Newsletter-Versand."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set frequency = 'digest' for the downstream subscriber fetch\nreturn [{\n  json: {\n    frequency: 'digest',\n    date: new Date().toISOString().substring(0, 10),\n    source: 'cron-digest'\n  }\n}];"
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000006",
+      "name": "Set Frequency: Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        1000
+      ],
+      "notes": "Markiert diesen Lauf als 'digest' (monatlich)."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/today",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Levcon-Api-Key",
+              "value": "={{ $env.LEVCON_INTERNAL_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000007",
+      "name": "Fetch Today News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        700
+      ],
+      "notes": "GET Levcon API: heutige AI-News-Ausgabe.\nResponse: { date, summaryDe, summaryEn, items[] }"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/subscribers?frequency={{ $json.frequency || 'daily' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Levcon-Api-Key",
+              "value": "={{ $env.LEVCON_INTERNAL_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000008",
+      "name": "Fetch Subscribers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        700
+      ],
+      "notes": "GET Subscribers gefiltert nach Frequency (daily/weekly/digest).\nResponse: Liste von { id, email, language, frequency, unsubscribeToken, lastSentDate }.\nFrequency stammt aus vorgelagertem Set-Node."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Render Newsletter HTML per subscriber (DE or EN)\n// Input: items from Fetch Subscribers (one item per subscriber)\n// Uses $('Fetch Today News').first().json for the news data\n// Output: one item per subscriber with email + subject + html + headers + lastSentDate\n\nconst news = $(\"Fetch Today News\").first().json;\nif (!news || !news.items) {\n  throw new Error('No news data available from Fetch Today News node');\n}\n\nconst today = news.date || new Date().toISOString().substring(0, 10);\nconst lastSentDate = today;\n\nconst DE_MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];\nconst EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst d = new Date(today + 'T00:00:00Z');\nconst dateDe = `${d.getUTCDate()}. ${DE_MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;\nconst dateEn = `${EN_MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;\n\nfunction escapeHtml(s) {\n  return (s || '').toString()\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#039;');\n}\n\nfunction cleanUrl(u) {\n  try {\n    const p = new URL(u);\n    ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid'].forEach(k => p.searchParams.delete(k));\n    let c = p.origin + p.pathname;\n    if (p.search) c += p.search;\n    return c;\n  } catch (e) {\n    return u || '';\n  }\n}\n\nfunction itemDe(it) {\n  const headline = escapeHtml(it.headline || '');\n  const source = escapeHtml(it.source || '');\n  const url = escapeHtml(cleanUrl(it.sourceUrl || it.url || ''));\n  const desc = escapeHtml(it.descriptionDe || it.summary || '');\n  return `<article style=\"margin-bottom:24px;\"><h3 style=\"margin:0 0 4px 0;font-size:16px;font-family:Georgia,'Times New Roman',serif;\">${headline}</h3><p style=\"margin:0 0 8px 0;font-size:12px;color:#888;\">${source} · <a href=\"${url}\" style=\"color:#b91c1c;\">Weiterlesen →</a></p><p style=\"margin:0;font-size:14px;line-height:1.5;\">${desc}</p></article>`;\n}\n\nfunction itemEn(it) {\n  const headline = escapeHtml(it.headline || '');\n  const source = escapeHtml(it.source || '');\n  const url = escapeHtml(cleanUrl(it.sourceUrl || it.url || ''));\n  const desc = escapeHtml(it.descriptionEn || it.summary || '');\n  return `<article style=\"margin-bottom:24px;\"><h3 style=\"margin:0 0 4px 0;font-size:16px;font-family:Georgia,'Times New Roman',serif;\">${headline}</h3><p style=\"margin:0 0 8px 0;font-size:12px;color:#888;\">${source} · <a href=\"${url}\" style=\"color:#b91c1c;\">Read more →</a></p><p style=\"margin:0;font-size:14px;line-height:1.5;\">${desc}</p></article>`;\n}\n\nfunction renderDe(news, unsubUrl, dateDe) {\n  const itemsHtml = (news.items || []).map(itemDe).join('');\n  return `<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>KI-News · ${escapeHtml(dateDe)}</title></head><body style=\"font-family:-apple-system,'Segoe UI',Roboto,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1a1a1a;background:#f0efec;\"><h1 style=\"font-family:Georgia,'Times New Roman',serif;color:#b91c1c;margin:0 0 8px 0;\">KI-News · ${escapeHtml(dateDe)}</h1><p style=\"font-style:italic;color:#555;line-height:1.5;margin:0 0 24px 0;\">${escapeHtml(news.summaryDe || '')}</p><hr style=\"border:0;border-top:1px solid #ccc;margin:24px 0;\">${itemsHtml}<hr style=\"border:0;border-top:1px solid #ccc;margin:24px 0;\"><p style=\"font-size:12px;color:#999;\">Levcon.ai · <a href=\"${escapeHtml(unsubUrl)}\" style=\"color:#999;\">Abmelden / Unsubscribe</a></p></body></html>`;\n}\n\nfunction renderEn(news, unsubUrl, dateEn) {\n  const itemsHtml = (news.items || []).map(itemEn).join('');\n  return `<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>AI News · ${escapeHtml(dateEn)}</title></head><body style=\"font-family:-apple-system,'Segoe UI',Roboto,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1a1a1a;background:#f0efec;\"><h1 style=\"font-family:Georgia,'Times New Roman',serif;color:#b91c1c;margin:0 0 8px 0;\">AI News · ${escapeHtml(dateEn)}</h1><p style=\"font-style:italic;color:#555;line-height:1.5;margin:0 0 24px 0;\">${escapeHtml(news.summaryEn || '')}</p><hr style=\"border:0;border-top:1px solid #ccc;margin:24px 0;\">${itemsHtml}<hr style=\"border:0;border-top:1px solid #ccc;margin:24px 0;\"><p style=\"font-size:12px;color:#999;\">Levcon.ai · <a href=\"${escapeHtml(unsubUrl)}\" style=\"color:#999;\">Unsubscribe</a></p></body></html>`;\n}\n\nconst siteUrl = ($env && $env.NEXT_PUBLIC_SITE_URL) || 'https://levcon.ai';\nconst out = [];\n\nfor (const sub of items) {\n  const s = sub.json;\n  const lang = (s.language || 'de').toLowerCase();\n  const unsubToken = s.unsubscribeToken || s.id;\n  const unsubUrl = `${siteUrl}/api/ai-news/unsubscribe?token=${encodeURIComponent(unsubToken)}`;\n\n  let html, subject;\n  if (lang === 'en') {\n    html = renderEn(news, unsubUrl, dateEn);\n    subject = `AI News · ${dateEn}`;\n  } else {\n    html = renderDe(news, unsubUrl, dateDe);\n    subject = `KI-News · ${dateDe}`;\n  }\n\n  out.push({\n    json: {\n      email: s.email,\n      subject,\n      html,\n      subscriberId: s.id,\n      subscriberLanguage: lang,\n      listUnsubscribe: `<mailto:news@levcon.ai?subject=Unsubscribe>, <${unsubUrl}>`,\n      listUnsubscribePost: 'List-Unsubscribe=One-Click',\n      lastSentDate\n    }\n  });\n}\n\nreturn out;"
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000009",
+      "name": "Render Newsletter HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        700
+      ],
+      "notes": "Erzeugt pro Subscriber ein HTML-Email (DE oder EN).\nVerwendet News-Daten aus 'Fetch Today News' via $('Fetch Today News').first().json.\nBaut List-Unsubscribe Header mit subscriber-spezifischer URL (RFC 8058 One-Click).\nBetreff sprachabhängig: 'KI-News · DD. MMMM YYYY' (DE) oder 'AI News · MMMM D, YYYY' (EN).\nTemplate referenziert templates/newsletter-html-de.html und newsletter-html-en.html (später austauschbar)."
+    },
+    {
+      "parameters": {
+        "fromEmail": "Levcon AI News <news@levcon.ai>",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {
+          "customHeaders": {
+            "header": [
+              {
+                "name": "List-Unsubscribe",
+                "value": "={{ $json.listUnsubscribe }}"
+              },
+              {
+                "name": "List-Unsubscribe-Post",
+                "value": "={{ $json.listUnsubscribePost }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000010",
+      "name": "Send Newsletter Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        700
+      ],
+      "notes": "SMTP-Versand pro Subscriber-Item (n8n iteriert automatisch).\nFrom: 'Levcon AI News <news@levcon.ai>'\nCustom Headers: List-Unsubscribe + List-Unsubscribe-Post (RFC 8058 One-Click).\nCredential: 'SMTP Levcon'",
+      "credentials": {
+        "smtp": {
+          "id": "PLACEHOLDER_REPLACE_WITH_SMTP_CREDENTIAL_ID",
+          "name": "SMTP Levcon"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/subscribers/{{ $json.subscriberId }}/last-sent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Levcon-Api-Key",
+              "value": "={{ $env.LEVCON_INTERNAL_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ date: $json.lastSentDate }) }}",
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000011",
+      "name": "Update Subscriber Last Sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1160,
+        700
+      ],
+      "notes": "Nach Versand: PATCH Levcon API um lastSentDate zu aktualisieren.\nStellt sicher, dass jeder Subscriber jede News nur einmal bekommt (auch bei Frequenz-Wechsel).\ncontinueOnFail=true, damit ein fehlgeschlagener Update nicht den gesamten Versand blockiert."
+    },
+    {
+      "parameters": {},
+      "id": "c3d4e5f6-0003-4000-8000-000000000012",
+      "name": "On Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        1400
+      ],
+      "notes": "Error-Trigger: wird aktiviert, wenn der Hauptflow fehlschlägt."
+    },
+    {
+      "parameters": {
+        "fromEmail": "ops@levcon.ai",
+        "toEmail": "={{ $env.ALERT_EMAIL }}",
+        "subject": "=ALERT: n8n Workflow '03 Newsletter Send' failed at {{ $now.toISO() }}",
+        "text": "=Workflow 'AI News — 03 Newsletter Send' failed.\n\nExecution ID: {{ $json.execution.id }}\nError message: {{ $json.execution.error.message }}\nError node: {{ $json.execution.lastNodeExecuted }}\nTimestamp: {{ $json.execution.stoppedAt }}\n\nPlease check n8n UI for details:\n{{ $env.N8N_BASE_URL }}/workflow/executions/{{ $json.execution.id }}",
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000013",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -300,
+        1400
+      ],
+      "notes": "Sendet Alert-Mail an ALERT_EMAIL.\nSMTP-Credential: 'SMTP Levcon'",
+      "credentials": {
+        "smtp": {
+          "id": "PLACEHOLDER_REPLACE_WITH_SMTP_CREDENTIAL_ID",
+          "name": "SMTP Levcon"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook: Newsletter Daily": {
+      "main": [
+        [
+          {
+            "node": "Set Frequency: Daily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron Weekly Sunday 08:00": {
+      "main": [
+        [
+          {
+            "node": "Set Frequency: Weekly",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron Digest 1st of Month 08:00": {
+      "main": [
+        [
+          {
+            "node": "Set Frequency: Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Frequency: Daily": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Frequency: Weekly": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Frequency: Digest": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Today News": {
+      "main": [
+        [
+          {
+            "node": "Fetch Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Subscribers": {
+      "main": [
+        [
+          {
+            "node": "Render Newsletter HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render Newsletter HTML": {
+      "main": [
+        [
+          {
+            "node": "Send Newsletter Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Newsletter Email": {
+      "main": [
+        [
+          {
+            "node": "Update Subscriber Last Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Vienna"
+  },
+  "pinData": {},
+  "tags": []
+}

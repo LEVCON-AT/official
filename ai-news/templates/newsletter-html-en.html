@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light">
+  <title>AI News of the Day — Levcon.ai</title>
+  <meta name="description" content="Daily curated AI press review by Levcon.ai">
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    /* Minimal media query block for responsive clients (Apple Mail, iOS, Gmail app).
+       All visual styling remains inline; this block only adjusts layout on small screens. */
+    @media only screen and (max-width: 600px) {
+      .lc-card { width: 100% !important; }
+      .lc-pad-h { padding-left: 20px !important; padding-right: 20px !important; }
+      .lc-item-thumb-cell { display: none !important; }
+      .lc-date { font-size: 24px !important; }
+      .lc-summary { font-size: 16px !important; }
+      .lc-item-headline { font-size: 17px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#1C1C1A;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;line-height:1.5;">
+
+  <!-- Preheader: hidden preview text shown in inbox snippet. Not rendered visually. -->
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#F0EFEC;">
+    {{SUMMARY}}
+  </div>
+
+  <!-- Outer wrapper: full-width cream background -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F0EFEC;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <!-- ═══ Main card (600px max width) ═══ -->
+        <table role="presentation" class="lc-card" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#FFFFFF;border:1px solid #D8D7D3;">
+
+          <!-- ── Header: Levcon wordmark ── -->
+          <tr>
+            <td class="lc-pad-h" style="padding:36px 32px 20px 32px;text-align:center;border-bottom:1px solid #D8D7D3;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;letter-spacing:0.26em;text-transform:uppercase;color:#1C1C1A;font-weight:400;">
+                LEVCON<span style="color:#C8102E;">.AI</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ── Subject area: "AI News of the Day" + date ── -->
+          <tr>
+            <td class="lc-pad-h" style="padding:40px 32px 0 32px;text-align:center;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#8A8A85;margin-bottom:14px;font-weight:400;">
+                AI News of the Day
+              </div>
+              <h1 class="lc-date" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#1C1C1A;line-height:1.2;letter-spacing:-0.01em;">
+                {{DATE}}
+              </h1>
+            </td>
+          </tr>
+
+          <!-- ── Daily summary ── -->
+          <tr>
+            <td class="lc-pad-h" style="padding:28px 40px 8px 40px;">
+              <p class="lc-summary" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;">
+                {{SUMMARY}}
+              </p>
+            </td>
+          </tr>
+
+          <!-- ── News items section ── -->
+          <tr>
+            <td class="lc-pad-h" style="padding:28px 32px 0 32px;">
+
+              <!-- ════════════════════════════════════════════════════════════
+                   NEWS ITEM BLOCK — repeat for each AiNewsItem.
+                   Replace all {{ITEM_*}} placeholders per item.
+                   If no thumbnail is available, remove the thumbnail <td>
+                   and set the headline <td> colspan or width to 100%.
+                   ════════════════════════════════════════════════════════════ -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #D8D7D3;">
+                <tr>
+                  <td style="padding:26px 0 26px 0;">
+
+                    <!-- Thumbnail + headline row -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <!-- Thumbnail cell (60x60). Remove this <td> if no thumbnail. -->
+                        <td class="lc-item-thumb-cell" style="width:76px;vertical-align:top;padding-right:16px;">
+                          <img src="{{ITEM_THUMBNAIL}}" alt="Thumbnail for {{ITEM_HEADLINE}}" width="60" height="60" style="display:block;width:60px;height:60px;border:1px solid #D8D7D3;outline:none;text-decoration:none;" />
+                        </td>
+                        <!-- Headline cell -->
+                        <td style="vertical-align:top;">
+                          <h2 class="lc-item-headline" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:19px;font-weight:500;line-height:1.3;color:#1C1C1A;">
+                            <a href="{{ITEM_URL}}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:none;font-weight:500;">
+                              {{ITEM_HEADLINE}}
+                            </a>
+                          </h2>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Description -->
+                    <p style="margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#1C1C1A;font-weight:300;">
+                      {{ITEM_DESCRIPTION}}
+                    </p>
+
+                    <!-- Read more + source attribution -->
+                    <p style="margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#8A8A85;letter-spacing:0.02em;">
+                      <a href="{{ITEM_URL}}" rel="noopener noreferrer" style="color:#C8102E;text-decoration:none;font-weight:500;">Read&nbsp;more&nbsp;→</a>
+                      <span style="color:#D8D7D3;margin:0 8px;" aria-hidden="true">·</span>
+                      Source: {{ITEM_SOURCE}}
+                    </p>
+
+                  </td>
+                </tr>
+              </table>
+              <!-- ════════════════════════════════════════════════════════════
+                   END NEWS ITEM BLOCK
+                   ════════════════════════════════════════════════════════════ -->
+
+            </td>
+          </tr>
+
+          <!-- ── Footer ── -->
+          <tr>
+            <td class="lc-pad-h" style="padding:32px 32px 36px 32px;border-top:1px solid #D8D7D3;background-color:#F0EFEC;">
+
+              <p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#8A8A85;font-weight:300;">
+                This email was sent by Levcon.ai to <a href="mailto:{{SUBSCRIBER_EMAIL}}" style="color:#1C1C1A;text-decoration:underline;">{{SUBSCRIBER_EMAIL}}</a>.
+              </p>
+
+              <p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
+                <a href="{{UNSUBSCRIBE_URL}}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Unsubscribe</a>
+                <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
+                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">levcon.ai</a>
+                <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
+                <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Privacy</a>
+              </p>
+
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#8A8A85;font-weight:300;letter-spacing:0.02em;">
+                Mst. Enric-Bernard Sep-Albi · Pfalzgasse 37/2/4 · 1220 Wien
+              </p>
+
+            </td>
+          </tr>
+
+        </table>
+        <!-- ═══ End main card ═══ -->
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

@@ -1,0 +1,644 @@
+{
+  "name": "AI News — 01 Collect & Curate",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Cron Daily 06:00 Vienna",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        600
+      ],
+      "notes": "Täglich 06:00 Europe/Vienna.\nStartet den Curation-Workflow.\nZeitzone wird über Workflow-Settings executionTimezone gesetzt.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://heise.de/rss/heise.rdf",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000002",
+      "name": "Fetch Heise RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        -300
+      ],
+      "notes": "DACH-Quelle: Heise — IT, KI, Security"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://rss.golem.de/rss.php?feed=RSS2.0",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000003",
+      "name": "Fetch Golem RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        -100
+      ],
+      "notes": "DACH-Quelle: Golem — IT, KI"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.tagesschau.de/xml/rss2",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000004",
+      "name": "Fetch Tagesschau RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        100
+      ],
+      "notes": "DACH-Quelle: Tagesschau — Allgemein, auch KI"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://rss.sueddeutsche.de/rss/wissen",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000005",
+      "name": "Fetch SZ Wissen RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        300
+      ],
+      "notes": "DACH-Quelle: Süddeutsche Wissen — Wissenschaft, KI"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.technologyreview.com/feed/",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000006",
+      "name": "Fetch MIT Tech Review RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        500
+      ],
+      "notes": "International: MIT Tech Review — KI, Tech (sehr hohe Qualität)"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://feeds.arstechnica.com/arstechnica/features",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000007",
+      "name": "Fetch Ars Technica RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        700
+      ],
+      "notes": "International: Ars Technica — Tech, KI"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000008",
+      "name": "Fetch The Verge AI RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        900
+      ],
+      "notes": "International: The Verge AI — KI-Fokus"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.anthropic.com/news/rss.xml",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000009",
+      "name": "Fetch Anthropic Blog RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        1100
+      ],
+      "notes": "International: Anthropic Blog — KI-Anbieter"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize RSS items to {title, link, source, pubDate, summary}\n// Input: items from RSS HTTP Request nodes (raw XML in item.json.data or item.json.body)\n// Output: flat list of normalized items\n\nconst AI_KEYWORDS = /\\b(AI|KI|ML|LLM|GPT|Claude|neural|model|machine learning|deep learning|generative|transformer|Anthropic|OpenAI|Gemini|Llama)\\b/i;\n\nfunction stripCdata(s) {\n  return s.replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1');\n}\n\nfunction stripTags(s) {\n  return s.replace(/<[^>]+>/g, '').replace(/\\s+/g, ' ').trim();\n}\n\nfunction sourceFromUrl(rawUrl) {\n  try {\n    const u = new URL(rawUrl);\n    const host = u.hostname.replace(/^www\\./, '');\n    const map = {\n      'heise.de': 'Heise',\n      'rss.golem.de': 'Golem',\n      'golem.de': 'Golem',\n      'tagesschau.de': 'Tagesschau',\n      'sueddeutsche.de': 'Süddeutsche Zeitung',\n      'technologyreview.com': 'MIT Tech Review',\n      'arstechnica.com': 'Ars Technica',\n      'theverge.com': 'The Verge',\n      'anthropic.com': 'Anthropic',\n      'venturebeat.com': 'VentureBeat',\n      'techcrunch.com': 'TechCrunch',\n      'wired.com': 'Wired',\n      'nature.com': 'Nature',\n      'openai.com': 'OpenAI',\n      'huggingface.co': 'Hugging Face',\n      'zdnet.de': 'ZDNet',\n      'derstandard.at': 'Der Standard',\n      'science.apa.at': 'APA Wissenschaft'\n    };\n    return map[host] || host;\n  } catch (e) {\n    return 'Unknown';\n  }\n}\n\nconst normalized = [];\n\nfor (const item of items) {\n  const xml = (typeof item.json === 'string') ? item.json\n    : (item.json.data || item.json.body || item.json.content || '');\n\n  // Track source from request URL if available\n  const requestUrl = item.json.url || item.json.requestUrl || '';\n  const fallbackSource = sourceFromUrl(requestUrl);\n\n  // Match <item>...</item> (RSS/RDF) or <entry>...</entry> (Atom)\n  const itemRegex = /<(?:item|entry)[\\s\\S]*?>([\\s\\S]*?)<\\/(?:item|entry)>/g;\n  let match;\n  while ((match = itemRegex.exec(xml)) !== null) {\n    const block = match[1];\n\n    const titleM = block.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/);\n    const title = titleM ? stripTags(stripCdata(titleM[1])) : '';\n\n    const linkM = block.match(/<link[^>]*?href=\"([^\"]+)\"[^>]*\\/?\\s*>/) || block.match(/<link[^>]*>([\\s\\S]*?)<\\/link>/);\n    const link = linkM ? (linkM[1] || '').trim() : '';\n\n    const pubM = block.match(/<pubDate[^>]*>([\\s\\S]*?)<\\/pubDate>/) || block.match(/<published[^>]*>([\\s\\S]*?)<\\/published>/) || block.match(/<updated[^>]*>([\\s\\S]*?)<\\/updated>/);\n    const pubDate = pubM ? pubM[1].trim() : new Date().toISOString();\n\n    const descM = block.match(/<description[^>]*>([\\s\\S]*?)<\\/description>/) || block.match(/<summary[^>]*>([\\s\\S]*?)<\\/summary>/);\n    let summary = descM ? stripTags(stripCdata(descM[1])) : '';\n    if (summary.length > 300) summary = summary.substring(0, 297) + '...';\n\n    const source = sourceFromUrl(link) === 'Unknown' ? fallbackSource : sourceFromUrl(link);\n\n    // Filter: KI/AI relevance (title or summary must contain a keyword)\n    if (title && link && (AI_KEYWORDS.test(title) || AI_KEYWORDS.test(summary))) {\n      normalized.push({\n        json: {\n          title,\n          link,\n          source,\n          pubDate,\n          summary,\n          origin: 'rss'\n        }\n      });\n    }\n  }\n}\n\nreturn normalized;"
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000010",
+      "name": "Normalize RSS Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        400
+      ],
+      "notes": "Erwartet alle Items der 8 RSS-Fetch-Nodes als kombinierten Input.\nParst XML, filtert nach KI-Relevanz (Keywords), normalisiert Struktur."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAI_API_ENDPOINT }}/ai_news/web_search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.ZAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"latest AI KI news today {{ $today.toFormat('yyyy-MM-dd') }}\",\n  \"num_results\": 15,\n  \"freshness\": \"one_day\"\n}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000011",
+      "name": "AI Web Search (z-ai)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -100,
+        1500
+      ],
+      "notes": "Ruft z-ai Web Search API auf.\nAPI-Key via $env.ZAI_API_KEY (Header Authorization: Bearer ...).\nErgänzt RSS-Feeds um tagesaktuelle Themen."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize z-ai web search results to same schema as RSS items\n// Expected input: item.json.data.results[] (or item.json.results[])\n\nconst out = [];\n\nfor (const item of items) {\n  const results = (item.json && (item.json.data || item.json)).results || (item.json && item.json.data && item.json.data.results) || [];\n  for (const r of results) {\n    const title = r.title || r.name || '';\n    const link = r.url || r.link || '';\n    const summary = (r.snippet || r.description || r.content || '').substring(0, 300);\n    const pubDate = r.published_at || r.date || new Date().toISOString();\n    let source = 'Unknown';\n    try {\n      const u = new URL(link);\n      source = u.hostname.replace(/^www\\./, '');\n    } catch (e) {}\n    if (title && link) {\n      out.push({\n        json: {\n          title,\n          link,\n          source,\n          pubDate,\n          summary,\n          origin: 'websearch'\n        }\n      });\n    }\n  }\n}\n\nreturn out;"
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000012",
+      "name": "Normalize Search Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        1500
+      ],
+      "notes": "Normalisiert z-ai Web-Search-Ergebnisse auf gleiche Struktur wie RSS-Items."
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000013",
+      "name": "Merge RSS + Search",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        520,
+        800
+      ],
+      "notes": "Kombiniert normalisierte RSS-Items (Input 1) mit normalisierten Web-Search-Items (Input 2)."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dedupe items by URL (normalized: strip trailing slash, query params utm_*, fbclid, gclid)\n// Also dedupe by title-similarity (lowercase, trim, first 80 chars)\n\nfunction normalizeUrl(u) {\n  try {\n    const parsed = new URL(u);\n    // Strip tracking params\n    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid', 'mc_cid', 'mc_eid'].forEach(p => parsed.searchParams.delete(p));\n    let clean = parsed.origin + parsed.pathname;\n    if (parsed.search) clean += parsed.search;\n    return clean.replace(/\\/$/, '').toLowerCase();\n  } catch (e) {\n    return (u || '').toLowerCase().trim();\n  }\n}\n\nconst seenUrl = new Set();\nconst seenTitle = new Set();\nconst deduped = [];\n\nfor (const item of items) {\n  const url = normalizeUrl(item.json.link);\n  const titleKey = (item.json.title || '').toLowerCase().replace(/[^a-z0-9\\s]/g, '').trim().substring(0, 80);\n\n  if (seenUrl.has(url) || seenTitle.has(titleKey)) continue;\n  seenUrl.add(url);\n  seenTitle.add(titleKey);\n  deduped.push(item);\n}\n\nreturn deduped;"
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000014",
+      "name": "Dedupe by URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        800
+      ],
+      "notes": "Dedupliziert Items nach normalisierter URL und Titel-Ähnlichkeit.\nEntfernt Tracking-Parameter (utm_*, fbclid, gclid)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAI_API_ENDPOINT }}/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"glm-4-plus\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an AI news curator. Select the top 5-10 most relevant KI/AI news items from the input. Provide a German summary (3-5 sentences) and an English summary. For each item provide: original headline, German description (1-2 sentences), English description, source name, source URL. Return as JSON.\\n\\nReturn strictly JSON in this shape:\\n{\\n  \\\"summaryDe\\\": \\\"...\\\",\\n  \\\"summaryEn\\\": \\\"...\\\",\\n  \\\"items\\\": [\\n    {\\n      \\\"headline\\\": \\\"...\\\",\\n      \\\"descriptionDe\\\": \\\"...\\\",\\n      \\\"descriptionEn\\\": \\\"...\\\",\\n      \\\"source\\\": \\\"...\\\",\\n      \\\"sourceUrl\\\": \\\"...\\\"\\n    }\\n  ]\\n}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify('Today\\'s collected AI news items (JSON array):\\n' + JSON.stringify(items.map(i => ({ title: i.json.title, link: i.json.link, source: i.json.source, pubDate: i.json.pubDate, summary: i.json.summary })), null, 2)) }}\n    }\n  ],\n  \"temperature\": 0.3,\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000015",
+      "name": "LLM Curation (z-ai)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        800
+      ],
+      "notes": "Ruft z-ai LLM Chat Completions Endpoint auf.\nCredential 'z-ai LLM' (Header Auth, Authorization: Bearer ...).\nSystem-Prompt: Kuratiere Top 5-10 KI/AI News, gib DE+EN Summary + Items als JSON zurück.",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PLACEHOLDER_REPLACE_WITH_z-ai_LLM_CREDENTIAL_ID",
+          "name": "z-ai LLM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse LLM JSON response.\n// Input: item.json (chat completion response) with choices[0].message.content\n// Output: { date, summaryDe, summaryEn, items[] }\n\nfunction extractJson(text) {\n  if (!text) return null;\n  // Try direct parse\n  try { return JSON.parse(text); } catch (e) {}\n  // Strip code fences\n  const fence = text.match(/```(?:json)?\\s*([\\s\\S]*?)```/);\n  if (fence) {\n    try { return JSON.parse(fence[1]); } catch (e) {}\n  }\n  // Find first { ... last }\n  const start = text.indexOf('{');\n  const end = text.lastIndexOf('}');\n  if (start >= 0 && end > start) {\n    try { return JSON.parse(text.substring(start, end + 1)); } catch (e) {}\n  }\n  return null;\n}\n\nconst out = [];\nfor (const item of items) {\n  const content = item.json && item.json.choices && item.json.choices[0] && item.json.choices[0].message && item.json.choices[0].message.content;\n  const parsed = extractJson(content);\n  if (!parsed) {\n    throw new Error('LLM response was not valid JSON. Raw content: ' + (content || '').substring(0, 500));\n  }\n  // Validate shape\n  if (!parsed.summaryDe || !parsed.summaryEn || !Array.isArray(parsed.items)) {\n    throw new Error('LLM response missing required fields. Got keys: ' + Object.keys(parsed).join(', '));\n  }\n  out.push({\n    json: {\n      date: new Date().toISOString().substring(0, 10),\n      summaryDe: parsed.summaryDe,\n      summaryEn: parsed.summaryEn,\n      items: parsed.items.map((it, idx) => ({\n        position: idx + 1,\n        headline: it.headline || '',\n        descriptionDe: it.descriptionDe || '',\n        descriptionEn: it.descriptionEn || '',\n        source: it.source || '',\n        sourceUrl: it.sourceUrl || ''\n      }))\n    }\n  });\n}\nreturn out;"
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000016",
+      "name": "Parse LLM JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        800
+      ],
+      "notes": "Extrahiert JSON aus LLM-Antwort (auch aus Code-Fences).\nValidiert Shape (summaryDe, summaryEn, items[]).\nFügt Position-Index und aktuelles Datum hinzu."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/internal/ingest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Levcon-Api-Key",
+              "value": "={{ $env.LEVCON_INTERNAL_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ date: $json.date, summaryDe: $json.summaryDe, summaryEn: $json.summaryEn, items: $json.items }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000017",
+      "name": "POST to Levcon Ingest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        800
+      ],
+      "notes": "POST an Levcon Internal Ingest Endpoint.\nAuth via X-Levcon-Api-Key Header (env LEVCON_INTERNAL_API_KEY).\nBody: { date, summaryDe, summaryEn, items[] }"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_BASE_URL }}/webhook/linkedin-post-levcon",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ date: $json.date, triggeredBy: 'workflow-01-collect-and-curate' }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000018",
+      "name": "Trigger LinkedIn Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        500
+      ],
+      "notes": "Triggert Workflow 02 (LinkedIn Post) via Webhook.\nURL-Platzhalter: $env.N8N_BASE_URL + Pfad 'linkedin-post-levcon'"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_BASE_URL }}/webhook/newsletter-daily",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ date: $json.date, triggeredBy: 'workflow-01-collect-and-curate' }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000019",
+      "name": "Trigger Newsletter Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        1100
+      ],
+      "notes": "Triggert Workflow 03 (Newsletter Daily) via Webhook.\nURL-Platzhalter: $env.N8N_BASE_URL + Pfad 'newsletter-daily'"
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0001-4000-8000-000000000020",
+      "name": "On Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        1900
+      ],
+      "notes": "Error-Trigger: wird aktiviert, wenn der Hauptflow fehlschlägt."
+    },
+    {
+      "parameters": {
+        "fromEmail": "ops@levcon.ai",
+        "toEmail": "={{ $env.ALERT_EMAIL }}",
+        "subject": "=ALERT: n8n Workflow '01 Collect & Curate' failed at {{ $now.toISO() }}",
+        "text": "=Workflow 'AI News — 01 Collect & Curate' failed.\n\nExecution ID: {{ $json.execution.id }}\nError message: {{ $json.execution.error.message }}\nError node: {{ $json.execution.lastNodeExecuted }}\nTimestamp: {{ $json.execution.stoppedAt }}\n\nPlease check n8n UI for details:\n{{ $env.N8N_BASE_URL }}/workflow/executions/{{ $json.execution.id }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000021",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -100,
+        1900
+      ],
+      "notes": "Sendet Alert-Mail an ALERT_EMAIL.\nSMTP-Credential: 'SMTP Levcon'",
+      "credentials": {
+        "smtp": {
+          "id": "PLACEHOLDER_REPLACE_WITH_SMTP_CREDENTIAL_ID",
+          "name": "SMTP Levcon"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron Daily 06:00 Vienna": {
+      "main": [
+        [
+          {
+            "node": "Fetch Heise RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Golem RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Tagesschau RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch SZ Wissen RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch MIT Tech Review RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Ars Technica RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch The Verge AI RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Anthropic Blog RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Web Search (z-ai)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Heise RSS": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Golem RSS": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Tagesschau RSS": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch SZ Wissen RSS": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch MIT Tech Review RSS": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Ars Technica RSS": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch The Verge AI RSS": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Anthropic Blog RSS": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize RSS Items": {
+      "main": [
+        [
+          {
+            "node": "Merge RSS + Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Web Search (z-ai)": {
+      "main": [
+        [
+          {
+            "node": "Normalize Search Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Search Results": {
+      "main": [
+        [
+          {
+            "node": "Merge RSS + Search",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge RSS + Search": {
+      "main": [
+        [
+          {
+            "node": "Dedupe by URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe by URL": {
+      "main": [
+        [
+          {
+            "node": "LLM Curation (z-ai)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Curation (z-ai)": {
+      "main": [
+        [
+          {
+            "node": "Parse LLM JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse LLM JSON": {
+      "main": [
+        [
+          {
+            "node": "POST to Levcon Ingest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST to Levcon Ingest": {
+      "main": [
+        [
+          {
+            "node": "Trigger LinkedIn Workflow",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Trigger Newsletter Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Vienna"
+  },
+  "pinData": {},
+  "tags": []
+}

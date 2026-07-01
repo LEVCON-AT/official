@@ -142,3 +142,146 @@ Stage Summary:
 - noscript: Sprachabhängiger Fallback-Hinweis
 - popstate: Browser-Zurück-Button resettet Panel-State
 - CSP: Nginx-Konfiguration dokumentiert (nicht als Meta-Tag wegen Next.js Inline-Assets)
+
+---
+Task ID: 6-b
+Agent: newsletter-template-creator
+Task: Bilinguale HTML-Email-Templates für Levcon.ai AI News Newsletter (DE + EN)
+
+Work Log:
+- Gelesen: /home/z/my-project/ai-news/CONTEXT.md, QUALITY-GUIDELINES.md, src/app/globals.css
+  - Levcon Design-Tokens extrahiert: --lc-bg #F0EFEC, --lc-ink #1C1C1A, --lc-red #C8102E,
+    --lc-rule #D8D7D3, --lc-muted #8A8A85
+  - DSGVO-Anforderungen aus §3.2 QUALITY-GUIDELINES: keine Tracker, keine Pixel,
+    One-Click-Unsubscribe (RFC 8058), externe Links mit rel="noopener noreferrer"
+- Erstellt: /home/z/my-project/ai-news/templates/newsletter-html-de.html (164 Zeilen, 9021 Bytes)
+- Erstellt: /home/z/my-project/ai-news/templates/newsletter-html-en.html (164 Zeilen, 9000 Bytes)
+- Beide Templates enthalten:
+  - HTML5 doctype, charset=UTF-8, viewport meta, X-UA-Compatible IE=edge
+  - color-scheme + supported-color-schemes meta (light only)
+  - MSO conditional comment (OfficeDocumentSettings / PixelsPerInch=96 für Outlook DPI)
+  - Inline-CSS für alle visuellen Eigenschaften + minimaler <style>-Block im <head>
+    ausschließlich für @media (max-width:600px) Responsive-Anpassungen
+  - Tabellen-basiertes Layout (4 Tabellen pro Mail, alle mit role="presentation")
+  - Karten-Layout: 600px max-width, weiße Karte (#FFFFFF) auf Cream-Außenhintergrund (#F0EFEC)
+  - Preheader-Div (hidden preview text via {{SUMMARY}})
+  - Header: "LEVCON.AI" Wordmark mit ".AI" in Rot (#C8102E), letter-spacing 0.26em
+  - Subject-Area: "KI-News des Tages" / "AI News of the Day" + {{DATE}} als große
+    Georgia-Italic-Headline (28px)
+  - Daily-Summary-Section: {{SUMMARY}} als Georgia-Serif-Paragraph (17px)
+  - News-Item-Block (mit HTML-Kommentaren als Wiederholungs-Markierung für n8n):
+    * Thumbnail 60×60px mit {{ITEM_THUMBNAIL}} (alt="Vorschaubild zu {{ITEM_HEADLINE}}")
+    * Headline als <h2> mit Link auf {{ITEM_URL}} (rel="noopener noreferrer")
+    * Description-Paragraph mit {{ITEM_DESCRIPTION}}
+    * "Weiterlesen →" / "Read more →" Link in Rot (#C8102E)
+    * Source-Attribution "Quelle: {{ITEM_SOURCE}}" / "Source: {{ITEM_SOURCE}}"
+    * Divider via border-top auf der äußeren Item-Tabelle
+  - Footer (Cream-Hintergrund, top-border):
+    * "Diese E-Mail wurde von Levcon.ai an {{SUBSCRIBER_EMAIL}} versendet." /
+      "This email was sent by Levcon.ai to {{SUBSCRIBER_EMAIL}}." (mailto:-Link)
+    * Abmeldelink: {{UNSUBSCRIBE_URL}} (Abbestellen / Unsubscribe)
+    * Website-Link: https://levcon.ai
+    * Privacy-Link: https://levcon.ai/datenschutz
+    * Impressum: "Mst. Enric-Bernard Sep-Albi · Pfalzgasse 37/2/4 · 1220 Wien"
+- Platzhalter-Variablen (alle in {{DOUBLE_CURLY_BRACES}}): {{DATE}}, {{SUMMARY}},
+  {{ITEM_HEADLINE}}, {{ITEM_DESCRIPTION}}, {{ITEM_SOURCE}}, {{ITEM_URL}},
+  {{ITEM_THUMBNAIL}}, {{UNSUBSCRIBE_URL}}, {{SUBSCRIBER_EMAIL}} (13 Vorkommen je Mail)
+
+Validierung:
+- HTML-Tag-Nesting: Python HTMLParser-Check → beide Files OK, alle Tags korrekt
+  verschachtelt und geschlossen
+- DSGVO-Check (ripgrep auf tracking|pixel|googleanalytics|gtag|fbclid|gclid|utm_|
+  <script|onclick|onload|onerror|javascript:|fetch|XMLHttpRequest|navigator.|
+  document.cookie): 0 Treffer in unseren HTML-Files (lediglich MSO-PixelsPerInch für
+  Outlook-DPI, kein Tracker)
+- 0 <script>-Tags, 0 on*=Handler, 0 javascript: URLs, 0 externe Bilder außer {{ITEM_THUMBNAIL}}
+- Alle 5 externen Links haben rel="noopener noreferrer" (6. Link ist mailto:)
+- Web-Safe-Fonts: Georgia (Serif) + Arial/Helvetica (Sans) — 0 Cormorant-Referenzen
+- Levcon-Farben inline: #F0EFEC (4×), #1C1C1A (11×), #C8102E (2×), #D8D7D3 (8×),
+  #8A8A85 (5×) — keine CSS-Variablen verwendet
+- alt-Text auf <img> vorhanden, role="presentation" auf 4 Layout-Tabellen
+- Mobile-Responsive: viewport meta + media query (≤600px): Karte wird 100% breit,
+  Padding wird reduziert, Thumbnail wird ausgeblendet, Schriftgrößen werden reduziert
+- Outlook-Kompatibilität: width="600" statt nur CSS-width, MSO-Conditional-Comment,
+  alle Styles inline
+- Accessibility: <h1>/<h2> semantic, role="presentation" auf Layout-Tabellen,
+  aria-hidden auf dekorativen Trennzeichen, alt-Texte auf Bildern
+
+Stage Summary:
+- Zwei bilingual-parallel aufgebaute HTML-Email-Templates erstellt (DE/EN)
+- DSGVO-konform: Keine Tracker, keine externen Bilder außer Thumbnails, kein JS
+- Levcon-treue Ästhetik: Cream-Außen, weiße Karte, minimalistisch, viel Whitespace,
+  Georgia-Italic für Headlines (Cormorant-Fallback), Red-Akzent nur für ".AI" und
+  "Weiterlesen →"
+- Email-Client-kompatibel: Outlook (MSO conditional), Gmail (inline CSS), Apple Mail
+  (responsive media query)
+- Bereit für n8n Workflow 03 (newsletter-send): Platzhalter-Variablen dokumentiert,
+  News-Item-Block als wiederholbare Einheit markiert
+
+---
+Task ID: 6-a
+Agent: n8n-workflow-creator
+Task: Drei n8n-Workflow-JSON-Templates für Levcon.ai AI News System erstellen (ready-to-import)
+
+Work Log:
+- Gelesen: CONTEXT.md, ARCHITECTURE.md, QUALITY-GUIDELINES.md, n8n-workflows/README.md, docs/SOURCES.md, templates/linkedin-post-template.md
+- Erstellt: workflow-01-collect-and-curate.json (21 Nodes)
+  - Schedule Trigger: täglich 06:00 Europe/Vienna (cron "0 6 * * *", workflow.settings.timezone)
+  - 8 parallele RSS-HTTP-Request-Nodes: Heise, Golem, Tagesschau, SZ Wissen, MIT Tech Review, Ars Technica, The Verge AI, Anthropic Blog
+  - Code Node "Normalize RSS Items": parst XML via Regex, filtert nach KI-Keywords (AI, KI, ML, LLM, GPT, Claude, neural, model, machine learning, deep learning, generative, transformer, Anthropic, OpenAI, Gemini, Llama), normalisiert zu {title, link, source, pubDate, summary, origin}
+  - HTTP Request "AI Web Search (z-ai)": POST an $env.ZAI_API_ENDPOINT/ai_news/web_search, Auth via Bearer $env.ZAI_API_KEY (Header), Body mit Query + num_results=15 + freshness=one_day
+  - Code Node "Normalize Search Results": gleiche Struktur wie RSS-Items
+  - Merge Node "Merge RSS + Search": kombiniert beide Streams (combineAll mode)
+  - Code Node "Dedupe by URL": normalisiert URLs (strip utm_*, fbclid, gclid), dedupe nach URL + Titel-Ähnlichkeit (first 80 chars, lowercase, alphanumeric)
+  - HTTP Request "LLM Curation (z-ai)": POST an $env.ZAI_API_ENDPOINT/chat/completions, Credential "z-ai LLM" (httpHeaderAuth), System-Prompt fordert Top 5-10 KI/AI News mit DE+EN Summary und pro Item (headline, descriptionDe, descriptionEn, source, sourceUrl), als JSON-Objekt, model=glm-4-plus, temperature=0.3, response_format json_object
+  - Code Node "Parse LLM JSON": extrahiert JSON aus Antwort (auch aus Code-Fences), validiert Shape (summaryDe, summaryEn, items[]), fügt Position-Index und aktuelles Datum hinzu
+  - HTTP Request "POST to Levcon Ingest": POST an $env.LEVCON_API_BASE/api/ai-news/internal/ingest, Header X-Levcon-Api-Key: $env.LEVCON_INTERNAL_API_KEY, Body {date, summaryDe, summaryEn, items[]}
+  - HTTP Request "Trigger LinkedIn Workflow": POST an $env.N8N_BASE_URL/webhook/linkedin-post-levcon
+  - HTTP Request "Trigger Newsletter Workflow": POST an $env.N8N_BASE_URL/webhook/newsletter-daily
+  - Error Trigger + emailSend "Send Alert Email" an $env.ALERT_EMAIL via SMTP-Levcon-Credential
+
+- Erstellt: workflow-02-linkedin-post.json (6 Nodes)
+  - Webhook Trigger: path "linkedin-post-levcon", Method POST
+  - HTTP Request "Fetch Today's News": GET $env.LEVCON_API_BASE/api/ai-news/today, Header X-Levcon-Api-Key
+  - Code Node "Format LinkedIn Post": baut Post-Text gemäß templates/linkedin-post-template.md, Datum DE "DD. MMMM YYYY" (z.B. "25. Juni 2025"), max 5 Headlines, Tracking-Param-Stripping, LinkedIn-Limit 3000 Zeichen, Hashtags #KI #AI #KünstlicheIntelligenz #Levcon, SITE_URL aus $env.NEXT_PUBLIC_SITE_URL
+  - LinkedIn Node "Create LinkedIn Post": Resource=post, Operation=create, Visibility=PUBLIC, Author via $env.LINKEDIN_AUTHOR_URN (Person oder Organization), Credential "LinkedIn Levcon" (linkedInOAuth2Api)
+  - Error Trigger + Alert Email an $env.ALERT_EMAIL
+
+- Erstellt: workflow-03-newsletter-send.json (13 Nodes)
+  - 3 Trigger (parallel nutzbar): Webhook "newsletter-daily" (von Workflow 01), Cron Weekly Sunday 08:00 ("0 8 * * 0"), Cron Digest 1st of Month 08:00 ("0 8 1 * *")
+  - 3 Code Nodes "Set Frequency: Daily/Weekly/Digest": emit {frequency, date, source}
+  - HTTP Request "Fetch Today News": GET /api/ai-news/today
+  - HTTP Request "Fetch Subscribers": GET /api/ai-news/subscribers?frequency={{frequency}}, Header X-Levcon-Api-Key
+  - Code Node "Render Newsletter HTML": pro Subscriber ein HTML-Email (DE oder EN) — ruft News-Daten via $('Fetch Today News').first().json ab, baut List-Unsubscribe-Header mit subscriber-spezifischer URL, Betreff sprachabhängig ("KI-News · DD. MMMM YYYY" oder "AI News · MMMM D, YYYY"), Levcon-Design (#b91c1c rot, Georgia serif, max-width 640px)
+  - emailSend "Send Newsletter Email": From "Levcon AI News <news@levcon.ai>", To subscriber email, HTML body, Custom Headers List-Unsubscribe + List-Unsubscribe-Post: List-Unsubscribe=One-Click (RFC 8058), SMTP-Credential "SMTP Levcon"
+  - HTTP Request "Update Subscriber Last Sent": PATCH /api/ai-news/subscribers/{id}/last-sent mit {date: lastSentDate}, Header X-Levcon-Api-Key — stellt sicher, dass jeder Subscriber jede News nur einmal bekommt
+  - Error Trigger + Alert Email an $env.ALERT_EMAIL
+
+- Quality-Checks erfüllt:
+  - Alle Nodes haben menschenlesbare Namen (kein "HTTP Request 1") — z.B. "Fetch Heise RSS", "LLM Curation (z-ai)", "Format LinkedIn Post", "Render Newsletter HTML"
+  - $env.X Expressions für alle Secrets (ZAI_API_KEY, ZAI_API_ENDPOINT, LEVCON_API_BASE, LEVCON_INTERNAL_API_KEY, ALERT_EMAIL, N8N_BASE_URL, NEXT_PUBLIC_SITE_URL, LINKEDIN_AUTHOR_URN)
+  - Credentials als Strings mit PLACEHOLDER-IDs referenziert (z-ai LLM, LinkedIn Levcon, SMTP Levcon) — Owner muss IDs nach Import zuweisen
+  - Unique Webhook-Paths: "linkedin-post-levcon" und "newsletter-daily"
+  - Notes/Comments an allen komplexen Nodes (insb. Code-Nodes, LLM-Prompt, Custom-Headers)
+  - Gültiges n8n-Export-Format: name, nodes, connections, active=false, settings (executionOrder=v1, timezone=Europe/Vienna), pinData={}, tags=[]
+  - Positionen flowen logisch left-to-right (x-Werte: -600 → 1820, y-Werte nach Source/Trigger gruppiert)
+
+- Validierung:
+  - Alle 3 Dateien sind valides JSON (JSON.parse erfolgreich)
+  - Struktur-Check: alle Nodes haben id/name/type/typeVersion/position/parameters
+  - Connection-Check: alle referenzierten Nodes existieren
+  - Keine generischen Node-Namen
+
+Files Created:
+- /home/z/my-project/ai-news/n8n-workflows/workflow-01-collect-and-curate.json
+- /home/z/my-project/ai-news/n8n-workflows/workflow-02-linkedin-post.json
+- /home/z/my-project/ai-news/n8n-workflows/workflow-03-newsletter-send.json
+
+Stage Summary:
+- 3 n8n-Workflows ready-to-import (40 Nodes total)
+- Volle End-to-End Pipeline: RSS+WebSearch → LLM-Kuration → Levcon-Ingest → LinkedIn-Post + Newsletter-Versand
+- Drei Frequenz-Varianten im Newsletter-Workflow: Daily (via Webhook), Weekly (Sonntags 08:00), Digest (1. des Monats 08:00)
+- Alle Credentials/Keys als Platzhalter — Owner muss nach Import Credentials zuweisen (z-ai LLM, LinkedIn Levcon, SMTP Levcon) und ENV-Vars in n8n-Docker setzen
+- RFC 8058 One-Click-Unsubscribe in jeder Newsletter-Mail (List-Unsubscribe-Post Header)
+- Fehler-Resilienz: Error Trigger + Alert Email in jedem Workflow
+- Kompatibel mit n8n v1.x (Code-Node v2, HTTP-Request v4.2, emailSend v2.1, scheduleTrigger v1.1, webhook v1.1, merge v2.1, errorTrigger v1, linkedIns v1)
