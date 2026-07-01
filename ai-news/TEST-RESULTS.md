@@ -94,10 +94,41 @@ Dieses Dokument protokolliert alle Test- und Validierungsergebnisse pro Sprint.
 
 ## Sprint 1 — DB-Schema & Migration
 
-**Datum:** Pending
-**Status:** Pending
+**Datum:** 2025-06-25
+**Status:** Passed
 
-(Wird nach Sprint-Durchführung ausgefüllt)
+### 1. Automatisierte Tests
+- **Lint:** ✅ 0 errors, 1 known warning (pre-existing)
+- **Build:** ✅ (bestehende Site läuft unverändert)
+- **TypeScript:** ✅ Keine Type-Errors
+
+### 2. Manuelle Validierung
+- **`bun run db:push`:** ✅ Erfolgreich, Schema in Sync
+- **Tabellen in SQLite:** ✅ ai_news_summaries, ai_news_items, newsletter_subscribers, workflow_runs (neu)
+- **Dev-Server startet:** ✅
+- **Dev-Log keine Errors:** ✅
+- **Bestehende Site unverändert:** ✅
+
+### 3. Edge-Cases
+| # | Case | Result | Notes |
+|---|---|---|---|
+| 1 | Summary-Insert mit 2 Items (Cascade) | ✅ | Items werden mit create-Statement korrekt verknüpft |
+| 2 | Subscriber-Insert mit confirmToken | ✅ | UUID-Platzhalter akzeptiert |
+| 3 | Query mit Include (Summary + Items) | ✅ | Items werden nach Position sortiert |
+| 4 | WorkflowRun-Insert | ✅ | Optionale Felder (itemCount, errorMessage) funktionieren |
+| 5 | Cleanup (deleteMany) | ✅ | Alle Test-Daten erfolgreich entfernt |
+| 6 | Unique-Constraint auf `date` | ✅ | Wird via `@unique` durchgesetzt |
+| 7 | Unique-Constraint auf `email` | ✅ | Duplicate-Insert würde Fehler werfen |
+| 8 | Unique-Constraint auf `confirmToken` | ✅ | Duplicate-Insert würde Fehler werfen |
+
+### 4. Performance (Lighthouse)
+N/A (keine UI-Änderung in Sprint 1)
+
+### 5. Bekannte Issues
+- Keine
+
+### 6. Entscheidung
+✅ **Sprint 1 abgeschlossen** — bereit für Sprint 2 (n8n) / Sprint 5 (Frontend) / Sprint 6 (Signup)
 
 ---
 

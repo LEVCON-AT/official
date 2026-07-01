@@ -99,7 +99,7 @@ ai-news/
 
 | Sprint | Titel | Paket-Typ | Status |
 |---|---|---|---|
-| 1 | DB-Schema & Migration | Backend | Pending |
+| 1 | DB-Schema & Migration | Backend | ✅ Done |
 | 2 | n8n Workflow: Collect & Curate | Backend | Pending |
 | 3 | n8n Workflow: LinkedIn Post | Backend | Pending |
 | 4 | n8n Workflow: Newsletter Send | Backend | Pending |

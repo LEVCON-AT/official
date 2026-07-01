@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,6 +9,10 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+// ═══════════════════════════════════════════════════════════
+//  LEGACY MODELS (bestehend, unverändert)
+// ═══════════════════════════════════════════════════════════
 
 model User {
   id        String   @id @default(cuid())
@@ -29,4 +30,78 @@ model Post {
   authorId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AI NEWS — Tägliche kuratierte KI-News
+//  Siehe ai-news/DATABASE-SCHEMA.md für Doku
+// ═══════════════════════════════════════════════════════════
+
+model AiNewsSummary {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @unique
+  summaryDe   String
+  summaryEn   String?
+  createdAt   DateTime @default(now())
+
+  items       AiNewsItem[]
+
+  @@map("ai_news_summaries")
+}
+
+model AiNewsItem {
+  id              Int      @id @default(autoincrement())
+  summaryId       Int
+  position        Int
+  headline        String
+  descriptionDe   String
+  descriptionEn   String?
+  source          String
+  sourceUrl       String
+  thumbnailUrl    String?
+  languageOrig    String   @default("en")
+  createdAt       DateTime @default(now())
+
+  summary         AiNewsSummary @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+
+  @@index([summaryId])
+  @@index([position])
+  @@map("ai_news_items")
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NEWSLETTER — Subscriber-Verwaltung
+// ═══════════════════════════════════════════════════════════
+
+model NewsletterSubscriber {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  language        String    @default("de")
+  frequency       String    @default("daily")
+  confirmToken    String    @unique
+  confirmedAt     DateTime?
+  unsubscribedAt  DateTime?
+  lastSentDate    DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([email])
+  @@index([language, frequency])
+  @@map("newsletter_subscribers")
+}
+
+// ═══════════════════════════════════════════════════════════
+//  WORKFLOW-RUNS — n8n-Monitoring (optional)
+// ═══════════════════════════════════════════════════════════
+
+model WorkflowRun {
+  id           Int       @id @default(autoincrement())
+  workflowId   String
+  runAt        DateTime
+  status       String
+  itemCount    Int?
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+
+  @@index([workflowId, runAt])
+  @@map("workflow_runs")
 }

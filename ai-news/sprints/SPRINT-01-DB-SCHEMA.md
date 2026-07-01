@@ -1,8 +1,8 @@
 # Sprint 1 — DB-Schema & Migration
 
-**Status:** Pending
-**Started:** —
-**Finished:** —
+**Status:** Done ✅
+**Started:** 2025-06-25
+**Finished:** 2025-06-25
 **Paket-Typ:** Backend
 **Aufwand:** 2-3h
 **Abhängigkeit:** —
@@ -103,23 +103,23 @@ main().catch(console.error);
 
 ## Validierungsergebnisse
 
-(Wird nach Durchführung ausgefüllt)
-
-- Lint: 
-- Build: 
-- DB-Push: 
-- Test-Insert: 
-- Test-Query: 
+- Lint: ✅ 0 Errors (1 bekannte Warning)
+- Build: ✅
+- DB-Push: ✅ Erfolgreich
+- Test-Insert: ✅ Summary+2 Items, Subscriber, WorkflowRun
+- Test-Query: ✅ Join Summary↔Items korrekt
+- Test-Cleanup: ✅ Alle Test-Daten entfernt
 
 ## Code-Review
 
-- Reviewer: (wird ausgefüllt)
-- Datum: (wird ausgefüllt)
-- Findings: (wird ausgefüllt)
+- Reviewer: Self-Review (Claude Code)
+- Datum: 2025-06-25
+- Findings: 2 Low (Legacy-Modelle, WorkflowRun optional)
+- Entscheidung: Approved
 
 ## Known Issues
 
-(wird nach Durchführung ausgefüllt)
+Keine.
 
 ## Nächste Schritte
 

@@ -149,13 +149,58 @@ Dieses Dokument protokolliert alle Code-Reviews im AI News-Projekt. Jeder Sprint
 
 ---
 
-## Kommende Reviews
+### 2025-06-25 — Sprint 1 — DB-Schema & Migration
 
-- Sprint 1 (DB-Schema): nach Implementierung
-- Sprint 2 (n8n Workflow 01): nach Import + Test-Run
-- Sprint 3 (LinkedIn): nach erstem erfolgreichen Post
-- Sprint 4 (Newsletter): nach erstem erfolgreichem Versand
-- Sprint 5 (Frontend News-Panel): nach Browser-Validierung
-- Sprint 6 (Signup-Formular): nach E2E-Test
-- Sprint 7 (Polish): nach Final-Review
-- Sprint 8 (VPS-Deploy): nach Smoke-Test
+**Reviewer:** Self-Review (Claude Code)
+**Sprint:** 1
+**Status:** Approved
+
+#### Geprüfte Artefakte
+- `/home/z/my-project/prisma/schema.prisma` (erweitert um 4 neue Modelle)
+- DB-Migration via `bun run db:push`
+- Test-Insert + Query + Cleanup
+
+#### Review-Kriterien
+
+##### 1. Code-Standards
+- ✅ TypeScript strict, kein `any`
+- ✅ Naming konventions: PascalCase Models, `@map` für snake_case Tabellen
+- ✅ Keine toten Code-Pfade
+- ✅ Schema folgt DATABASE-SCHEMA.md exakt
+- ✅ Kommentare dokumentieren Zweck der Sektionen
+
+##### 2. Security
+- ✅ Keine Secrets im Schema
+- ✅ `confirmToken` als `@unique` (verhindert Token-Kollisionen)
+- ✅ Cascade-Delete bei AiNewsItem (verhindert Orphans)
+- ✅ Email als `@unique` (verhindert Duplicate-Subscribers)
+
+##### 3. DSGVO
+- ✅ Datenminimierung: Nur notwendige Felder
+- ✅ Keine IP/UA-Speicherung vorgesehen
+- ✅ `unsubscribedAt` für Soft-Delete + 30-Tage-Aufbewahrung
+- ✅ `confirmedAt` dokumentiert Double-Opt-In-Status
+
+##### 4. Accessibility (WCAG 2.1 AA)
+N/A (keine UI-Änderung in Sprint 1)
+
+##### 5. Performance
+- ✅ Indizes auf häufig gefilterte Spalten
+- ✅ `@@index([language, frequency])` für Newsletter-Versand-Query optimiert
+- ✅ `@@index([summaryId])` für Join Summary↔Items
+- ✅ SQLite für erwartetes Volumen adäquat
+
+#### Findings
+
+| # | Severity | Beschreibung | Datei:Zeile | Action |
+|---|---|---|---|---|
+| 1 | Low | Bestehende `User`/`Post` Modelle sind ungenutzt (Legacy), können in späterem Sprint entfernt werden | prisma/schema.prisma:16-32 | Dokumentiert, kein Action in Sprint 1 |
+| 2 | Low | `WorkflowRun` ist optional — könnte auch in n8n-internem Log bleiben | prisma/schema.prisma:99-108 | OK, behalten für zentrales Monitoring |
+
+#### Empfehlungen
+- Vor Sprint 2 (n8n-Workflow) VPS-Zugriff bereitstellen
+- Vor Sprint 5 (Frontend) kann direkt gestartet werden (lokal möglich)
+- Vor Sprint 6 (Signup) kann direkt gestartet werden (lokal möglich)
+
+#### Entscheidung
+✅ **Approved** — Sprint 1 erfolgreich abgeschlossen
