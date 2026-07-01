@@ -2,8 +2,8 @@
 
 **Projekt:** Levcon.ai AI News — täglicher kuratierter KI-Presse-Review
 **Owner:** Enric-Bernard Sep-Albi (Levcon.ai)
-**Gestartet:** 2025-06-25
-**Status:** Planning
+**Gestartet:** 2025-06-25 (ursprünglich), rekonstruiert 2025-07-01
+**Status:** In Implementation
 
 ---
 
@@ -32,109 +32,76 @@ Eine tägliche, kuratierte KI-News-Sektion auf levcon.ai, die:
 | 9 | Voller VPS-Setup (DB, n8n, SMTP, LinkedIn-API) dokumentiert | HIGH |
 | 10 | Placeholder/Config für API-Keys — Owner muss einrichten | HIGH |
 
-## 3. Architektur-Überblick
+## 3. Architektur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  n8n (VPS) — täglicher Workflow 06:00                       │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ 1. Cron 06:00                                       │   │
-│  │ 2. RSS + Web-Search sammeln                         │   │
-│  │ 3. LLM kuratieren + DE/EN zusammenfassen            │   │
-│  │ 4. SQLite (Prisma) speichern                        │   │
-│  │ 5. Parallel:                                        │   │
-│  │    a) LinkedIn Post (DE)                             │   │
-│  │    b) Newsletter Versand (je Sprache & Frequenz)    │   │
-│  └─────────────────────────────────────────────────────┘   │
+│  n8n (VPS) — täglicher Workflow 06:00 CET                   │
+│  - RSS + Web-Search sammeln                                 │
+│  - LLM (z-ai) kuratiert + fasst zusammen (DE/EN)            │
+│  - SQLite (Prisma) speichert                                │
+│  - Parallel: LinkedIn Post + Newsletter Versand             │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  Next.js 16 App                                             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ Panel "AI NEWS" — liest aus SQLite via Prisma       │   │
-│  │ → Aktuelle Ausgabe + Archiv (Aufklapp-Accordion)    │   │
-│  │ → Signup-Formular (DE/EN)                           │   │
-│  │ → Double-Opt-In via API                             │   │
-│  └─────────────────────────────────────────────────────┘   │
+│  - Panel "AI NEWS" liest aus SQLite via Prisma              │
+│  - Server-Component, revalidate=3600 (1h cache)             │
+│  - Signup-Formular + Double-Opt-In via API                  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 4. Dokumentenstruktur
-
-```
-ai-news/
-├── CONTEXT.md                  ← Dieses Dokument (Master)
-├── QUALITY-GUIDELINES.md       ← Verbindliche Coding-Standards
-├── ARCHITECTURE.md             ← Technische Architektur & Datenmodell
-├── DATABASE-SCHEMA.md          ← Prisma-Schema-Design
-├── SPRINT-PLAN.md              ← Sprint-Pakete & Abhängigkeiten
-├── VPS-SETUP.md                ← VPS-Setup-Anleitung
-├── CODE-REVIEW.md              ← Code-Review-Log (wird fortlaufend gepflegt)
-├── TEST-RESULTS.md             ← Test- & Validierungsergebnisse
-├── ENV-TEMPLATE.md             ← .env-Platzhalter (ohne echte Werte)
-├── sprints/
-│   ├── SPRINT-01-DB-SCHEMA.md
-│   ├── SPRINT-02-N8N-COLLECT-WORKFLOW.md
-│   ├── SPRINT-03-N8N-LINKEDIN-WORKFLOW.md
-│   ├── SPRINT-04-N8N-NEWSLETTER-WORKFLOW.md
-│   ├── SPRINT-05-FRONTEND-NEWS-PANEL.md
-│   ├── SPRINT-06-FRONTEND-SIGNUP-FORM.md
-│   └── SPRINT-07-ARCHIVE-AND-POLISH.md
-├── n8n-workflows/
-│   ├── README.md
-│   ├── workflow-01-collect-and-curate.json
-│   ├── workflow-02-linkedin-post.json
-│   └── workflow-03-newsletter-send.json
-├── docs/
-│   ├── SOURCES.md              ← RSS-Quellen-Liste
-│   ├── LINKEDIN-API.md         ← LinkedIn-API-Setup
-│   └── SMTP-SETUP.md           ← Mailserver-Konfiguration
-└── templates/
-    ├── newsletter-html-de.html
-    ├── newsletter-html-en.html
-    └── linkedin-post-template.md
-```
-
-## 5. Sprint-Übersicht (Kurzfassung, Details in SPRINT-PLAN.md)
+## 4. Sprint-Übersicht
 
 | Sprint | Titel | Paket-Typ | Status |
 |---|---|---|---|
 | 1 | DB-Schema & Migration | Backend | ✅ Done |
-| 2 | n8n Workflow: Collect & Curate | Backend | Pending |
-| 3 | n8n Workflow: LinkedIn Post | Backend | Pending |
-| 4 | n8n Workflow: Newsletter Send | Backend | Pending |
-| 5 | Frontend: News-Panel (Liste + Aufklappen) | Frontend | Pending |
-| 6 | Frontend: Signup-Formular + Double-Opt-In | Frontend | Pending |
+| 2 | n8n: Collect & Curate Workflow | Backend | Pending (braucht VPS) |
+| 3 | n8n: LinkedIn Post Workflow | Backend | Pending (braucht LinkedIn-API) |
+| 4 | n8n: Newsletter Send Workflow | Backend | Pending (braucht SMTP) |
+| 5 | Frontend: News-Panel (Liste + Aufklappen) | Frontend | ✅ Done |
+| 6 | Frontend: Signup-Formular + Double-Opt-In | Fullstack | Pending |
 | 7 | Archiv + Polish + DSGVO-Texte | Both | Pending |
+| 8 | VPS-Deployment & Smoke-Test | DevOps | Pending |
 
-## 6. Verbindliche Regeln für jeden Sprint
+## 5. Quality-Gates (für jeden Sprint)
 
-Vor jedem Sprint MUSS der Agent folgende Schritte dokumentieren:
+1. **Code-Complete:** Alle Akzeptanzkriterien erfüllt
+2. **Lint & Build:** `bun run lint` 0 Errors, Build erfolgreich
+3. **Manuelle Validierung:** Dev-Server, Browser-Check, Edge-Cases
+4. **Doku-Update:** Sprint-Doku, Code-Review, Test-Results
+5. **Commit & Push:** Conventional Commits Format
 
-1. **Sprint-Ziel** (was wird geliefert?)
-2. **Akzeptanzkriterien** (wann ist der Sprint done?)
-3. **Implementierungsschritte** (chronologisch)
-4. **Validierung** (Tests, Lint, Browser-Check)
-5. **Code-Review** (Self-Review nach QUALITY-GUIDELINES.md)
-6. **Update** dieser Datei: Status-Feld aktualisieren
-7. **Commit** mit eindeutiger Message (`feat(ai-news): <sprint> ...`)
+## 6. Offene Punkte (vor jeweiligen Sprints zu klären)
 
-## 7. Offene Punkte (vor Sprint 1 zu klären)
+- [ ] VPS-Zugangsdaten (für Sprint 2, 8)
+- [ ] LinkedIn-API-Credentials (für Sprint 3)
+- [ ] SMTP-Credentials (für Sprint 4, 6)
+- [ ] LLM-API-Key für curation (z-ai-web-dev-sdk)
 
-- [ ] VPS-Zugangsdaten (Owner: SSH, n8n-URL)
-- [ ] LinkedIn-API-Credentials (Owner)
-- [ ] SMTP-Credentials für Newsletter (Owner)
-- [ ] LLM-API-Key für curation (z-ai-web-dev-sdk vorhanden)
-- [ ] Web-Search-API-Key (z-ai-web-dev-sdk vorhanden)
-- [ ] Domain für Mail-Versand ( SPF/DKIM/DMARC )
+## 7. Code-Standards
 
-Bis diese verfügbar sind, werden in Code & Workflows Platzhalter verwendet.
+- TypeScript strict, kein `any`
+- Prisma mit `@map` für snake_case Spaltennamen
+- Server-Components bevorzugt, `'use client'` nur wenn nötig
+- WCAG 2.1 AA (aria-expanded, focus-visible, Kontrast ≥ 4.5:1)
+- DSGVO: Double-Opt-In, keine IPs, One-Click-Unsubscribe (RFC 8058)
+- Levcon-Design: Creme (#F0EFEC), Schwarz (#1C1C1A), Rot (#C8102E)
+- Conventional Commits: `feat(ai-news): ...`
 
-## 8. Referenz-Dokumente
+## 8. Verwandte Dateien
 
-- [QUALITY-GUIDELINES.md](./QUALITY-GUIDELINES.md) — Coding-Standards
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — Technische Details
-- [DATABASE-SCHEMA.md](./DATABASE-SCHEMA.md) — Prisma-Modell
-- [SPRINT-PLAN.md](./SPRINT-PLAN.md) — Sprint-Aufteilung
-- [VPS-SETUP.md](./VPS-SETUP.md) — VPS-Setup
-- [ENV-TEMPLATE.md](./ENV-TEMPLATE.md) — .env-Platzhalter
+- `prisma/schema.prisma` — 4 neue Models (AiNewsSummary, AiNewsItem, NewsletterSubscriber, WorkflowRun)
+- `src/components/ainews/AiNewsItem.tsx` — Client-Komponente mit Aufklapp-Logik
+- `src/components/ainews/data.ts` — Server-Helper: `getTodaysNews()`
+- `src/components/LevconPage.tsx` — Integration des AI News-Panels
+- `src/app/[locale]/page.tsx` — Lädt News serverseitig, übergibt an LevconPage
+- `src/messages/{de,en}.json` — i18n-Strings unter `ainews.*`
+- `src/app/globals.css` — Styles unter `/* ── AI NEWS ── */`
+
+## 9. Nächste Schritte
+
+- Sprint 6 (Signup-Formular + Double-Opt-In) — kann sofort lokal starten
+- Sprint 2-4 (n8n-Workflows) — brauchen VPS + Credentials
+- Sprint 7 (Archiv + Polish) — nach Sprint 6
+- Sprint 8 (VPS-Deployment) — nach allen Sprints

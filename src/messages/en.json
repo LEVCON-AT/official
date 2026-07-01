@@ -14,8 +14,20 @@
     "nav_schulungen": "AI Training",
     "nav_framework": "Framework",
     "nav_privacy": "Data Strategy",
+    "nav_ainews": "AI News",
     "nav_faq": "FAQ",
     "nav_kontakt": "Contact"
+  },
+  "ainews": {
+    "title": "AI News",
+    "lead": "What moves the AI world today — curated, not copied.",
+    "no_news_today": "No news published yet today. Please check back later.",
+    "expand_aria": "Show summary",
+    "collapse_aria": "Hide summary",
+    "external_aria": "Open article",
+    "read_more": "Read more →",
+    "today_label": "Today",
+    "source_label": "Source"
   },
   "about": {
     "statement": "I am Enric-Bernard Sep-Albi\u00A0— AI Trainer and Organisational Developer based in Vienna. I help companies deploy artificial intelligence effectively, securely, and without the hype.",

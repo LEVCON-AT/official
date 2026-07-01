@@ -14,8 +14,20 @@
     "nav_schulungen": "KI Schulungen",
     "nav_framework": "Framework",
     "nav_privacy": "Datenstrategie",
+    "nav_ainews": "AI News",
     "nav_faq": "FAQ",
     "nav_kontakt": "Kontakt"
+  },
+  "ainews": {
+    "title": "AI News",
+    "lead": "Was die KI-Welt heute bewegt — kuratiert, nicht kopiert.",
+    "no_news_today": "Heute noch keine News veröffentlicht. Schauen Sie später wieder vorbei.",
+    "expand_aria": "Kurzzusammenfassung anzeigen",
+    "collapse_aria": "Kurzzusammenfassung ausblenden",
+    "external_aria": "Artikel öffnen",
+    "read_more": "Weiterlesen →",
+    "today_label": "Heute",
+    "source_label": "Quelle"
   },
   "about": {
     "statement": "Ich bin Enric-Bernard Sep-Albi\u00A0— KI-Trainer und Organisationsentwickler aus Wien. Ich helfe Unternehmen, künstliche Intelligenz wirksam, sicher und ohne Hype einzusetzen.",

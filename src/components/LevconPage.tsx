@@ -3,12 +3,19 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations, useMessages } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
+import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
+import type { AiNewsData } from '@/components/ainews/data';
 
-type PanelId = 'schulungen' | 'framework' | 'privacy' | 'faq' | 'kontakt' | 'impressum' | 'datenschutz';
+type PanelId = 'schulungen' | 'framework' | 'privacy' | 'ainews' | 'faq' | 'kontakt' | 'impressum' | 'datenschutz';
 
 const FADE_MS = 320;
 
-export default function LevconPage({ locale }: { locale: string }) {
+type LevconPageProps = {
+  locale: string;
+  todaysNews: AiNewsData | null;
+};
+
+export default function LevconPage({ locale, todaysNews }: LevconPageProps) {
   const [activePanel, setActivePanel] = useState<PanelId | null>(null);
   const [introHiding, setIntroHiding] = useState(false);
   const [introGone, setIntroGone] = useState(false);
@@ -254,6 +261,14 @@ export default function LevconPage({ locale }: { locale: string }) {
           </button>
           <span className="nav-sep" aria-hidden="true">/</span>
           <button
+            className={`nav-btn${activePanel === 'ainews' ? ' active' : ''}`}
+            onClick={() => handleNavClick('ainews')}
+            aria-expanded={activePanel === 'ainews'}
+          >
+            {t('header.nav_ainews')}
+          </button>
+          <span className="nav-sep" aria-hidden="true">/</span>
+          <button
             className={`nav-btn${activePanel === 'faq' ? ' active' : ''}`}
             onClick={() => handleNavClick('faq')}
             aria-expanded={activePanel === 'faq'}
@@ -367,6 +382,46 @@ export default function LevconPage({ locale }: { locale: string }) {
                 </div>
               ))}
             </div>
+          </div></div>
+        </section>
+
+        {/* AI News */}
+        <section
+          className={`panel${activePanel === 'ainews' ? ' open' : ''}`}
+          id="ainews"
+          aria-hidden={activePanel !== 'ainews'}
+        >
+          <div className="panel-inner"><div className="panel-content">
+            <h2 className="panel-title">{t('ainews.title')}</h2>
+            <p className="panel-lead">{t('ainews.lead')}</p>
+
+            {todaysNews ? (
+              <>
+                <div className="ainews-summary">
+                  <div className="ainews-summary-date">
+                    {t('ainews.today_label')} ·{' '}
+                    {new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'de-AT', {
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric',
+                    }).format(todaysNews.date)}
+                  </div>
+                  <p className="ainews-summary-text">
+                    {locale === 'en' && todaysNews.summaryEn
+                      ? todaysNews.summaryEn
+                      : todaysNews.summaryDe}
+                  </p>
+                </div>
+
+                <div className="ainews-list">
+                  {todaysNews.items.map((item: AiNewsItemType) => (
+                    <AiNewsItem key={item.id} item={item} locale={locale} />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="ainews-empty">{t('ainews.no_news_today')}</p>
+            )}
           </div></div>
         </section>
 
