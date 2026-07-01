@@ -27,7 +27,44 @@
     "external_aria": "Artikel öffnen",
     "read_more": "Weiterlesen →",
     "today_label": "Heute",
-    "source_label": "Quelle"
+    "source_label": "Quelle",
+    "signup": {
+      "title": "Newsletter",
+      "lead": "Täglich kuratiert. Kein Spam. Jederzeit abmeldbar.",
+      "email_label": "E-Mail",
+      "frequency_label": "Frequenz",
+      "daily": "Täglich",
+      "daily_desc": "Jeden Morgen die aktuelle Ausgabe",
+      "weekly": "Wöchentlich",
+      "weekly_desc": "Sonntags die Woche im Rückblick",
+      "digest": "Monatlich",
+      "digest_desc": "Erste des Monats als kompakter Digest",
+      "consent": "Ich stimme der Verarbeitung meiner Daten gemäß Datenschutzerklärung zu.",
+      "consent_link": "Datenschutzerklärung",
+      "submit": "Abonnieren",
+      "submitting": "Wird gesendet…",
+      "success_title": "Bestätigung erforderlich",
+      "success_body": "Bitte prüfen Sie Ihr Postfach — wir haben Ihnen eine Bestätigungsmail gesendet. Erst nach Klick auf den Link sind Sie angemeldet.",
+      "error_required_name": "Name ist erforderlich.",
+      "error_required_email": "E-Mail ist erforderlich.",
+      "error_invalid_email": "Bitte eine gültige E-Mail-Adresse eingeben.",
+      "error_required_consent": "Bitte stimmen Sie der Datenschutzerklärung zu.",
+      "error_required_frequency": "Bitte wählen Sie eine Frequenz.",
+      "error_exists": "Diese E-Mail ist bereits angemeldet.",
+      "error_spam": "Verdächtige Aktivität erkannt.",
+      "error_generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut."
+    },
+    "confirm": {
+      "success_title": "Anmeldung bestätigt",
+      "success_body": "Vielen Dank! Sie erhalten ab sofort die Levcon AI News.",
+      "error_invalid": "Ungültiger oder abgelaufener Bestätigungslink.",
+      "error_already": "Ihre Anmeldung ist bereits bestätigt."
+    },
+    "unsubscribe": {
+      "success_title": "Abmeldung erfolgreich",
+      "success_body": "Sie wurden abgemeldet. Es tut uns leid, Sie gehen zu sehen.",
+      "error_invalid": "Ungültiger Abmeldelink."
+    }
   },
   "about": {
     "statement": "Ich bin Enric-Bernard Sep-Albi\u00A0— KI-Trainer und Organisationsentwickler aus Wien. Ich helfe Unternehmen, künstliche Intelligenz wirksam, sicher und ohne Hype einzusetzen.",

@@ -27,7 +27,44 @@
     "external_aria": "Open article",
     "read_more": "Read more →",
     "today_label": "Today",
-    "source_label": "Source"
+    "source_label": "Source",
+    "signup": {
+      "title": "Newsletter",
+      "lead": "Daily curated. No spam. Unsubscribe anytime.",
+      "email_label": "Email",
+      "frequency_label": "Frequency",
+      "daily": "Daily",
+      "daily_desc": "Every morning, the latest edition",
+      "weekly": "Weekly",
+      "weekly_desc": "Sundays, the week in review",
+      "digest": "Monthly",
+      "digest_desc": "First of the month, a compact digest",
+      "consent": "I consent to the processing of my data in accordance with the Privacy Policy.",
+      "consent_link": "Privacy Policy",
+      "submit": "Subscribe",
+      "submitting": "Sending…",
+      "success_title": "Confirmation required",
+      "success_body": "Please check your inbox — we've sent you a confirmation email. You'll only be subscribed after clicking the link.",
+      "error_required_name": "Name is required.",
+      "error_required_email": "Email is required.",
+      "error_invalid_email": "Please enter a valid email address.",
+      "error_required_consent": "Please accept the Privacy Policy.",
+      "error_required_frequency": "Please choose a frequency.",
+      "error_exists": "This email is already subscribed.",
+      "error_spam": "Suspicious activity detected.",
+      "error_generic": "Something went wrong. Please try again later."
+    },
+    "confirm": {
+      "success_title": "Subscription confirmed",
+      "success_body": "Thank you! You'll now receive Levcon AI News.",
+      "error_invalid": "Invalid or expired confirmation link.",
+      "error_already": "Your subscription is already confirmed."
+    },
+    "unsubscribe": {
+      "success_title": "Unsubscribed",
+      "success_body": "You've been unsubscribed. Sorry to see you go.",
+      "error_invalid": "Invalid unsubscribe link."
+    }
   },
   "about": {
     "statement": "I am Enric-Bernard Sep-Albi\u00A0— AI Trainer and Organisational Developer based in Vienna. I help companies deploy artificial intelligence effectively, securely, and without the hype.",
