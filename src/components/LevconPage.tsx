@@ -5,6 +5,7 @@ import { useTranslations, useMessages } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
 import AiNewsSignup from '@/components/ainews/AiNewsSignup';
+import AiNewsArchive from '@/components/ainews/AiNewsArchive';
 import type { AiNewsData } from '@/components/ainews/data';
 
 type PanelId = 'schulungen' | 'framework' | 'privacy' | 'ainews' | 'faq' | 'kontakt' | 'impressum' | 'datenschutz';
@@ -14,9 +15,10 @@ const FADE_MS = 320;
 type LevconPageProps = {
   locale: string;
   todaysNews: AiNewsData | null;
+  archivedNews: AiNewsData[];
 };
 
-export default function LevconPage({ locale, todaysNews }: LevconPageProps) {
+export default function LevconPage({ locale, todaysNews, archivedNews }: LevconPageProps) {
   const [activePanel, setActivePanel] = useState<PanelId | null>(null);
   const [introHiding, setIntroHiding] = useState(false);
   const [introGone, setIntroGone] = useState(false);
@@ -423,6 +425,8 @@ export default function LevconPage({ locale, todaysNews }: LevconPageProps) {
             ) : (
               <p className="ainews-empty">{t('ainews.no_news_today')}</p>
             )}
+
+            <AiNewsArchive archive={archivedNews} locale={locale} />
 
             <AiNewsSignup locale={locale} onOpenPrivacy={() => openPanel('datenschutz')} />
           </div></div>

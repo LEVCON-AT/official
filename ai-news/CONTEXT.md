@@ -60,8 +60,8 @@ Eine tägliche, kuratierte KI-News-Sektion auf levcon.ai, die:
 | 3 | n8n: LinkedIn Post Workflow | Backend | Pending (braucht LinkedIn-API) |
 | 4 | n8n: Newsletter Send Workflow | Backend | Pending (braucht SMTP) |
 | 5 | Frontend: News-Panel (Liste + Aufklappen) | Frontend | ✅ Done |
-| 6 | Frontend: Signup-Formular + Double-Opt-In | Fullstack | Pending |
-| 7 | Archiv + Polish + DSGVO-Texte | Both | Pending |
+| 6 | Frontend: Signup-Formular + Double-Opt-In | Fullstack | ✅ Done |
+| 7 | Archiv + Polish + DSGVO-Texte | Both | ✅ Done |
 | 8 | VPS-Deployment & Smoke-Test | DevOps | Pending |
 
 ## 5. Quality-Gates (für jeden Sprint)

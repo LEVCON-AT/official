@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import LevconPage from '@/components/LevconPage';
-import { getTodaysNews } from '@/components/ainews/data';
+import { getTodaysNews, getArchivedNews } from '@/components/ainews/data';
 import type { Metadata, Viewport } from 'next';
 
 type Props = {
@@ -78,8 +78,11 @@ export default async function LocalePage({ params }: Props) {
 
   const baseUrl = 'https://levcon.ai';
 
-  // Load today's AI news (server-side, cached 1 hour via revalidate)
-  const todaysNews = await getTodaysNews();
+  // Load today's AI news + archive (server-side, cached 1 hour via revalidate)
+  const [todaysNews, archivedNews] = await Promise.all([
+    getTodaysNews(),
+    getArchivedNews(30),
+  ]);
 
   // Schema.org structured data
   const schemaOrg = {
@@ -143,7 +146,7 @@ export default async function LocalePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
       />
-      <LevconPage locale={locale} todaysNews={todaysNews} />
+      <LevconPage locale={locale} todaysNews={todaysNews} archivedNews={archivedNews} />
       <noscript>
         <div className="noscript-msg">
           {locale === 'de'

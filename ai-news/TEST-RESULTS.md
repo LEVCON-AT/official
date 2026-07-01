@@ -115,8 +115,42 @@
 
 ## Sprint 7 — Archiv + Polish + DSGVO-Texte
 
-**Datum:** Pending
-**Status:** Pending
+**Datum:** 2025-07-01
+**Status:** Passed (Code-Complete, E2E pending VPS)
+
+### 1. Automatisierte Tests
+- **Lint:** ✅ 0 errors, 1 known warning (pre-existing, unrelated)
+- **TypeScript:** ✅ Keine Errors in src/ oder ai-news/
+- **JSON-Validierung:** ✅ de.json + en.json valid
+
+### 2. Manuelle Validierung
+- **Dev-Server startet:** ✅
+- **Code-Review:** ✅ Approved (Self-Review)
+- **DSGVO-Texte erweitert:** ✅ DE + EN
+
+### 3. Edge-Cases (Code-Review geprüft)
+| # | Case | Result | Notes |
+|---|---|---|---|
+| 1 | Archiv leer (keine vergangenen Ausgaben) | ✅ | AiNewsArchive rendert nichts (early return) |
+| 2 | Archiv mit 1 Ausgabe | ✅ | Korrekt angezeigt |
+| 3 | Archiv mit >30 Ausgaben | ✅ | Limit 30 greift, Cap 90 als Sicherheit |
+| 4 | Archiv-Aufklapp-Logik | ✅ | useState toggle, aria-expanded |
+| 5 | Archiv nutzt gleiche AiNewsItem-Komponente | ✅ | Konsistenz, eigener State pro Item |
+| 6 | DSGVO: Newsletter-Abschnitt DE | ✅ | Double-Opt-In, Token-Ablauf, Retention |
+| 7 | DSGVO: Newsletter-Abschnitt EN | ✅ | Vollständig übersetzt |
+| 8 | DSGVO: Externe Links erwähnt | ✅ | rel-Attribut dokumentiert |
+| 9 | DSGVO: Server-Logfiles | ✅ | Standard-Info hinzugefügt |
+| 10 | DSGVO: Ihre Rechte + Aufsichtsbehörde | ✅ | AT Datenschutzbehörde referenziert |
+| 11 | Cleanup-Retention-Doku | ✅ | docs/CLEANUP-RETENTION.md erstellt |
+| 12 | Parallel-Loading (Promise.all) | ✅ | Performance-Optimierung |
+
+### 4. Limitationen (Sandbox)
+- Dev-Server in Sandbox instabil → Archiv-Browser-Test auf VPS verschoben
+- Cleanup-API-Endpoint muss in Sprint 8 implementiert werden
+- Test-Daten (1 gestriger Eintrag) müssen vor Production gelöscht werden
+
+### 5. Entscheidung
+✅ **Sprint 7 code-complete** — E2E-Validierung in Sprint 8 (VPS)
 
 ---
 

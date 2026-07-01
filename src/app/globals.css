@@ -755,6 +755,89 @@
   font-size: 1.05rem;
 }
 
+/* ── AI NEWS ARCHIVE ─────────────────────────── */
+.ainews-archive {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--lc-rule);
+}
+
+.ainews-archive-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--lc-ink);
+  font-family: var(--lc-ff-b);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  -webkit-appearance: none;
+  min-height: 44px;
+}
+
+.ainews-archive-toggle:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 4px;
+}
+
+.ainews-archive-label {
+  flex: 1;
+  text-align: left;
+}
+
+.ainews-archive-count {
+  font-size: 0.5rem;
+  color: var(--lc-muted);
+  background: var(--lc-panel-bg);
+  padding: 0.15rem 0.5rem;
+  border-radius: 1px;
+  letter-spacing: 0.1em;
+}
+
+.ainews-archive-list {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.ainews-archive-edition {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--lc-rule);
+}
+
+.ainews-archive-edition:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.ainews-archive-date {
+  font-family: var(--lc-ff-d);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--lc-ink);
+  margin-bottom: 0.6rem;
+  line-height: 1.2;
+}
+
+.ainews-archive-summary {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--lc-ink);
+  opacity: var(--lc-muted-text);
+  font-weight: 300;
+  margin-bottom: 1rem;
+}
+
+.ainews-archive-edition .ainews-list {
+  margin-top: 1rem;
+}
+
 /* ── AI NEWS SIGNUP ──────────────────────────── */
 .ainews-signup {
   margin-top: 3rem;
