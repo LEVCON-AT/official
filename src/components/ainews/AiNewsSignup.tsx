@@ -21,6 +21,9 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const formLoadTime = useRef<number>(Date.now());
 
+  // Reveal trigger: form expands when first character is typed
+  const hasEmailInput = email.length > 0;
+
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -134,6 +137,11 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
             onChange={(e) => {
               setEmail(e.target.value);
               setErrors((prev) => ({ ...prev, email: undefined }));
+              // When email is cleared, reset errors and status (form collapses)
+              if (!e.target.value) {
+                setErrors({});
+                setStatus('idle');
+              }
             }}
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'ainews-email-error' : undefined}
@@ -145,95 +153,103 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
           )}
         </div>
 
-        <fieldset className="ainews-form-group">
-          <legend className="form-label">{t('frequency_label')} *</legend>
-          <div className="ainews-frequency-options">
-            {(['daily', 'weekly', 'digest'] as const).map((freq) => (
-              <label
-                key={freq}
-                className={`ainews-frequency-option${frequency === freq ? ' selected' : ''}`}
-              >
-                <input
-                  type="radio"
-                  name="frequency"
-                  value={freq}
-                  checked={frequency === freq}
-                  onChange={() => setFrequency(freq)}
-                  className="ainews-frequency-input"
-                />
-                <span className="ainews-frequency-label">{t(freq)}</span>
-                <span className="ainews-frequency-desc">{t(`${freq}_desc`)}</span>
-              </label>
-            ))}
-          </div>
-          {errors.frequency && (
-            <div className="form-field-error" role="alert">
-              {errors.frequency}
-            </div>
-          )}
-        </fieldset>
-
-        <div className="form-checkbox-row">
-          <input
-            className="form-checkbox"
-            type="checkbox"
-            id="ainews-consent"
-            name="consent"
-            required
-            checked={consent}
-            onChange={(e) => {
-              setConsent(e.target.checked);
-              setErrors((prev) => ({ ...prev, consent: undefined }));
-            }}
-            aria-invalid={!!errors.consent}
-          />
-          <label className="form-checkbox-label" htmlFor="ainews-consent">
-            {locale === 'de' ? (
-              <>
-                {t('consent').split('Datenschutzerklärung')[0]}
-                <button
-                  type="button"
-                  className="inline-link"
-                  onClick={onOpenPrivacy}
-                >
-                  {t('consent_link')}
-                </button>
-                {t('consent').split('Datenschutzerklärung')[1]}
-              </>
-            ) : (
-              <>
-                {t('consent').split('Privacy Policy')[0]}
-                <button
-                  type="button"
-                  className="inline-link"
-                  onClick={onOpenPrivacy}
-                >
-                  {t('consent_link')}
-                </button>
-                {t('consent').split('Privacy Policy')[1]}
-              </>
-            )}
-          </label>
-        </div>
-        {errors.consent && (
-          <div className="form-field-error" role="alert">
-            {errors.consent}
-          </div>
-        )}
-
-        <button
-          className="form-submit ainews-signup-submit"
-          type="submit"
-          disabled={submitting}
+        <div
+          className={`ainews-signup-reveal${hasEmailInput ? ' is-open' : ''}`}
+          aria-hidden={!hasEmailInput}
+          inert={!hasEmailInput}
         >
-          {submitting ? t('submitting') : t('submit')}
-        </button>
+          <div className="ainews-signup-reveal-inner">
+            <fieldset className="ainews-form-group">
+              <legend className="form-label">{t('frequency_label')} *</legend>
+              <div className="ainews-frequency-options">
+                {(['daily', 'weekly', 'digest'] as const).map((freq) => (
+                  <label
+                    key={freq}
+                    className={`ainews-frequency-option${frequency === freq ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="frequency"
+                      value={freq}
+                      checked={frequency === freq}
+                      onChange={() => setFrequency(freq)}
+                      className="ainews-frequency-input"
+                    />
+                    <span className="ainews-frequency-label">{t(freq)}</span>
+                    <span className="ainews-frequency-desc">{t(`${freq}_desc`)}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.frequency && (
+                <div className="form-field-error" role="alert">
+                  {errors.frequency}
+                </div>
+              )}
+            </fieldset>
 
-        {status === 'error' && (
-          <div className="form-status error" role="alert">
-            {t('error_generic')}
+            <div className="form-checkbox-row">
+              <input
+                className="form-checkbox"
+                type="checkbox"
+                id="ainews-consent"
+                name="consent"
+                required
+                checked={consent}
+                onChange={(e) => {
+                  setConsent(e.target.checked);
+                  setErrors((prev) => ({ ...prev, consent: undefined }));
+                }}
+                aria-invalid={!!errors.consent}
+              />
+              <label className="form-checkbox-label" htmlFor="ainews-consent">
+                {locale === 'de' ? (
+                  <>
+                    {t('consent').split('Datenschutzerklärung')[0]}
+                    <button
+                      type="button"
+                      className="inline-link"
+                      onClick={onOpenPrivacy}
+                    >
+                      {t('consent_link')}
+                    </button>
+                    {t('consent').split('Datenschutzerklärung')[1]}
+                  </>
+                ) : (
+                  <>
+                    {t('consent').split('Privacy Policy')[0]}
+                    <button
+                      type="button"
+                      className="inline-link"
+                      onClick={onOpenPrivacy}
+                    >
+                      {t('consent_link')}
+                    </button>
+                    {t('consent').split('Privacy Policy')[1]}
+                  </>
+                )}
+              </label>
+            </div>
+            {errors.consent && (
+              <div className="form-field-error" role="alert">
+                {errors.consent}
+              </div>
+            )}
+
+            <button
+              className="form-submit ainews-signup-submit"
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting ? t('submitting') : t('submit')}
+            </button>
+
+            {status === 'error' && (
+              <div className="form-status error" role="alert">
+                {t('error_generic')}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </form>
     </div>
   );
