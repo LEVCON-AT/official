@@ -58,3 +58,5 @@ db/*.db-journal
 
 # Screenshots (temporary)
 *.png
+# Allow favicons and OG images in public/
+!public/*.png

@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
+import { Cormorant_Garamond, DM_Sans, Raleway } from 'next/font/google';
 import './globals.css';
 
 const cormorant = Cormorant_Garamond({
@@ -18,6 +18,13 @@ const dmSans = DM_Sans({
   display: 'swap',
 });
 
+const raleway = Raleway({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-raleway',
+  display: 'swap',
+});
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +35,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${cormorant.variable} ${dmSans.variable}`}>
+      <body className={`${cormorant.variable} ${dmSans.variable} ${raleway.variable}`}>
         <NextIntlClientProvider
           messages={messages}
         >

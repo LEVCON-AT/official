@@ -156,6 +156,7 @@
 .levcon-body {
   --lc-ff-d: var(--font-cormorant), Georgia, serif;
   --lc-ff-b: var(--font-dm-sans), system-ui, sans-serif;
+  --lc-ff-logo: var(--font-raleway), var(--font-dm-sans), system-ui, sans-serif;
 
   background: var(--lc-bg);
   color: var(--lc-ink);
@@ -204,9 +205,9 @@
 }
 
 .logo-wordmark {
-  font-family: var(--lc-ff-b);
+  font-family: var(--lc-ff-logo);
   font-size: 0.7rem;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--lc-ink);
