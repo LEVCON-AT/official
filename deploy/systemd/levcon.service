@@ -42,12 +42,11 @@ SyslogIdentifier=levcon
 MemoryMax=512M
 CPUQuota=80%
 
-# Security Hardening
+# Security Hardening (vereinfacht — ohne ProtectSystem, das namespace-Issues verursacht)
 NoNewPrivileges=true
 PrivateTmp=true
-ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/www/levcon/db /var/www/levcon/.next
+ReadWritePaths=/var/www/levcon
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true

@@ -271,6 +271,15 @@ echo -e "\n${YELLOW}[19] Start services...${NC}"
 
 # systemd service file wurde u.U. aktualisiert → daemon-reload nötig
 systemctl daemon-reload
+
+# Service stoppen + Zombie-Prozesse auf Port 3000 killen
+systemctl stop levcon 2>/dev/null || true
+sleep 1
+if command -v fuser &> /dev/null; then
+    fuser -k 3000/tcp 2>/dev/null || true
+fi
+sleep 1
+
 systemctl restart nginx
 systemctl restart levcon
 sleep 3
