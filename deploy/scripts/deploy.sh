@@ -183,22 +183,21 @@ echo -e "${YELLOW}Hinweis: Stelle sicher, dass levcon.ai und engine.levcon.at au
 echo -e "${YELLOW}Drücke ENTER zum Fortfahren...${NC}"
 read
 
-# levcon.ai
+# nginx stoppen (falls noch Reste laufen) — certbot --standalone braucht Port 80
+systemctl stop nginx 2>/dev/null || true
+
+# levcon.ai (ohne www — falls www gewünscht, später mit certbot expand hinzufügen)
 if [ ! -f "/etc/letsencrypt/live/levcon.ai/fullchain.pem" ]; then
-    echo "Erstelle Zertifikat für levcon.ai (via standalone, nginx kurz gestoppt)..."
+    echo "Erstelle Zertifikat für levcon.ai (via standalone)..."
     certbot certonly --standalone \
-        --pre-hook "systemctl stop nginx" \
-        --post-hook "systemctl start nginx" \
-        -d levcon.ai -d www.levcon.ai \
+        -d levcon.ai \
         --email admin@levcon.at --agree-tos --no-eff-email --non-interactive
 fi
 
 # engine.levcon.at
 if [ ! -f "/etc/letsencrypt/live/engine.levcon.at/fullchain.pem" ]; then
-    echo "Erstelle Zertifikat für engine.levcon.at (via standalone, nginx kurz gestoppt)..."
+    echo "Erstelle Zertifikat für engine.levcon.at (via standalone)..."
     certbot certonly --standalone \
-        --pre-hook "systemctl stop nginx" \
-        --post-hook "systemctl start nginx" \
         -d engine.levcon.at \
         --email admin@levcon.at --agree-tos --no-eff-email --non-interactive
 fi
