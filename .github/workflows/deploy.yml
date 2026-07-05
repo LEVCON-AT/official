@@ -46,25 +46,66 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
+          set -e
+          PORT="${VPS_PORT:-22}"
+          echo "Using VPS_HOST=$VPS_HOST PORT=$PORT"
+          
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 700 ~/.ssh
+          
+          # Write private key
+          echo "$VPS_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          
+          # Verify key was written
+          if [ ! -s ~/.ssh/deploy_key ]; then
+            echo "ERROR: VPS_SSH_KEY secret is empty or not set"
+            exit 1
+          fi
+          
+          # Key scan (more robust with timeout)
+          echo "Scanning VPS host key on port $PORT..."
+          ssh-keyscan -p "$PORT" -T 30 "$VPS_HOST" >> ~/.ssh/known_hosts 2>&1 || {
+            echo "ERROR: ssh-keyscan failed for $VPS_HOST:$PORT"
+            exit 1
+          }
+          
+          # Test SSH connection
+          echo "Testing SSH connection..."
+          ssh -i ~/.ssh/deploy_key -p "$PORT" -o ConnectTimeout=10 -o StrictHostKeyChecking=yes \
+            "${{ secrets.VPS_USER }}@$VPS_HOST" "echo SSH_OK" || {
+            echo "ERROR: SSH connection failed"
+            exit 1
+          }
+          echo "✓ SSH setup complete"
 
       - name: Copy update script to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
-          scp -i ~/.ssh/deploy_key -P ${{ secrets.VPS_PORT || 22 }} \
+          PORT="${VPS_PORT:-22}"
+          scp -i ~/.ssh/deploy_key -P "$PORT" -o StrictHostKeyChecking=yes \
             deploy/scripts/vps-update.sh \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/vps-update.sh
+            "$VPS_USER@$VPS_HOST:/tmp/vps-update.sh"
 
       - name: Execute update script on VPS
         uses: appleboy/ssh-action@v1
+        env:
+          PORT: ${{ secrets.VPS_PORT }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
+          envs: PORT
           script: |
             chmod +x /tmp/vps-update.sh
             bash /tmp/vps-update.sh
