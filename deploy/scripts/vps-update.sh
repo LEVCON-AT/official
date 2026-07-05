@@ -45,6 +45,24 @@ cd "$PROJECT_DIR" || {
 git config --global --add safe.directory "$PROJECT_DIR"
 git config --add safe.directory "$PROJECT_DIR"
 
+# ── 0.5. ENV-FILE KORRIGIEREN (falls Dev-Pfade drin) ───────────
+# WICHTIG: .env hat evtl. noch DATABASE_URL=file:/home/z/my-project/...
+# (Dev-Umgebung). Das muss auf VPS-Pfad korrigiert werden.
+if [ -f ".env" ]; then
+    VPS_DB_URL="file:/var/www/levcon/db/levcon.db"
+    if grep -q "^DATABASE_URL=" .env; then
+        CURRENT_DB_URL=$(grep "^DATABASE_URL=" .env | head -1 | cut -d'=' -f2- | tr -d '"')
+        if [ "$CURRENT_DB_URL" != "$VPS_DB_URL" ]; then
+            echo "  Korrigiere DATABASE_URL: $CURRENT_DB_URL → $VPS_DB_URL"
+            sed -i "s|^DATABASE_URL=.*|DATABASE_URL=\"$VPS_DB_URL\"|" .env
+        fi
+    fi
+    # Auch PORT sicherstellen
+    if grep -q "^PORT=" .env; then
+        sed -i "s|^PORT=.*|PORT=\"3002\"|" .env
+    fi
+fi
+
 # ── 1. SAVE CURRENT STATE (for rollback) ───────────────────────
 echo -e "\n${YELLOW}[1] Save current state for rollback...${NC}"
 
