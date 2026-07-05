@@ -90,6 +90,13 @@ if [ -f "db/levcon.db" ]; then
     chown www-data:www-data db/levcon.db
     chmod 664 db/levcon.db
     echo "  ✓ DB ownership korrigiert (www-data)"
+    echo "  ✓ DB Pfad: $(pwd)/db/levcon.db"
+    echo "  ✓ DB Owner: $(stat -c '%U:%G' db/levcon.db)"
+    echo "  ✓ DB Permissions: $(stat -c '%a' db/levcon.db)"
+else
+    echo -e "${RED}  ✗ DB-Datei nicht gefunden nach db:push!${NC}"
+    echo "  Erwartet: $(pwd)/db/levcon.db"
+    echo "  .env DATABASE_URL: $(grep '^DATABASE_URL=' .env)"
 fi
 
 echo "  ✓ DB Schema synchronisiert"

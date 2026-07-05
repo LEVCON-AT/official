@@ -119,11 +119,21 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             sleep 5
+            echo "=== Service Status ==="
+            systemctl is-active levcon
+            echo "=== DB File ==="
+            ls -la /var/www/levcon/db/ 2>&1
+            echo "=== .env DATABASE_URL ==="
+            grep DATABASE_URL /var/www/levcon/.env
+            echo "=== Test local ==="
+            curl -sI http://127.0.0.1:3002/ | head -3
+            echo "=== Test external ==="
+            curl -sI https://levcon.ai/ | head -3
             if curl -sf https://levcon.ai/ -o /dev/null; then
               echo "✅ Health check passed — site is up"
             else
-              echo "❌ Health check failed — investigating"
-              systemctl status levcon --no-pager | tail -20
+              echo "❌ Health check failed"
+              journalctl -u levcon --no-pager -n 10
               exit 1
             fi
 
