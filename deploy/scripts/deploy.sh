@@ -136,7 +136,12 @@ echo "  Commit: $(git log --oneline -1)"
 # ── 8. ENVIRONMENT FILE ────────────────────────────────────────
 echo -e "\n${YELLOW}[8] Environment file...${NC}"
 
+# WICHTIG: DATABASE_URL muss auf VPS-Pfad zeigen, nicht auf Dev-Pfad
+# Immer aktualisieren (auch wenn .env schon existiert), um falsche Pfade zu korrigieren
+VPS_DB_URL="file:/var/www/levcon/db/levcon.db"
+
 if [ ! -f ".env" ]; then
+    # Neue .env aus Template erstellen
     cp deploy/.env.production .env
     # Generiere LEVCON_INTERNAL_API_KEY
     INTERNAL_KEY=$(openssl rand -hex 32)
@@ -144,7 +149,32 @@ if [ ! -f ".env" ]; then
     echo -e "${YELLOW}.env erstellt. Bitte SMTP_PASS und ZAI_API_KEY eintragen!${NC}"
     echo -e "${YELLOW}Editor: nano /var/www/levcon/.env${NC}"
 else
-    echo ".env existiert bereits — überspringe"
+    echo ".env existiert bereits — prüfe DATABASE_URL..."
+fi
+
+# SECURITY: DATABASE_URL immer auf VPS-Pfad setzen (überschreibt Dev-Pfade)
+if grep -q "^DATABASE_URL=" .env; then
+    # Ersetze existierende DATABASE_URL (egal was drin steht)
+    sed -i "s|^DATABASE_URL=.*|DATABASE_URL=\"$VPS_DB_URL\"|" .env
+    echo "  ✓ DATABASE_URL korrigiert: $VPS_DB_URL"
+else
+    # Füge hinzu falls nicht vorhanden
+    echo "DATABASE_URL=\"$VPS_DB_URL\"" >> .env
+    echo "  ✓ DATABASE_URL hinzugefügt: $VPS_DB_URL"
+fi
+
+# Auch PORT sicherstellen (falls .env altes PORT=3000 hat)
+if grep -q "^PORT=" .env; then
+    sed -i "s|^PORT=.*|PORT=\"3002\"|" .env
+else
+    echo "PORT=\"3002\"" >> .env
+fi
+
+# Auch NEXT_PUBLIC_SITE_URL sicherstellen
+if grep -q "^NEXT_PUBLIC_SITE_URL=" .env; then
+    sed -i "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=\"https://levcon.ai\"|" .env
+else
+    echo "NEXT_PUBLIC_SITE_URL=\"https://levcon.ai\"" >> .env
 fi
 
 chmod 600 .env
@@ -154,16 +184,30 @@ echo -e "\n${YELLOW}[9] Database directory...${NC}"
 
 mkdir -p db
 chown -R www-data:www-data db
+chmod 755 db
 
 # ── 10. INSTALL DEPENDENCIES ───────────────────────────────────
 echo -e "\n${YELLOW}[10] Install dependencies...${NC}"
 
 bun install
 
-# ── 11. PRISMA DB PUSH ─────────────────────────────────────────
+# ── 11. PRISMA DB PUSH (erstellt/aktualisiert Schema) ──────────
 echo -e "\n${YELLOW}[11] Prisma DB push...${NC}"
 
+# WICHTIG: db:push liest DATABASE_URL aus .env — muss vor db:push korrekt sein
+echo "  DATABASE_URL in .env: $(grep '^DATABASE_URL=' .env | head -1)"
+
 bun run db:push
+
+# Verifiziere DB existiert
+if [ -f "db/levcon.db" ]; then
+    echo "  ✓ DB erstellt: $(ls -la db/levcon.db | awk '{print $5}') bytes"
+    chown www-data:www-data db/levcon.db
+    chmod 644 db/levcon.db
+else
+    echo -e "${RED}  ✗ DB wurde nicht erstellt!${NC}"
+    echo "  Prüfe .env DATABASE_URL: $(grep '^DATABASE_URL=' .env)"
+fi
 
 # ── 12. NEXT.JS BUILD ──────────────────────────────────────────
 echo -e "\n${YELLOW}[12] Next.js build...${NC}"
