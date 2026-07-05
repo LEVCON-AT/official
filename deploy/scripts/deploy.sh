@@ -232,15 +232,11 @@ else
     exit 1
 fi
 
-# ── 17. NGINX BASIC AUTH (für n8n UI) ──────────────────────────
-echo -e "\n${YELLOW}[17] Nginx Basic Auth für n8n UI...${NC}"
-
-if [ ! -f "/etc/nginx/.htpasswd.engine" ]; then
-    echo -e "${YELLOW}Erstelle Basic Auth für n8n UI (engine.levcon.at)${NC}"
-    echo -e "${YELLOW}Username: admin${NC}"
-    echo -e "${YELLOW}Bitte Passwort eingeben:${NC}"
-    htpasswd -c /etc/nginx/.htpasswd.engine admin
-fi
+# ── 17. NGINX BASIC AUTH ENTFERNT ──────────────────────────────
+# (n8n hat eigenen Login, Basic Auth ist redundant und blockiert API-Zugriffe)
+echo -e "\n${YELLOW}[17] Basic Auth übersprungen (n8n hat eigenen Login)${NC}"
+# Falls alte .htpasswd.engine existiert, referenziert nginx sie nicht mehr
+# (wir haben die auth_basic Direktiven aus der Config entfernt)
 
 # ── 18. AUTO-RENEWAL (Let's Encrypt) ───────────────────────────
 echo -e "\n${YELLOW}[18] Auto-renewal...${NC}"
@@ -259,8 +255,27 @@ chmod +x /etc/letsencrypt/renewal-hooks/post/reload-nginx.sh
 # ── 19. START SERVICES ─────────────────────────────────────────
 echo -e "\n${YELLOW}[19] Start services...${NC}"
 
+# systemd service file wurde u.U. aktualisiert → daemon-reload nötig
+systemctl daemon-reload
 systemctl restart nginx
 systemctl restart levcon
+sleep 3
+
+# Verify Next.js läuft
+if systemctl is-active --quiet levcon; then
+    echo "  ✓ levcon service aktiv"
+else
+    echo -e "${RED}  ✗ levcon service nicht aktiv!${NC}"
+    journalctl -u levcon --no-pager -n 30
+fi
+
+# Verify Port 3000 lauscht
+if ss -tln | grep -q ':3000'; then
+    echo "  ✓ Port 3000 lauscht"
+else
+    echo -e "${RED}  ✗ Port 3000 nicht erreichbar — Next.js läuft nicht${NC}"
+    journalctl -u levcon --no-pager -n 30
+fi
 
 # ── 20. DB BACKUP CRON ─────────────────────────────────────────
 echo -e "\n${YELLOW}[20] DB backup cron...${NC}"

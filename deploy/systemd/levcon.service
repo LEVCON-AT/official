@@ -18,10 +18,15 @@ After=network.target
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/levcon
+WorkingDirectory=/var/www/levcon/.next/standalone
 EnvironmentFile=/var/www/levcon/.env
 
 # Start Next.js (Standalone Build)
+# WICHTIG: HOSTNAME=0.0.0.0 damit Next.js auf allen Interfaces lauscht
+# (sonst lauscht er nur auf 127.0.0.1 und nginx bekommt keine Verbindung)
+Environment="HOSTNAME=0.0.0.0"
+Environment="PORT=3000"
+Environment="NODE_ENV=production"
 ExecStart=/usr/bin/node /var/www/levcon/.next/standalone/server.js
 
 # Restart Logic
@@ -42,7 +47,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/www/levcon/db /var/www/levcon/.next/cache
+ReadWritePaths=/var/www/levcon/db /var/www/levcon/.next/cache /var/www/levcon/.next/standalone/.next/cache
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
