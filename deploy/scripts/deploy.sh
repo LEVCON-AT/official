@@ -39,6 +39,8 @@ fi
 
 echo "OS: $(uname -a)"
 echo "Hostname: $(hostname)"
+echo "Skript-Verzeichnis: $(dirname "$0")"
+echo "CWD: $(pwd)"
 
 # ── 1. SYSTEM UPDATE & PACKAGES ────────────────────────────────
 echo -e "\n${YELLOW}[1] System update & packages...${NC}"
@@ -118,11 +120,18 @@ if [ -d "levcon" ]; then
     git config --global --add safe.directory /var/www/levcon
     cd levcon
     git config --add safe.directory /var/www/levcon
-    git pull origin main
+    git fetch origin main
+    git reset --hard origin/main
+    git clean -fd
 else
     git clone https://github.com/LEVCON-AT/official.git levcon
     cd levcon
 fi
+
+# WICHTIG: Alle folgenden relativen Pfade (deploy/...) beziehen sich
+# auf /var/www/levcon — wir sind jetzt dort
+echo "  CWD: $(pwd)"
+echo "  Commit: $(git log --oneline -1)"
 
 # ── 8. ENVIRONMENT FILE ────────────────────────────────────────
 echo -e "\n${YELLOW}[8] Environment file...${NC}"
