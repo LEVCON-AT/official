@@ -54,6 +54,7 @@ apt-get install -y \
     nginx \
     certbot \
     python3-certbot-nginx \
+    apache2-utils \
     sqlite3 \
     build-essential \
     htop \
