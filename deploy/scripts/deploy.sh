@@ -186,11 +186,11 @@ read
 # nginx stoppen (falls noch Reste laufen) — certbot --standalone braucht Port 80
 systemctl stop nginx 2>/dev/null || true
 
-# levcon.ai (ohne www — falls www gewünscht, später mit certbot expand hinzufügen)
+# levcon.ai (inkl. www — beide DNS-Einträge vorhanden)
 if [ ! -f "/etc/letsencrypt/live/levcon.ai/fullchain.pem" ]; then
-    echo "Erstelle Zertifikat für levcon.ai (via standalone)..."
+    echo "Erstelle Zertifikat für levcon.ai + www.levcon.ai (via standalone)..."
     certbot certonly --standalone \
-        -d levcon.ai \
+        -d levcon.ai -d www.levcon.ai \
         --email admin@levcon.at --agree-tos --no-eff-email --non-interactive
 fi
 
