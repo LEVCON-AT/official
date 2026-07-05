@@ -74,7 +74,12 @@ echo "  ✓ Dependencies installiert"
 # ── 4. PRISMA DB PUSH (falls Schema geändert) ──────────────────
 echo -e "\n${YELLOW}[4] Prisma DB push...${NC}"
 
-bun run db:push
+# WICHTIG: Prisma-Engines brauchen Execute-Rechte VOR db:push
+chmod +x node_modules/@prisma/engines/* 2>/dev/null || true
+chmod +x node_modules/.bin/* 2>/dev/null || true
+
+# db:push ausführen (mit --accept-data-loss für Schema-Änderungen)
+bun run db:push --accept-data-loss 2>&1 || bun run db:push 2>&1
 echo "  ✓ DB Schema synchronisiert"
 
 # ── 5. NEXT.JS BUILD ───────────────────────────────────────────

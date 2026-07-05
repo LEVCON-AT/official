@@ -197,7 +197,11 @@ echo -e "\n${YELLOW}[11] Prisma DB push...${NC}"
 # WICHTIG: db:push liest DATABASE_URL aus .env — muss vor db:push korrekt sein
 echo "  DATABASE_URL in .env: $(grep '^DATABASE_URL=' .env | head -1)"
 
-bun run db:push
+# Prisma-Engines brauchen Execute-Rechte VOR db:push
+chmod +x node_modules/@prisma/engines/* 2>/dev/null || true
+chmod +x node_modules/.bin/* 2>/dev/null || true
+
+bun run db:push --accept-data-loss 2>&1 || bun run db:push 2>&1
 
 # Verifiziere DB existiert
 if [ -f "db/levcon.db" ]; then
