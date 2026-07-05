@@ -8,7 +8,8 @@ const SMTP_HOST = process.env.SMTP_HOST || 'localhost';
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587', 10);
 const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
-const NEWSLETTER_FROM = process.env.NEWSLETTER_FROM_EMAIL || SMTP_USER || 'news@levcon.ai';
+const NEWSLETTER_FROM = process.env.SMTP_FROM || `"Levcon AI News" <${SMTP_USER}>`;
+const NEWSLETTER_REPLY_TO = process.env.SMTP_REPLY_TO || 'hello@levcon.ai';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://levcon.ai';
 
 // Rate limiting via in-memory cache (per email, max 5 signups per hour)
@@ -236,8 +237,9 @@ async function sendConfirmationEmail(
   });
 
   await transporter.sendMail({
-    from: `"Levcon AI News" <${NEWSLETTER_FROM}>`,
+    from: NEWSLETTER_FROM,
     to: email,
+    replyTo: NEWSLETTER_REPLY_TO,
     subject,
     text,
     html,

@@ -1,0 +1,54 @@
+# ═══════════════════════════════════════════════════════════════
+#  LEVCON.AI — SYSTEMD SERVICE (Next.js)
+#  Pfad auf VPS: /etc/systemd/system/levcon.service
+# ═══════════════════════════════════════════════════════════════
+#
+#  Nach Installation:
+#    sudo systemctl daemon-reload
+#    sudo systemctl enable levcon
+#    sudo systemctl start levcon
+#    sudo systemctl status levcon
+
+[Unit]
+Description=Levcon.ai Next.js Application
+Documentation=https://github.com/LEVCON-AT/official
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/levcon
+EnvironmentFile=/var/www/levcon/.env
+
+# Start Next.js (Standalone Build)
+ExecStart=/usr/bin/node /var/www/levcon/.next/standalone/server.js
+
+# Restart Logic
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=levcon
+
+# Resource Limits
+MemoryMax=512M
+CPUQuota=80%
+
+# Security Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/levcon/db /var/www/levcon/.next/cache
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
