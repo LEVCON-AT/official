@@ -80,6 +80,18 @@ chmod +x node_modules/.bin/* 2>/dev/null || true
 
 # db:push ausführen (mit --accept-data-loss für Schema-Änderungen)
 bun run db:push --accept-data-loss 2>&1 || bun run db:push 2>&1
+
+# WICHTIG: DB-Datei gehört root (db:push läuft als root), aber der Service
+# läuft als www-data → wir müssen ownership + permissions korrigieren
+# Auch das db/ Verzeichnis muss www-data gehören (für SQLite WAL/SHM-Files)
+chown -R www-data:www-data db 2>/dev/null || true
+chmod 755 db 2>/dev/null || true
+if [ -f "db/levcon.db" ]; then
+    chown www-data:www-data db/levcon.db
+    chmod 664 db/levcon.db
+    echo "  ✓ DB ownership korrigiert (www-data)"
+fi
+
 echo "  ✓ DB Schema synchronisiert"
 
 # ── 5. NEXT.JS BUILD ───────────────────────────────────────────
