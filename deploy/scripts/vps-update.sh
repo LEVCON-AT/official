@@ -18,6 +18,11 @@
 
 set -e
 
+# Non-interactive mode (wichtig für CI/CD — keine Prompts!)
+export DEBIAN_FRONTEND=noninteractive
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -63,7 +68,7 @@ echo "  ✓ Code aktualisiert: $(git log --oneline -1)"
 # ── 3. INSTALL DEPENDENCIES ────────────────────────────────────
 echo -e "\n${YELLOW}[3] Install dependencies...${NC}"
 
-bun install --frozen-lockfile
+bun install --frozen-lockfile --no-progress 2>&1 || bun install --frozen-lockfile 2>&1
 echo "  ✓ Dependencies installiert"
 
 # ── 4. PRISMA DB PUSH (falls Schema geändert) ──────────────────
@@ -105,11 +110,17 @@ echo "  ✓ Static files kopiert"
 # ── 7. PERMISSIONS ─────────────────────────────────────────────
 echo -e "\n${YELLOW}[7] Set permissions...${NC}"
 
+# Ownership ( rekursiv, aber schnell mit chown -R)
 chown -R www-data:www-data /var/www/levcon
-find /var/www/levcon -type d -exec chmod 755 {} \;
-find /var/www/levcon -type f -exec chmod 644 {} \;
-chmod 600 /var/www/levcon/.env
-chmod +x /var/www/levcon/.next/standalone/server.js
+
+# WICHTIG: Nur kritische Files chmod'en, nicht node_modules (das dauert ewig)
+chmod 755 /var/www/levcon
+chmod 755 /var/www/levcon/db 2>/dev/null || true
+chmod 644 /var/www/levcon/.env
+chmod 755 /var/www/levcon/.next/standalone/server.js 2>/dev/null || true
+
+# DB schreibbar machen
+chmod 664 /var/www/levcon/db/levcon.db 2>/dev/null || true
 
 echo "  ✓ Permissions gesetzt"
 
