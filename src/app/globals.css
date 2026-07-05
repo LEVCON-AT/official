@@ -210,13 +210,11 @@
   font-weight: 500;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--lc-ink);
-  opacity: 0.8;
+  color: #464644; /* #1C1C1A @ 80% on #F0EFEC */
 }
 
 .logo-ai {
   color: var(--lc-red);
-  opacity: 1;
 }
 
 .site-slogan {
