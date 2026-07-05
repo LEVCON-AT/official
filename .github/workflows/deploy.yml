@@ -1,0 +1,105 @@
+# ═══════════════════════════════════════════════════════════════
+#  LEVCON.AI — GITHUB ACTIONS DEPLOYMENT WORKFLOW
+#  Datei: .github/workflows/deploy.yml
+# ═══════════════════════════════════════════════════════════════
+#
+#  Trigger: Jeder Push auf `main` → automatisches Deployment auf VPS
+#  Manueller Trigger: GitHub UI → Actions → "Deploy to VPS" → Run workflow
+#
+#  Voraussetzungen (siehe deploy/DEPLOYMENT.md):
+#  1. Einmaliges Initial-Setup via deploy/scripts/deploy.sh auf VPS
+#  2. GitHub Secrets konfiguriert:
+#     - VPS_HOST (z.B. 87.106.25.91)
+#     - VPS_USER (z.B. root oder deploy-User)
+#     - VPS_SSH_KEY (private SSH-Key)
+#     - VPS_PORT (optional, default 22)
+
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable debug output'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+# Verhindert parallele Deploys
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Production VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy update script to VPS
+        run: |
+          scp -i ~/.ssh/deploy_key -P ${{ secrets.VPS_PORT || 22 }} \
+            deploy/scripts/vps-update.sh \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/vps-update.sh
+
+      - name: Execute update script on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            chmod +x /tmp/vps-update.sh
+            bash /tmp/vps-update.sh
+
+      - name: Health Check
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            sleep 5
+            if curl -sf https://levcon.ai/ -o /dev/null; then
+              echo "✅ Health check passed — site is up"
+            else
+              echo "❌ Health check failed — investigating"
+              systemctl status levcon --no-pager | tail -20
+              exit 1
+            fi
+
+      - name: Cleanup
+        if: always()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            rm -f /tmp/vps-update.sh
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Check logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          exit 1
