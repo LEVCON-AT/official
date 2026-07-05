@@ -49,6 +49,8 @@ apt-get install -y \
     curl \
     wget \
     git \
+    unzip \
+    zip \
     nginx \
     certbot \
     python3-certbot-nginx \
