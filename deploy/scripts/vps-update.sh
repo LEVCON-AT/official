@@ -122,6 +122,11 @@ chmod 755 /var/www/levcon/.next/standalone/server.js 2>/dev/null || true
 # DB schreibbar machen
 chmod 664 /var/www/levcon/db/levcon.db 2>/dev/null || true
 
+# Prisma Engines brauchen Execute-Rechte (sonst EACCES bei db:push)
+chmod +x /var/www/levcon/node_modules/@prisma/engines/* 2>/dev/null || true
+# Auch node binary selbst
+chmod +x /var/www/levcon/node_modules/.bin/* 2>/dev/null || true
+
 echo "  ✓ Permissions gesetzt"
 
 # ── 8. NGINX CONFIG (falls geändert) ───────────────────────────
