@@ -177,6 +177,11 @@ echo -e "\n${YELLOW}[13] Copy standalone files...${NC}"
 cp -r public .next/standalone/
 cp -r .next/static .next/standalone/.next/
 
+# Cache-Verzeichnisse vorab anlegen (sonst scheitert systemd ProtectSystem)
+mkdir -p .next/standalone/.next/cache
+mkdir -p .next/cache
+mkdir -p db
+
 chown -R www-data:www-data /var/www/levcon
 
 # ── 14. SYSTEMD SERVICE ────────────────────────────────────────
