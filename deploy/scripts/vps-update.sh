@@ -36,6 +36,10 @@ cd "$PROJECT_DIR" || {
     exit 1
 }
 
+# Fix "dubious ownership" warning (root vs www-data)
+git config --global --add safe.directory "$PROJECT_DIR"
+git config --add safe.directory "$PROJECT_DIR"
+
 # ── 1. SAVE CURRENT STATE (for rollback) ───────────────────────
 echo -e "\n${YELLOW}[1] Save current state for rollback...${NC}"
 

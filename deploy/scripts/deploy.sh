@@ -113,7 +113,10 @@ cd /var/www
 
 if [ -d "levcon" ]; then
     echo "Verzeichnis existiert bereits — pull latest..."
+    # Fix "dubious ownership" warning (root vs www-data)
+    git config --global --add safe.directory /var/www/levcon
     cd levcon
+    git config --add safe.directory /var/www/levcon
     git pull origin main
 else
     git clone https://github.com/LEVCON-AT/official.git levcon
