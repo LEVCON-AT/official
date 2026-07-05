@@ -176,27 +176,8 @@ cp deploy/systemd/levcon.service /etc/systemd/system/levcon.service
 systemctl daemon-reload
 systemctl enable levcon
 
-# ── 15. NGINX CONFIGURATION ────────────────────────────────────
-echo -e "\n${YELLOW}[15] Nginx configuration...${NC}"
-
-mkdir -p /var/www/letsencrypt
-
-# levcon.ai
-cp deploy/nginx/levcon.ai.conf /etc/nginx/sites-available/levcon.ai
-ln -sf /etc/nginx/sites-available/levcon.ai /etc/nginx/sites-enabled/levcon.ai
-
-# engine.levcon.at
-cp deploy/nginx/engine.levcon.at.conf /etc/nginx/sites-available/engine.levcon.at
-ln -sf /etc/nginx/sites-available/engine.levcon.at /etc/nginx/sites-enabled/engine.levcon.at
-
-# Default site entfernen (sonst Konflikt)
-rm -f /etc/nginx/sites-enabled/default
-
-# Test config
-nginx -t
-
-# ── 16. SSL CERTIFICATES (Let's Encrypt) ───────────────────────
-echo -e "\n${YELLOW}[16] SSL certificates...${NC}"
+# ── 15. SSL CERTIFICATES (Let's Encrypt) — VOR nginx config! ───
+echo -e "\n${YELLOW}[15] SSL certificates (vor nginx config)...${NC}"
 
 echo -e "${YELLOW}Hinweis: Stelle sicher, dass levcon.ai und engine.levcon.at auf 87.106.25.91 zeigen!${NC}"
 echo -e "${YELLOW}Drücke ENTER zum Fortfahren...${NC}"
@@ -204,14 +185,51 @@ read
 
 # levcon.ai
 if [ ! -f "/etc/letsencrypt/live/levcon.ai/fullchain.pem" ]; then
-    certbot certonly --webroot -w /var/www/letsencrypt -d levcon.ai -d www.levcon.ai \
+    echo "Erstelle Zertifikat für levcon.ai (via standalone, nginx kurz gestoppt)..."
+    certbot certonly --standalone \
+        --pre-hook "systemctl stop nginx" \
+        --post-hook "systemctl start nginx" \
+        -d levcon.ai -d www.levcon.ai \
         --email admin@levcon.at --agree-tos --no-eff-email --non-interactive
 fi
 
 # engine.levcon.at
 if [ ! -f "/etc/letsencrypt/live/engine.levcon.at/fullchain.pem" ]; then
-    certbot certonly --webroot -w /var/www/letsencrypt -d engine.levcon.at \
+    echo "Erstelle Zertifikat für engine.levcon.at (via standalone, nginx kurz gestoppt)..."
+    certbot certonly --standalone \
+        --pre-hook "systemctl stop nginx" \
+        --post-hook "systemctl start nginx" \
+        -d engine.levcon.at \
         --email admin@levcon.at --agree-tos --no-eff-email --non-interactive
+fi
+
+# ── 16. NGINX CONFIGURATION ────────────────────────────────────
+echo -e "\n${YELLOW}[16] Nginx configuration...${NC}"
+
+mkdir -p /var/www/letsencrypt
+
+# levcon.ai
+cp deploy/nginx/levcon.ai.conf /etc/nginx/sites-available/levcon.ai
+ln -sf /etc/nginx/sites-available/levcon.ai /etc/nginx/sites-enabled/levcon.ai
+
+# engine.levcon.at — falls bereits "n8n" config existiert, diese deaktivieren
+if [ -f /etc/nginx/sites-enabled/n8n ] || [ -f /etc/nginx/sites-available/n8n ]; then
+    echo "  Bestehende n8n config deaktiviert (durch engine.levcon.at ersetzt)"
+    rm -f /etc/nginx/sites-enabled/n8n
+fi
+cp deploy/nginx/engine.levcon.at.conf /etc/nginx/sites-available/engine.levcon.at
+ln -sf /etc/nginx/sites-available/engine.levcon.at /etc/nginx/sites-enabled/engine.levcon.at
+
+# Default site entfernen (sonst Konflikt)
+rm -f /etc/nginx/sites-enabled/default
+
+# Test config (warnings sind OK, nur errors blocken)
+if nginx -t 2>&1; then
+    echo "  ✓ Nginx config OK"
+else
+    echo -e "${RED}  ✗ Nginx config test fehlgeschlagen${NC}"
+    echo -e "${YELLOW}  Prüfe Fehler oben. Andere Sites (matrix, fincal etc.) können Warnungen verursachen.${NC}"
+    exit 1
 fi
 
 # ── 17. NGINX BASIC AUTH (für n8n UI) ──────────────────────────
