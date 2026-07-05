@@ -45,24 +45,6 @@ cd "$PROJECT_DIR" || {
 git config --global --add safe.directory "$PROJECT_DIR"
 git config --add safe.directory "$PROJECT_DIR"
 
-# ── 0.5. ENV-FILE KORRIGIEREN (falls Dev-Pfade drin) ───────────
-# WICHTIG: .env hat evtl. noch DATABASE_URL=file:/home/z/my-project/...
-# (Dev-Umgebung). Das muss auf VPS-Pfad korrigiert werden.
-if [ -f ".env" ]; then
-    VPS_DB_URL="file:/var/www/levcon/db/levcon.db"
-    if grep -q "^DATABASE_URL=" .env; then
-        CURRENT_DB_URL=$(grep "^DATABASE_URL=" .env | head -1 | cut -d'=' -f2- | tr -d '"')
-        if [ "$CURRENT_DB_URL" != "$VPS_DB_URL" ]; then
-            echo "  Korrigiere DATABASE_URL: $CURRENT_DB_URL → $VPS_DB_URL"
-            sed -i "s|^DATABASE_URL=.*|DATABASE_URL=\"$VPS_DB_URL\"|" .env
-        fi
-    fi
-    # Auch PORT sicherstellen
-    if grep -q "^PORT=" .env; then
-        sed -i "s|^PORT=.*|PORT=\"3002\"|" .env
-    fi
-fi
-
 # ── 1. SAVE CURRENT STATE (for rollback) ───────────────────────
 echo -e "\n${YELLOW}[1] Save current state for rollback...${NC}"
 
@@ -77,11 +59,45 @@ fi
 echo -e "\n${YELLOW}[2] Git pull...${NC}"
 
 # Reset any local changes (force clean state)
+# WICHTIG: -e .env schützt die .env vor dem Löschen (sonst Secrets weg)
 git fetch origin main
 git reset --hard origin/main
-git clean -fd
+git clean -fd -e .env -e .env.local -e .env.production
 
 echo "  ✓ Code aktualisiert: $(git log --oneline -1)"
+
+# ── 2.5. ENV-FILE KORRIGIEREN (nach git pull, vor db:push) ─────
+# WICHTIG: .env hat evtl. noch DATABASE_URL=file:/home/z/my-project/...
+# (Dev-Umgebung). Das muss auf VPS-Pfad korrigiert werden.
+if [ -f ".env" ]; then
+    VPS_DB_URL="file:/var/www/levcon/db/levcon.db"
+    if grep -q "^DATABASE_URL=" .env; then
+        CURRENT_DB_URL=$(grep "^DATABASE_URL=" .env | head -1 | cut -d'=' -f2- | tr -d '"')
+        if [ "$CURRENT_DB_URL" != "$VPS_DB_URL" ]; then
+            echo "  Korrigiere DATABASE_URL: $CURRENT_DB_URL → $VPS_DB_URL"
+            sed -i "s|^DATABASE_URL=.*|DATABASE_URL=\"$VPS_DB_URL\"|" .env
+        fi
+    else
+        # DATABASE_URL fehlt → hinzufügen
+        echo "DATABASE_URL=\"$VPS_DB_URL\"" >> .env
+        echo "  Füge DATABASE_URL hinzu: $VPS_DB_URL"
+    fi
+    # Auch PORT sicherstellen
+    if grep -q "^PORT=" .env; then
+        sed -i "s|^PORT=.*|PORT=\"3002\"|" .env
+    fi
+else
+    echo -e "${RED}  ✗ .env fehlt! Erstelle aus Template...${NC}"
+    cp deploy/.env.production .env 2>/dev/null || true
+    # Wenn immer noch fehlt, erstelle Minimal-Env
+    if [ ! -f ".env" ]; then
+        echo "DATABASE_URL=\"file:/var/www/levcon/db/levcon.db\"" > .env
+        echo "PORT=\"3002\"" >> .env
+        echo "NEXT_PUBLIC_SITE_URL=\"https://levcon.ai\"" >> .env
+        echo "LEVCON_INTERNAL_API_KEY=\"$(openssl rand -hex 32)\"" >> .env
+        echo "  ⚠ Minimal-Env erstellt — bitte SMTP_PASS etc. eintragen!"
+    fi
+fi
 
 # ── 3. INSTALL DEPENDENCIES ────────────────────────────────────
 echo -e "\n${YELLOW}[3] Install dependencies...${NC}"
