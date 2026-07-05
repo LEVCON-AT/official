@@ -272,11 +272,11 @@ echo -e "\n${YELLOW}[19] Start services...${NC}"
 # systemd service file wurde u.U. aktualisiert → daemon-reload nötig
 systemctl daemon-reload
 
-# Service stoppen + Zombie-Prozesse auf Port 3001 killen
+# Service stoppen + Zombie-Prozesse auf Port 3002 killen
 systemctl stop levcon 2>/dev/null || true
 sleep 1
 if command -v fuser &> /dev/null; then
-    fuser -k 3001/tcp 2>/dev/null || true
+    fuser -k 3002/tcp 2>/dev/null || true
 fi
 sleep 1
 
@@ -292,11 +292,11 @@ else
     journalctl -u levcon --no-pager -n 30
 fi
 
-# Verify Port 3001 lauscht
-if ss -tln | grep -q ':3001'; then
-    echo "  ✓ Port 3001 lauscht"
+# Verify Port 3002 lauscht
+if ss -tln | grep -q ':3002'; then
+    echo "  ✓ Port 3002 lauscht"
 else
-    echo -e "${RED}  ✗ Port 3001 nicht erreichbar — Next.js läuft nicht${NC}"
+    echo -e "${RED}  ✗ Port 3002 nicht erreichbar — Next.js läuft nicht${NC}"
     journalctl -u levcon --no-pager -n 30
 fi
 

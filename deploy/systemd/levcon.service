@@ -24,9 +24,9 @@ EnvironmentFile=/var/www/levcon/.env
 # Start Next.js (Standalone Build)
 # WICHTIG: HOSTNAME=0.0.0.0 damit Next.js auf allen Interfaces lauscht
 # (sonst lauscht er nur auf 127.0.0.1 und nginx bekommt keine Verbindung)
-# PORT=3001 weil Port 3000 bereits durch PDF-Server belegt ist
+# PORT=3002 weil Port 3000 (PDF-Server) und 3001 (levcon.at coming-soon) belegt sind
 Environment="HOSTNAME=0.0.0.0"
-Environment="PORT=3001"
+Environment="PORT=3002"
 Environment="NODE_ENV=production"
 ExecStart=/usr/bin/node /var/www/levcon/.next/standalone/server.js
 
