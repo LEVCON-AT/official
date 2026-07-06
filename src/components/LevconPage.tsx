@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations, useMessages } from 'next-intl';
-import { Link, usePathname } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
 import AiNewsSignup from '@/components/ainews/AiNewsSignup';
 import AiNewsArchive from '@/components/ainews/AiNewsArchive';
@@ -37,7 +37,6 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
 
   const t = useTranslations();
   const messages = useMessages() as Record<string, unknown>;
-  const pathname = usePathname();
 
   // Raw HTML content (bypasses next-intl ICU parsing)
   const impressumHtml = (messages.impressum as Record<string, string>).body;
@@ -634,7 +633,7 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
         <div className="footer-right">
           <div className="lang-switch" role="group" aria-label={t('footer.lang_aria_label')}>
             <Link
-              href={pathname || '/'}
+              href="/"
               locale="de"
               className={`lang-btn${locale === 'de' ? ' active' : ''}`}
               aria-pressed={locale === 'de' ? 'true' : 'false'}
@@ -643,7 +642,7 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
             </Link>
             <div className="lang-divider" aria-hidden="true" />
             <Link
-              href={pathname || '/'}
+              href="/"
               locale="en"
               className={`lang-btn${locale === 'en' ? ' active' : ''}`}
               aria-pressed={locale === 'en' ? 'true' : 'false'}
