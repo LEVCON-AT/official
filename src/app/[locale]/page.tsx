@@ -8,6 +8,9 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
+// Nur konfigurierte Locales erlauben (verhindert Caching-Issues)
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
