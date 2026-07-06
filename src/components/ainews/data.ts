@@ -15,10 +15,30 @@ export type AiNewsData = {
  * Returns null if no news published yet today.
  * Server-only — do not import in client components.
  */
-export async function getTodaysNews(): Promise<AiNewsData | null> {
+/**
+ * Helper: Get start of "today" in Europe/Vienna timezone as UTC Date.
+ * n8n runs in Europe/Vienna, so news are stored with Vienna dates.
+ * Next.js runs in UTC, so we need to convert.
+ */
+function getViennaTodayRange(): { startOfDay: Date; endOfDay: Date } {
   const now = new Date();
-  const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  // Format current date in Vienna timezone (YYYY-MM-DD)
+  const viennaDateStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Vienna',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+
+  // Create UTC midnight for that Vienna date
+  const startOfDay = new Date(viennaDateStr + 'T00:00:00.000Z');
   const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+
+  return { startOfDay, endOfDay };
+}
+
+export async function getTodaysNews(): Promise<AiNewsData | null> {
+  const { startOfDay, endOfDay } = getViennaTodayRange();
 
   const summary = await db.aiNewsSummary.findFirst({
     where: {
@@ -48,8 +68,7 @@ export async function getTodaysNews(): Promise<AiNewsData | null> {
  * Server-only.
  */
 export async function getArchivedNews(limit: number = 30): Promise<AiNewsData[]> {
-  const now = new Date();
-  const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const { startOfDay } = getViennaTodayRange();
 
   const summaries = await db.aiNewsSummary.findMany({
     where: {
