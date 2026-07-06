@@ -1,5 +1,5 @@
 {
-  "name": "AI News — 03 Newsletter Send",
+  "name": "AI News — 03 Newsletter Send (Local)",
   "nodes": [
     {
       "parameters": {
@@ -106,7 +106,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/today",
+        "url": "https://levcon.ai/api/ai-news/today",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -131,7 +131,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/subscribers?frequency={{ $json.frequency || 'daily' }}",
+        "url": "=https://levcon.ai/api/ai-news/internal/subscribers?frequency={{ $json.frequency || \"daily\" }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -141,7 +141,9 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
       },
       "id": "c3d4e5f6-0003-4000-8000-000000000008",
       "name": "Fetch Subscribers",
@@ -208,7 +210,7 @@
     {
       "parameters": {
         "method": "PATCH",
-        "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/subscribers/{{ $json.subscriberId }}/last-sent",
+        "url": "=https://levcon.ai/api/ai-news/internal/subscribers?id={{ $json.subscriberId }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -225,7 +227,9 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ date: $json.lastSentDate }) }}",
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
       },
       "id": "c3d4e5f6-0003-4000-8000-000000000011",
       "name": "Update Subscriber Last Sent",

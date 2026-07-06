@@ -1,0 +1,90 @@
+{
+  "name": "AI News — Cleanup (Daily)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cleanup-cron",
+      "name": "Cron Daily 03:00 Vienna",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://levcon.ai/api/ai-news/internal/cleanup",
+        "authentication": "genericCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"olderThanDays\": {\n    \"unconfirmed\": 7,\n    \"unsubscribed\": 30,\n    \"workflowRuns\": 90\n  }\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "cleanup-request",
+      "name": "POST Cleanup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {},
+      "id": "cleanup-error-trigger",
+      "name": "On Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [240, 540]
+    },
+    {
+      "parameters": {
+        "fromEmail": "admin@levcon.at",
+        "toEmail": "admin@levcon.at",
+        "subject": "=Levcon AI News — Cleanup Failed",
+        "text": "=Cleanup workflow failed at {{ $now.toISO() }}\n\nError: {{ $json.error?.message || 'Unknown' }}\n\nCheck n8n logs: https://engine.levcon.at",
+        "options": {}
+      },
+      "id": "cleanup-alert-email",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [680, 540]
+    }
+  ],
+  "connections": {
+    "Cron Daily 03:00 Vienna": {
+      "main": [
+        [
+          {
+            "node": "POST Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "tags": []
+}
