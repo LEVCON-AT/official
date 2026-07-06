@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations, useMessages } from 'next-intl';
-import { Link } from '@/i18n/navigation';
 import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
 import AiNewsSignup from '@/components/ainews/AiNewsSignup';
 import AiNewsArchive from '@/components/ainews/AiNewsArchive';
@@ -632,23 +631,21 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
 
         <div className="footer-right">
           <div className="lang-switch" role="group" aria-label={t('footer.lang_aria_label')}>
-            <Link
+            <a
               href="/"
-              locale="de"
               className={`lang-btn${locale === 'de' ? ' active' : ''}`}
-              aria-pressed={locale === 'de' ? 'true' : 'false'}
+              aria-current={locale === 'de' ? 'page' : undefined}
             >
               DE
-            </Link>
+            </a>
             <div className="lang-divider" aria-hidden="true" />
-            <Link
-              href="/"
-              locale="en"
+            <a
+              href="/en"
               className={`lang-btn${locale === 'en' ? ' active' : ''}`}
-              aria-pressed={locale === 'en' ? 'true' : 'false'}
+              aria-current={locale === 'en' ? 'page' : undefined}
             >
               EN
-            </Link>
+            </a>
           </div>
         </div>
       </footer>

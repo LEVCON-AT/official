@@ -149,7 +149,7 @@ export default async function LocalePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
       />
-      <LevconPage locale={locale} todaysNews={todaysNews} archivedNews={archivedNews} />
+      <LevconPage key={locale} locale={locale} todaysNews={todaysNews} archivedNews={archivedNews} />
       <noscript>
         <div className="noscript-msg">
           {locale === 'de'
