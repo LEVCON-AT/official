@@ -56,7 +56,6 @@ export async function GET() {
           sourceUrl: item.sourceUrl,
           thumbnailUrl: item.thumbnailUrl,
           languageOrig: item.languageOrig,
-          category: item.category,
         })),
       },
     });
