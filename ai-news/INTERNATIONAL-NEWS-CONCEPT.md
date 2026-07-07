@@ -118,18 +118,17 @@ SearXNG sucht mit gezielten Queries in mehreren Sprachen:
 | Modell | RAM | Context | Speed | Qualität | Empfehlung |
 |---|---|---|---|---|---|
 | Qwen 2.5 1.5B (aktuell) | ~1.2 GB | 32K | ~15 tok/s | OK, aber limitiert | Current |
-| **Qwen3 1.7B** | ~1.5 GB | 32K | ~12 tok/s | Sehr gut (neueste Gen) | ⭐ Empfohlen |
+| **Qwen3.5 2B** | ~1.8 GB | 32K | ~10 tok/s | Sehr gut (neueste Gen) | ⭐ Empfohlen |
 | Qwen 2.5 3B | ~2.5 GB | 32K | ~8 tok/s | Sehr gut, multilingual | Alternative |
 
-**Empfehlung: Qwen3 1.7B**
-- Neueste Modell-Generation (Qwen3-Serie)
+**Empfehlung: Qwen3.5 2B**
+- Neueste Modell-Generation (Qwen3.5-Serie)
 - Bessere Reasoning-Fähigkeiten als Qwen 2.5
 - Multilingual (DE, EN, ZH, JA, FR)
-- RAM-freundlich (~1.5 GB, passt in VPS-Budget)
+- RAM-freundlich (~1.8 GB, passt in VPS-Budget)
 - Token-Limit: `num_predict: 4096` (für 10+ Items mit DE+EN Summaries)
 - Inkludiert auch SLMs (Small Language Models) als valides News-Thema
-
-**Wichtig:** Qwen3 Modelle heißen in Ollama `qwen3:1.7b` (oder ähnlich). Vorab mit `ollama list` prüfen, welche Tags verfügbar sind.
+- Ollama Tag: `qwen3.5:2b`
 
 ### 3.2 Prompt-Engineering
 
@@ -257,11 +256,14 @@ Falls Qwen 2.5 3B zu langsam für alle Items in einem Durchgang:
 | **Aufklappen** | Wie bisher: Chevron → Summary + Thumbnail + Weiterlesen |
 | **Kategorie** | SVG-Icon (schlicht, einfarbig, Style-Token-konform) neben der Quelle |
 
-**Sprach-Filter (Tags):**
-- Über der News-Liste: kleine auswählbare Tags `[Alle] [🇩🇪 DE] [🇺🇸 EN] [🇨🇳 ZH] [🇯🇵 JA] [🇫🇷 FR]`
+**Sprach-Filter (Tags, dynamisch):**
+- Über der News-Liste: kleine auswählbare Tags — **nur für Sprachen, die in den angezeigten News vorhanden sind**
+- Beispiel: Wenn heute nur DE + EN + ZH News vorhanden → `[Alle] [🇩🇪 DE] [🇺🇸 EN] [🇨🇳 ZH]`
+- Wenn morgen nur DE + EN → `[Alle] [🇩🇪 DE] [🇺🇸 EN]`
 - Klick filtert die Liste live (Client-seitig, kein Reload)
 - Default: "Alle"
 - Minimalistisch: schlichte Text-Tags, nicht knallig, im Levcon-Style
+- Implementierung: React useState + Filter über `items.filter(i => activeLang === 'all' || i.languageOrig === activeLang)`
 
 **Kategorie-Icons (SVG, einfarbig, Style-Token-konform):**
 | Kategorie | SVG-Icon | Bedeutung |

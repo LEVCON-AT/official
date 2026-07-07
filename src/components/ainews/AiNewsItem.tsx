@@ -14,6 +14,7 @@ export type AiNewsItemType = {
   sourceUrl: string;
   thumbnailUrl: string | null;
   languageOrig: string;
+  category: string | null;
 };
 
 type Props = {

@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
             sourceUrl: string;
             thumbnailUrl?: string | null;
             languageOrig?: string;
+            category?: string | null;
           }, idx: number) => ({
             position: item.position || idx + 1,
             headline: item.headline,
@@ -94,6 +95,7 @@ export async function POST(request: NextRequest) {
             sourceUrl: item.sourceUrl,
             thumbnailUrl: item.thumbnailUrl || null,
             languageOrig: item.languageOrig || 'en',
+            category: item.category || null,
           })),
         },
       },

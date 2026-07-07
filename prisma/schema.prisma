@@ -60,6 +60,7 @@ model AiNewsItem {
   sourceUrl       String
   thumbnailUrl    String?
   languageOrig    String   @default("en")
+  category        String?  // "research|business|regulation|tools|society"
   createdAt       DateTime @default(now())
 
   summary         AiNewsSummary @relation(fields: [summaryId], references: [id], onDelete: Cascade)

@@ -104,6 +104,7 @@ function mapSummary(summary: {
     sourceUrl: string;
     thumbnailUrl: string | null;
     languageOrig: string;
+    category: string | null;
   }>;
 }): AiNewsData {
   return {
@@ -120,6 +121,7 @@ function mapSummary(summary: {
       sourceUrl: item.sourceUrl,
       thumbnailUrl: item.thumbnailUrl,
       languageOrig: item.languageOrig,
+      category: item.category,
     })),
   };
 }
