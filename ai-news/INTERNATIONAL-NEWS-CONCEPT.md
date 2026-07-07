@@ -23,7 +23,9 @@ Levcon.ai wird die **umfassendste tägliche KI-News-Kuration** im DACH-Raum — 
 
 ### 2.1 RSS-Feeds (primär, stabil)
 
-#### 🇩🇪 Deutsch (DACH & EU-Recht)
+**Kriterium:** Nur Quellen mit klarem KI-Bezug (keine generellen Crypto/IT-Seiten).
+
+#### 🇩🇪 Deutsch (DACH & EU-Recht) — 10 Quellen
 | Quelle | RSS-URL | Fokus |
 |---|---|---|
 | Heise KI | https://heise.de/rss/heise.rdf | IT, KI, Security |
@@ -31,13 +33,17 @@ Levcon.ai wird die **umfassendste tägliche KI-News-Kuration** im DACH-Raum — 
 | Tagesschau | https://www.tagesschau.de/xml/rss2 | Allgemein, auch KI |
 | Mixed.de | https://mixed.de/feed/ | KI-spezifisch |
 | AInauten | https://ainauten.com/feed/ | KI-spezifisch |
-| BTC-ECHO KI | https://www.btc-echo.de/feed/ | KI + Crypto |
+| KI-Campus | https://www.ki-campus.org/rss | KI-Bildung |
+| Der Standard Tech | https://www.derstandard.at/rss/web/tech | Tech, KI (AT) |
+| Süddeutsche Wissen | https://rss.sueddeutsche.de/rss/wissen | Wissenschaft, KI |
+| ZDNet DE | https://www.zdnet.de/feed/ | Enterprise IT, KI |
+| Netzwelt | https://www.netzwelt.de/feed/ | Tech, KI |
 
-#### 🇺🇸 Englisch (Global & Silicon Valley)
+#### 🇺🇸 Englisch (Global & Silicon Valley) — 12 Quellen
 | Quelle | RSS-URL | Fokus |
 |---|---|---|
 | MIT Tech Review | https://www.technologyreview.com/feed/ | KI, Tech |
-| Ars Technica | https://feeds.arstechnica.com/arstechnica/features | Tech, KI |
+| Ars Technica AI | https://feeds.arstechnica.com/arstechnica/features | Tech, KI |
 | The Verge AI | https://www.theverge.com/rss/ai-artificial-intelligence/index.xml | KI |
 | TechCrunch AI | https://techcrunch.com/category/artificial-intelligence/feed/ | KI-Startups |
 | VentureBeat AI | https://venturebeat.com/category/ai/feed/ | KI-Business |
@@ -45,22 +51,40 @@ Levcon.ai wird die **umfassendste tägliche KI-News-Kuration** im DACH-Raum — 
 | Hugging Face Blog | https://huggingface.co/blog/feed.xml | Open-Source KI |
 | Anthropic Blog | https://www.anthropic.com/news/rss.xml | KI-Anbieter |
 | OpenAI Blog | https://openai.com/blog/rss.xml | KI-Anbieter |
+| The Information | https://www.theinformation.com/feed | KI-Inside |
+| Towards Data Science | https://towardsdatascience.com/feed | KI-Forschung |
+| Wired AI | https://www.wired.com/feed/tag/ai/latest/rss | KI |
 
-#### 🇨🇳 Chinesisch (Asiatischer Markt & Big Tech)
+#### 🇨🇳 Chinesisch (Asiatischer Markt & Big Tech) — 4 Quellen
 | Quelle | RSS-URL | Fokus |
 |---|---|---|
 | Synced (机器之心) | https://syncedreview.com/feed/ | KI-Forschung (EN-Zusammenfassung) |
 | Caixin Global | https://www.caixinglobal.com/feed/ | Tech & Wirtschaft |
+| Pandaily | https://pandaily.com/feed/ | Tech, KI (China) |
+| TechNode | https://technode.com/feed/ | Tech, KI (China) |
 
-#### 🇯🇵 Japanisch (Robotik & Hardware)
+#### 🇯🇵 Japanisch (Robotik & Hardware) — 3 Quellen
 | Quelle | RSS-URL | Fokus |
 |---|---|---|
 | ITmedia AI | https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml | Tech, KI |
+| Nikkei Tech | https://tech.nikkeibp.co.jp/rss/index.rdf | Tech, KI |
+| ASCII.jp | https://ascii.jp/rss.xml | Tech, KI |
 
-#### 🇫🇷 Französisch (Europäische Forschung)
+#### 🇫🇷 Französisch (Europäische Forschung) — 3 quellen
 | Quelle | RSS-URL | Fokus |
 |---|---|---|
 | L'Usine Digitale | https://www.usine-digitale.fr/rss/index.xml | Tech, KI |
+| Le Journal du Net | https://www.journaldunet.com/rss/ | Tech, KI |
+| ActuIA | https://actuia.com/feed/ | KI-spezifisch (FR) |
+
+#### 🌐 Multilingual / Research — 3 Quellen
+| Quelle | RSS-URL | Fokus |
+|---|---|---|
+| arXiv cs.AI | https://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submittedDate&sortOrder=descending&max_results=10 | KI-Forschung |
+| arXiv cs.LG | https://export.arxiv.org/api/query?search_query=cat:cs.LG&sortBy=submittedDate&sortOrder=descending&max_results=10 | ML-Forschung |
+| arXiv cs.CL | https://export.arxiv.org/api/query?search_query=cat:cs.CL&sortBy=submittedDate&sortOrder=descending&max_results=10 | NLP/LLM-Forschung |
+
+**Gesamt: 35 Quellen (10 DE + 12 EN + 4 ZH + 3 JA + 3 FR + 3 Research)**
 
 ### 2.2 SearXNG Web-Suche (ergänzend)
 
@@ -94,14 +118,18 @@ SearXNG sucht mit gezielten Queries in mehreren Sprachen:
 | Modell | RAM | Context | Speed | Qualität | Empfehlung |
 |---|---|---|---|---|---|
 | Qwen 2.5 1.5B (aktuell) | ~1.2 GB | 32K | ~15 tok/s | OK, aber limitiert | Current |
-| **Qwen 2.5 3B** | ~2.5 GB | 32K | ~8 tok/s | Sehr gut, multilingual | ⭐ Empfohlen |
-| Qwen 2.5 7B | ~4.5 GB | 32K | ~3 tok/s | Excellent | RAM-kritisch |
+| **Qwen3 1.7B** | ~1.5 GB | 32K | ~12 tok/s | Sehr gut (neueste Gen) | ⭐ Empfohlen |
+| Qwen 2.5 3B | ~2.5 GB | 32K | ~8 tok/s | Sehr gut, multilingual | Alternative |
 
-**Empfehlung: Qwen 2.5 3B**
-- Besseres Context-Fenster für mehr Items
+**Empfehlung: Qwen3 1.7B**
+- Neueste Modell-Generation (Qwen3-Serie)
+- Bessere Reasoning-Fähigkeiten als Qwen 2.5
 - Multilingual (DE, EN, ZH, JA, FR)
-- Mit 2.6 GB freiem RAM machbar (Swap als Puffer)
+- RAM-freundlich (~1.5 GB, passt in VPS-Budget)
 - Token-Limit: `num_predict: 4096` (für 10+ Items mit DE+EN Summaries)
+- Inkludiert auch SLMs (Small Language Models) als valides News-Thema
+
+**Wichtig:** Qwen3 Modelle heißen in Ollama `qwen3:1.7b` (oder ähnlich). Vorab mit `ollama list` prüfen, welche Tags verfügbar sind.
 
 ### 3.2 Prompt-Engineering
 
@@ -112,7 +140,14 @@ You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting fi
 
 Your task: Select the 10 most relevant and impactful AI news items from today's international sources.
 
-Selection criteria (in priority order):
+Relevant topics (in priority order):
+- AI/ML research and breakthroughs (including LLMs, SLMs, multimodal AI)
+- AI business and industry developments (investments, products, partnerships)
+- AI regulation and policy (EU AI Act, global regulation)
+- AI tools and applications (productivity, automation, dev tools)
+- AI society and ethics (impact, risks, education)
+
+Selection criteria:
 1. Impact: Will this change how businesses use AI?
 2. Novelty: Is this genuinely new, not a rehash?
 3. Diversity: Mix of research, business, regulation, tools
@@ -220,36 +255,51 @@ Falls Qwen 2.5 3B zu langsam für alle Items in einem Durchgang:
 | **Original-Link** | Externer Link (rel="noopener noreferrer nofollow") |
 | **Thumbnail** | 60×60px, lazy-loaded (optional, nur wenn verfügbar) |
 | **Aufklappen** | Wie bisher: Chevron → Summary + Thumbnail + Weiterlesen |
+| **Kategorie** | SVG-Icon (schlicht, einfarbig, Style-Token-konform) neben der Quelle |
 
-**Keine separaten Reiter** — alle News in einer Liste, sortiert nach Relevanz (LLM entscheidet).
+**Sprach-Filter (Tags):**
+- Über der News-Liste: kleine auswählbare Tags `[Alle] [🇩🇪 DE] [🇺🇸 EN] [🇨🇳 ZH] [🇯🇵 JA] [🇫🇷 FR]`
+- Klick filtert die Liste live (Client-seitig, kein Reload)
+- Default: "Alle"
+- Minimalistisch: schlichte Text-Tags, nicht knallig, im Levcon-Style
 
-### 4.3 Übersetzungs-Feature (optional, später)
+**Kategorie-Icons (SVG, einfarbig, Style-Token-konform):**
+| Kategorie | SVG-Icon | Bedeutung |
+|---|---|---|
+| 🔬 Research | Flask/Beaker | Forschung, Papers, Breakthroughs |
+| 💼 Business | Briefcase/Chart | Investments, Firmen, Produkte |
+| ⚖️ Regulation | Scale/Balance | Gesetze, Regulierung, Policy |
+| 🛠️ Tools | Wrench/Hammer | Produkte, Software, Dev-Tools |
+| 🌍 Society | Globe | Gesellschaft, Ethik, Bildung |
 
-Für nicht-deutschsprachige Originalartikel:
+**Wichtig:** Icons als SVG inline, einfarbig (currentColor), Größe 12×12px. Nutzen CSS-Variablen (`var(--lc-muted)` default, `var(--lc-ink)` hover). Keine bunten Emojis im Production-Design — das war nur zur Veranschaulichung.
 
-**Option A (empfohlen): LLM-Übersetzung beim Aufklappen**
-- Beim Aufklappen zeigt das Item: "Deutsche Zusammenfassung" (bereits vorhanden)
-- Zusätzlich Button: "Originalartikel auf Deutsch lesen →"
-- Klick öffnet neues Fenster mit Google Translate (`https://translate.google.com/translate?sl=auto&tl=de&u=<URL>`)
+### 4.3 Thumbnail-Steuerung
 
-**Option B (später): Vollständige Übersetzung**
-- LLM übersetzt den kompletten Artikel beim Scraping
-- Speicherung in DB
-- Aufklappen zeigt übersetzten Volltext
-- RAM/CPU-intensiv, nur für Top 3 Items
+**Deaktivierbar über CSS-Variable:**
+```css
+:root {
+  --lc-show-thumbnails: none; /* 'block' um einzublenden */
+}
 
-**Empfehlung:** Option A — leichtgewichtig, kein zusätzlicher LLM-Aufwand, User entscheidet selbst.
+.ainews-item-thumb {
+  display: var(--lc-show-thumbnails);
+}
+```
 
-### 4.4 Kategorien (optional, später)
+Oder über eine Environment-Variable in Next.js:
+```env
+NEXT_PUBLIC_SHOW_THUMBNAILS=false
+```
 
-Jedes Item bekommt eine Kategorie vom LLM:
-- 🔬 Research (Forschung, Papers)
-- 💼 Business (Investments, Firmen)
-- ⚖️ Regulation (Gesetze, Regulierung)
-- 🛠️ Tools (Produkte, Software)
-- 🌍 Society (Gesellschaft, Ethik)
+In der Komponente:
+```tsx
+{item.thumbnailUrl && process.env.NEXT_PUBLIC_SHOW_THUMBNAILS === 'true' && (
+  <img src={item.thumbnailUrl} ... />
+)}
+```
 
-Anzeige als kleiner Tag neben der Quelle. Keine Filterung (hält es minimalistisch).
+**Default:** `false` (ultraschlicht wie jetzt). Kann jederzeit ohne Code-Änderung aktiviert werden.
 
 ---
 
@@ -454,3 +504,4 @@ model NewsletterSubscriber {
 - [ ] Final Code Review (Best Practices, Kommentare, Sauberkeit)
 - [ ] HTML-Code Erscheinungsbild im Browser prüfen (Desktop & Mobile)
 - [ ] SearXNG Engine-Optimierung (Startpage deaktivieren, stabile Engines priorisieren)
+- [ ] **Sitemap & SEO:** Jede Seite (Datenschutz, Impressum, AI News, etc.) muss einzeln aufrufbar, indexierbar und verlinkbar sein. Sitemap.xml prüfen/erweitern. Panels als eigene Routen oder mit Hash-Links absichern.
