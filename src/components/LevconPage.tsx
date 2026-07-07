@@ -24,6 +24,9 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formLoadTime = useRef<number>(Date.now());
 
+  // News status (from URL params: ?news=confirmed|unsubscribed|already|error)
+  const [newsStatus, setNewsStatus] = useState<'confirmed' | 'unsubscribed' | 'already' | 'error' | null>(null);
+
   // Contact form state
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -33,6 +36,25 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
   const [formSending, setFormSending] = useState(false);
   const [formStatus, setFormStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; consent?: string }>({});
+
+  // Check URL for news status params (after confirm/unsubscribe redirect)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const status = params.get('news');
+      if (status && ['confirmed', 'unsubscribed', 'already', 'error'].includes(status)) {
+        setNewsStatus(status as typeof newsStatus);
+        // Auto-open AI News panel
+        setActivePanel('ainews');
+        setIntroGone(true);
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Clean URL (remove query param)
+        const newUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
+  }, []);
 
   const t = useTranslations();
   const messages = useMessages() as Record<string, unknown>;
@@ -289,6 +311,17 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
 
       {/* ── MAIN ──────────────────────────────── */}
       <main id="main-content" className="levcon-main">
+
+        {/* Newsletter Status Banner (after confirm/unsubscribe redirect) */}
+        {newsStatus && (
+          <div className={`news-status-banner ${newsStatus === 'error' ? 'error' : 'success'}`} role="status" aria-live="polite">
+            {newsStatus === 'confirmed' && (locale === 'de' ? 'Anmeldung bestätigt — willkommen bei Levcon AI News!' : 'Subscription confirmed — welcome to Levcon AI News!')}
+            {newsStatus === 'unsubscribed' && (locale === 'de' ? 'Abmeldung erfolgreich.' : 'Unsubscribed successfully.')}
+            {newsStatus === 'already' && (locale === 'de' ? 'Ihre Anmeldung ist bereits bestätigt.' : 'Your subscription is already confirmed.')}
+            {newsStatus === 'error' && (locale === 'de' ? 'Ungültiger oder abgelaufener Link.' : 'Invalid or expired link.')}
+            <button type="button" className="news-status-close" onClick={() => setNewsStatus(null)} aria-label={locale === 'de' ? 'Schließen' : 'Close'}>×</button>
+          </div>
+        )}
 
         {/* Intro / About */}
         <div className={introClass}>

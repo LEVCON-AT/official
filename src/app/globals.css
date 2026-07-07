@@ -837,6 +837,46 @@
   margin-top: 1rem;
 }
 
+/* ── NEWS STATUS BANNER (Confirm/Unsubscribe) ── */
+.news-status-banner {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  border-left: 3px solid var(--lc-red);
+  background: var(--lc-panel-bg);
+  animation: fadeInDown 0.4s ease;
+}
+
+.news-status-banner.success {
+  border-left-color: var(--lc-success, #2d8a4e);
+}
+
+.news-status-banner.error {
+  border-left-color: var(--lc-red);
+}
+
+.news-status-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--lc-muted);
+  padding: 0 0.25rem;
+  -webkit-appearance: none;
+}
+
+.news-status-close:hover { color: var(--lc-ink); }
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ── AI NEWS SIGNUP ──────────────────────────── */
 .ainews-signup {
   margin-top: 3rem;
