@@ -152,6 +152,10 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
   }, [formName, formEmail, formMessage, formConsent, t]);
 
   const goHome = useCallback(() => {
+    setActivePanel(null);
+    setIntroHiding(false);
+    setIntroGone(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     router.push('/');
   }, [router]);
 
@@ -160,10 +164,25 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
       goHome();
       return;
     }
-    // Navigate to panel route
+
+    // Immediate visual feedback (state-based, no wait for server)
+    if (!introGone) {
+      setIntroHiding(true);
+      if (fadeTimer.current) clearTimeout(fadeTimer.current);
+      fadeTimer.current = setTimeout(() => {
+        setIntroGone(true);
+        setActivePanel(target);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, FADE_MS);
+    } else {
+      setActivePanel(target);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Also update URL for SEO + shareability
     const slug = getPanelSlug(target, locale);
     router.push('/' + slug);
-  }, [activePanel, locale, router, goHome]);
+  }, [activePanel, introGone, locale, router, goHome]);
 
   const handleNavClick = useCallback((target: string) => {
     if (target === 'home') {
@@ -267,6 +286,14 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
           </button>
           <span className="nav-sep" aria-hidden="true">/</span>
           <button
+            className={`nav-btn${activePanel === 'ainews' ? ' active' : ''}`}
+            onClick={() => handleNavClick('ainews')}
+            aria-expanded={activePanel === 'ainews'}
+          >
+            {t('header.nav_ainews')}
+          </button>
+          <span className="nav-sep" aria-hidden="true">/</span>
+          <button
             className={`nav-btn${activePanel === 'schulungen' ? ' active' : ''}`}
             onClick={() => handleNavClick('schulungen')}
             aria-expanded={activePanel === 'schulungen'}
@@ -288,14 +315,6 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
             aria-expanded={activePanel === 'privacy'}
           >
             {t('header.nav_privacy')}
-          </button>
-          <span className="nav-sep" aria-hidden="true">/</span>
-          <button
-            className={`nav-btn${activePanel === 'ainews' ? ' active' : ''}`}
-            onClick={() => handleNavClick('ainews')}
-            aria-expanded={activePanel === 'ainews'}
-          >
-            {t('header.nav_ainews')}
           </button>
           <span className="nav-sep" aria-hidden="true">/</span>
           <button
