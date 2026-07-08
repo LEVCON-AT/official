@@ -1689,6 +1689,19 @@ a.contact-row:hover { opacity: 0.5; }
   outline-offset: 2px;
 }
 
+.footer-github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  width: 14px;
+  height: 14px;
+}
+
+.footer-github-link svg {
+  display: block;
+}
+
 .footer-legal-sep { font-size: 0.55rem; color: var(--lc-rule); user-select: none; }
 
 /* ── LANGUAGE SWITCHER ──────────────────────── */
