@@ -2,14 +2,14 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations, useMessages } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
 import AiNewsSignup from '@/components/ainews/AiNewsSignup';
 import AiNewsArchive from '@/components/ainews/AiNewsArchive';
 import AiNewsSettings from '@/components/ainews/AiNewsSettings';
 import { LANG_CODE_TO_SHORT } from '@/components/ainews/languages';
+import { getPanelSlug, type PanelId } from '@/components/panel-routing';
 import type { AiNewsData } from '@/components/ainews/data';
-
-type PanelId = 'schulungen' | 'framework' | 'privacy' | 'ainews' | 'faq' | 'kontakt' | 'impressum' | 'datenschutz';
 
 const FADE_MS = 320;
 
@@ -17,12 +17,14 @@ type LevconPageProps = {
   locale: string;
   todaysNews: AiNewsData | null;
   archivedNews: AiNewsData[];
+  initialPanel?: PanelId | null;
 };
 
-export default function LevconPage({ locale, todaysNews, archivedNews }: LevconPageProps) {
-  const [activePanel, setActivePanel] = useState<PanelId | null>(null);
+export default function LevconPage({ locale, todaysNews, archivedNews, initialPanel }: LevconPageProps) {
+  const router = useRouter();
+  const [activePanel, setActivePanel] = useState<PanelId | null>(initialPanel || null);
   const [introHiding, setIntroHiding] = useState(false);
-  const [introGone, setIntroGone] = useState(false);
+  const [introGone, setIntroGone] = useState(!!initialPanel);
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formLoadTime = useRef<number>(Date.now());
 
@@ -60,12 +62,16 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
     };
   }, []);
 
-  // Handle browser back/forward — reset to home state
+  // Handle browser back/forward — sync state with URL
   useEffect(() => {
     const handlePopState = () => {
-      setActivePanel(null);
-      setIntroHiding(false);
-      setIntroGone(false);
+      // Next.js router handles this automatically via Link navigation
+      // This is just a fallback for direct URL changes
+      if (window.location.pathname === '/' || window.location.pathname === '/en') {
+        setActivePanel(null);
+        setIntroHiding(false);
+        setIntroGone(false);
+      }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -146,32 +152,18 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
   }, [formName, formEmail, formMessage, formConsent, t]);
 
   const goHome = useCallback(() => {
-    setActivePanel(null);
-    setIntroHiding(false);
-    setIntroGone(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+    router.push('/');
+  }, [router]);
 
   const openPanel = useCallback((target: PanelId) => {
     if (activePanel === target) {
       goHome();
       return;
     }
-
-    // If intro is visible, fade it out first then show panel
-    if (!introGone) {
-      setIntroHiding(true);
-      if (fadeTimer.current) clearTimeout(fadeTimer.current);
-      fadeTimer.current = setTimeout(() => {
-        setIntroGone(true);
-        setActivePanel(target);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, FADE_MS);
-    } else {
-      setActivePanel(target);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [activePanel, introGone, goHome]);
+    // Navigate to panel route
+    const slug = getPanelSlug(target, locale);
+    router.push('/' + slug);
+  }, [activePanel, locale, router, goHome]);
 
   const handleNavClick = useCallback((target: string) => {
     if (target === 'home') {

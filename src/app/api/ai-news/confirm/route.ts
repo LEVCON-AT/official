@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
  */
 function redirectToHome(language: string, status: string): NextResponse {
   const localePath = language === 'en' ? '/en' : '';
-  const url = `${SITE_URL}${localePath}/?news=${status}#ainews`;
+  const newsSlug = language === 'en' ? 'ai-news' : 'ai-news';
+  const url = `${SITE_URL}${localePath}/${newsSlug}?news=${status}`;
   return NextResponse.redirect(url, { status: 303 });
 }
