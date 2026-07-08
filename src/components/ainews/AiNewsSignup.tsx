@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Mail, ChevronDown, Check } from 'lucide-react';
 import { NEWS_LANGUAGES, DEFAULT_NEWS_LANGS, LANG_CODE_TO_SHORT } from './languages';
@@ -28,6 +28,20 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
   // News language preferences (which languages to include in newsletter)
   const [newsLangs, setNewsLangs] = useState<Set<string>>(new Set(DEFAULT_NEWS_LANGS));
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Click-outside to close dropdown
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setLangDropdownOpen(false);
+      }
+    }
+    if (langDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [langDropdownOpen]);
 
   const toggleNewsLang = (lang: string) => {
     setNewsLangs(prev => {
@@ -216,7 +230,7 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
               <legend className="form-label">
                 {locale === 'de' ? 'News-Sprachen' : 'News Languages'} *
               </legend>
-              <div className="ainews-lang-dropdown-wrapper">
+              <div className="ainews-lang-dropdown-wrapper" ref={dropdownRef}>
                 <button
                   type="button"
                   className="ainews-lang-dropdown-trigger"

@@ -90,7 +90,7 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
         setSettingsToken(settings);
         setActivePanel('ainews');
         setIntroGone(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Don't scroll to top — AiNewsSettings component will scroll to itself
         const newUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({}, document.title, newUrl);
       }

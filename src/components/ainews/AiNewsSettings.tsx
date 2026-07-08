@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { Mail, ChevronDown, Check, Loader2 } from 'lucide-react';
-import { NEWS_LANGUAGES, LANG_CODE_TO_SHORT } from './languages';
+import { ChevronDown, Check, Loader2 } from 'lucide-react';
+import { NEWS_LANGUAGES } from './languages';
 
 type SubscriberData = {
   id: number;
@@ -33,6 +33,10 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
   const [newsLangs, setNewsLangs] = useState<Set<string>>(new Set(['de', 'en']));
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
+  // Refs for click-outside + scroll
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
   // Fetch subscriber data
   useEffect(() => {
     async function fetchSubscriber() {
@@ -55,6 +59,28 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
     }
     fetchSubscriber();
   }, [token, locale]);
+
+  // Click-outside to close dropdown
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setLangDropdownOpen(false);
+      }
+    }
+    if (langDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [langDropdownOpen]);
+
+  // Scroll to settings after load
+  useEffect(() => {
+    if (!loading && subscriber && settingsRef.current) {
+      setTimeout(() => {
+        settingsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [loading, subscriber]);
 
   const toggleNewsLang = (lang: string) => {
     setNewsLangs(prev => {
@@ -100,7 +126,7 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
   if (loading) {
     return (
       <div className="ainews-settings-loading">
-        <Loader2 size={20} className="animate-spin" aria-hidden="true" />
+        <Loader2 size={16} className="ainews-settings-spinner" aria-hidden="true" />
         <span>{locale === 'de' ? 'Laden…' : 'Loading…'}</span>
       </div>
     );
@@ -122,16 +148,11 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
     .join(', ');
 
   return (
-    <div className="ainews-settings">
-      <div className="ainews-settings-header">
-        <Mail size={14} aria-hidden="true" />
-        <h3 className="ainews-signup-title">
-          {locale === 'de' ? 'Einstellungen' : 'Settings'}
-        </h3>
-      </div>
-      <p className="ainews-signup-lead">
-        {subscriber.email}
-      </p>
+    <div className="ainews-settings" ref={settingsRef}>
+      <h3 className="ainews-settings-title">
+        {locale === 'de' ? 'Einstellungen' : 'Settings'}
+      </h3>
+      <p className="ainews-settings-email">{subscriber.email}</p>
 
       <div className="ainews-settings-form">
         {/* Newsletter language */}
@@ -180,7 +201,7 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
           <legend className="form-label">
             {locale === 'de' ? 'News-Sprachen' : 'News Languages'}
           </legend>
-          <div className="ainews-lang-dropdown-wrapper">
+          <div className="ainews-lang-dropdown-wrapper" ref={dropdownRef}>
             <button
               type="button"
               className="ainews-lang-dropdown-trigger"
@@ -198,7 +219,7 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
               />
             </button>
             {langDropdownOpen && (
-              <div className="ainews-lang-dropdown-menu" role="listbox" aria-multiselectable="true">
+              <div className="ainews-lang-dropdown-menu ainews-lang-dropdown-up" role="listbox" aria-multiselectable="true">
                 {NEWS_LANGUAGES.map(lang => (
                   <button
                     key={lang.code}
