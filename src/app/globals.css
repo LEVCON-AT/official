@@ -1102,6 +1102,60 @@
   font-weight: 300;
 }
 
+/* ── NEWS LANGUAGE CHECKBOXES ────────────── */
+.ainews-news-lang-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.ainews-news-lang-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--lc-rule);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  font-family: var(--lc-ff-b);
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+}
+
+.ainews-news-lang-option:hover {
+  border-color: var(--lc-ink);
+  color: var(--lc-ink);
+}
+
+.ainews-news-lang-option.selected {
+  border-color: var(--lc-ink);
+  background: var(--lc-panel-bg);
+  color: var(--lc-ink);
+}
+
+.ainews-news-lang-option:focus-within {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 2px;
+}
+
+.ainews-news-lang-input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.ainews-news-lang-hint {
+  font-size: 0.7rem;
+  color: var(--lc-muted);
+  margin-top: 0.5rem;
+  font-weight: 300;
+}
+
 .ainews-signup-submit {
   align-self: flex-start;
   margin-top: 0.5rem;

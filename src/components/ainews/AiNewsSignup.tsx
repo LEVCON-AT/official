@@ -24,16 +24,31 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
   // Reveal trigger: form expands when first character is typed
   const hasEmailInput = email.length > 0;
 
+  // News language preferences (which languages to include in newsletter)
+  const [newsLangs, setNewsLangs] = useState<Set<string>>(new Set(['de', 'en']));
+
+  const toggleNewsLang = (lang: string) => {
+    setNewsLangs(prev => {
+      const next = new Set(prev);
+      if (next.has(lang)) {
+        if (next.size > 1) next.delete(lang); // Mindestens 1 Sprache
+      } else {
+        next.add(lang);
+      }
+      return next;
+    });
+  };
+
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
     // Honeypot — bots fill this, humans don't
     if (formData.get('website')) {
-      return; // silently ignore
+      return;
     }
 
-    // Time check — submitted too fast = bot
+    // Time check
     if (Date.now() - formLoadTime.current < 2500) {
       return;
     }
@@ -70,6 +85,7 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
           email: email.trim().toLowerCase(),
           frequency,
           language: locale,
+          newsLanguages: Array.from(newsLangs).join(','),
         }),
       });
 
@@ -185,6 +201,34 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
                   {errors.frequency}
                 </div>
               )}
+            </fieldset>
+
+            {/* News language preferences */}
+            <fieldset className="ainews-form-group">
+              <legend className="form-label">
+                {locale === 'de' ? 'News-Sprachen' : 'News Languages'} *
+              </legend>
+              <div className="ainews-news-lang-options">
+                {(['de', 'en', 'zh', 'ja', 'fr'] as const).map(lang => (
+                  <label
+                    key={lang}
+                    className={`ainews-news-lang-option${newsLangs.has(lang) ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={newsLangs.has(lang)}
+                      onChange={() => toggleNewsLang(lang)}
+                      className="ainews-news-lang-input"
+                    />
+                    <span className="ainews-news-lang-label">{lang.toUpperCase()}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="ainews-news-lang-hint">
+                {locale === 'de'
+                  ? 'Welche Sprachen sollen im Newsletter enthalten sein?'
+                  : 'Which languages should be included in the newsletter?'}
+              </p>
             </fieldset>
 
             <div className="form-checkbox-row">

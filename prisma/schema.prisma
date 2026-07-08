@@ -77,7 +77,8 @@ model AiNewsItem {
 model NewsletterSubscriber {
   id              Int       @id @default(autoincrement())
   email           String    @unique
-  language        String    @default("de")
+  language        String    @default("de")  // Newsletter-Sprache (DE/EN)
+  newsLanguages   String    @default("de,en")  // Welche News-Sprachen (de,en,zh,ja,fr)
   frequency       String    @default("daily")
   confirmToken    String    @unique
   confirmedAt     DateTime?

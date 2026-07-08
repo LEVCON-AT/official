@@ -24,6 +24,7 @@ type SubscribeBody = {
   email?: unknown;
   frequency?: unknown;
   language?: unknown;
+  newsLanguages?: unknown;
   website?: unknown; // honeypot
 };
 
@@ -143,7 +144,7 @@ function buildConfirmationEmail(
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as SubscribeBody;
-    const { email: rawEmail, frequency: rawFrequency, language: rawLanguage, website } = body;
+    const { email: rawEmail, frequency: rawFrequency, language: rawLanguage, newsLanguages: rawNewsLanguages, website } = body;
 
     // Honeypot — bots fill this
     if (website) {
@@ -164,6 +165,16 @@ export async function POST(request: NextRequest) {
 
     if (typeof rawLanguage !== 'string' || !isValidLanguage(rawLanguage)) {
       return NextResponse.json({ error: 'Invalid language.' }, { status: 400 });
+    }
+
+    // Validate newsLanguages (comma-separated, e.g. "de,en,zh")
+    let newsLanguages = 'de,en';
+    if (typeof rawNewsLanguages === 'string') {
+      const validLangs = ['de', 'en', 'zh', 'ja', 'fr'];
+      const requested = rawNewsLanguages.split(',').map(l => l.trim()).filter(l => validLangs.includes(l));
+      if (requested.length > 0) {
+        newsLanguages = requested.join(',');
+      }
     }
 
     // Rate limiting
@@ -189,6 +200,7 @@ export async function POST(request: NextRequest) {
         data: {
           frequency: rawFrequency,
           language: rawLanguage,
+          newsLanguages: newsLanguages,
           confirmToken: newToken,
           confirmedAt: null,
           unsubscribedAt: null,
@@ -206,6 +218,7 @@ export async function POST(request: NextRequest) {
         email,
         frequency: rawFrequency,
         language: rawLanguage,
+        newsLanguages: newsLanguages,
         confirmToken,
       },
     });
