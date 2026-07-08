@@ -1,11 +1,10 @@
 # Sprint 9 — Code-Node "Build Ollama Request" (Updated)
 
-**Zweck:** Diesen Code in den n8n Code-Node "Build Ollama Request" kopieren.
-Ersetzt den bisherigen Code vollständig.
+**Anleitung:** Öffne in n8n den Code-Node "Build Ollama Request" und ersetze den gesamten Code mit dem untenstehenden.
 
 ---
 
-## Vollständiger Code
+## Vollständiger Code (kopieren & einfügen)
 
 ```javascript
 const allItems = $input.all();
@@ -55,29 +54,15 @@ return [{ json: response }];
 
 ---
 
-## Was sich geändert hat
+## Was sich geändert hat (gegenüber deinem aktuellen Code)
 
-| Parameter | Vorher (Sprint 5) | Nachher (Sprint 9) |
+| Parameter | Vorher (dein aktueller) | Nachher (Sprint 9) |
 |---|---|---|
 | Modell | `qwen2.5:1.5b` | `qwen3.5:2b` |
 | `num_predict` | 3000 | 4096 |
 | Input Items | `slice(0, 7)` | `slice(0, 20)` |
-| Ausgabe Items | 5-7 | 10 |
-| Prompt | Generisch ("Select top 5-10") | Analytisch ("McKinsey briefing", SLMs, Impact, Novelty) |
+| Ausgabe Items | "top 5-7" | **"Select the 10 most relevant"** |
+| Prompt-Stil | Generisch ("AI news curator") | Analytisch ("McKinsey briefing", SLMs, Impact, Novelty) |
 | Kategorien | Keine | `research|business|regulation|tools|society` |
 | Sprache | Keine `languageOrig` | `de|en|zh|ja|fr` |
-| Timeout | 300s | 300s (unverändert) |
-
----
-
-## Erwartete Performance
-
-- Prompt: ~1200 Tokens (20 Items) → ~25 Sekunden
-- Generation: ~3500 Tokens (10 Items + 2 Summaries) → ~350 Sekunden
-- **Total: ~5-6 Minuten** (akzeptabel für 06:00 Uhr Cron)
-
-## RAM-Erwartung
-
-- Qwen3.5 2B: ~1.8 GB RAM
-- VPS gesamt: ~3.3 GB von 3.8 GB
-- Swap: ~500 MB Puffer
+| Thumbnail | Kein Feld | `thumbnailUrl` (null oder URL) |
