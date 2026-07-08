@@ -24,9 +24,6 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formLoadTime = useRef<number>(Date.now());
 
-  // News status (from URL params: ?news=confirmed|unsubscribed|already|error)
-  const [newsStatus, setNewsStatus] = useState<'confirmed' | 'unsubscribed' | 'already' | 'error' | null>(null);
-
   // Contact form state
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -37,24 +34,11 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
   const [formStatus, setFormStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; consent?: string }>({});
 
-  // Check URL for news status params (after confirm/unsubscribe redirect)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const status = params.get('news');
-      if (status && ['confirmed', 'unsubscribed', 'already', 'error'].includes(status)) {
-        setNewsStatus(status as typeof newsStatus);
-        // Auto-open AI News panel
-        setActivePanel('ainews');
-        setIntroGone(true);
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        // Clean URL (remove query param)
-        const newUrl = window.location.pathname + window.location.hash;
-        window.history.replaceState({}, document.title, newUrl);
-      }
-    }
-  }, []);
+  // News status (from URL params: ?news=confirmed|unsubscribed|already|error)
+  const [newsStatus, setNewsStatus] = useState<'confirmed' | 'unsubscribed' | 'already' | 'error' | null>(null);
+
+  // Language filter for AI News
+  const [newsLangFilter, setNewsLangFilter] = useState<string>('all');
 
   const t = useTranslations();
   const messages = useMessages() as Record<string, unknown>;
@@ -80,6 +64,22 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Check URL for news status params (after confirm/unsubscribe redirect)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const status = params.get('news');
+      if (status && ['confirmed', 'unsubscribed', 'already', 'error'].includes(status)) {
+        setNewsStatus(status as typeof newsStatus);
+        setActivePanel('ainews');
+        setIntroGone(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const newUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
   }, []);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
@@ -447,8 +447,39 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
                   </p>
                 </div>
 
+                {/* Dynamic language filter tags */}
+                {(() => {
+                  const langSet = new Set(todaysNews.items.map((i: AiNewsItemType) => i.languageOrig));
+                  const langs = Array.from(langSet).sort();
+                  if (langs.length <= 1) return null;
+                  const langLabels: Record<string, string> = { de: 'DE', en: 'EN', zh: 'ZH', ja: 'JA', fr: 'FR' };
+                  return (
+                    <div className="ainews-lang-filter" role="group" aria-label="Filter by language">
+                      <button
+                        type="button"
+                        className={`ainews-lang-tag${newsLangFilter === 'all' ? ' active' : ''}`}
+                        onClick={() => setNewsLangFilter('all')}
+                      >
+                        {locale === 'en' ? 'All' : 'Alle'}
+                      </button>
+                      {langs.map(lang => (
+                        <button
+                          key={lang}
+                          type="button"
+                          className={`ainews-lang-tag${newsLangFilter === lang ? ' active' : ''}`}
+                          onClick={() => setNewsLangFilter(lang)}
+                        >
+                          {langLabels[lang] || lang.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
+
                 <div className="ainews-list">
-                  {todaysNews.items.map((item: AiNewsItemType) => (
+                  {todaysNews.items
+                    .filter((item: AiNewsItemType) => newsLangFilter === 'all' || item.languageOrig === newsLangFilter)
+                    .map((item: AiNewsItemType) => (
                     <AiNewsItem key={item.id} item={item} locale={locale} />
                   ))}
                 </div>

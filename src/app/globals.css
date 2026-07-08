@@ -595,6 +595,47 @@
   margin-top: 2.5rem;
 }
 
+/* ── LANGUAGE FILTER TAGS ─────────────────── */
+.ainews-lang-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ainews-lang-tag {
+  font-family: var(--lc-ff-b);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+  background: none;
+  border: 1px solid var(--lc-rule);
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  -webkit-appearance: none;
+  min-height: 28px;
+}
+
+.ainews-lang-tag:hover {
+  border-color: var(--lc-ink);
+  color: var(--lc-ink);
+}
+
+.ainews-lang-tag.active {
+  border-color: var(--lc-ink);
+  background: var(--lc-ink);
+  color: var(--lc-bg);
+}
+
+.ainews-lang-tag:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 2px;
+}
+
 .ainews-item {
   border-bottom: 1px solid var(--lc-rule);
 }
@@ -648,6 +689,59 @@
   font-weight: 400;
   line-height: 1.45;
   color: var(--lc-ink);
+}
+
+/* Language tag (e.g. ZH, JA, FR) */
+.ainews-lang-tag-inline {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--lc-ff-b);
+  font-size: 0.45rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: var(--lc-red);
+  border: 1px solid var(--lc-red);
+  padding: 0.1rem 0.35rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+  border-radius: 1px;
+}
+
+/* Category SVG icon */
+.ainews-category-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--lc-muted);
+  margin-right: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* Translate link + separator */
+.ainews-item-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ainews-link-sep {
+  color: var(--lc-rule);
+  font-size: 0.7rem;
+}
+
+.ainews-item-translate {
+  font-family: var(--lc-ff-b);
+  font-size: 0.55rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+  text-decoration: none;
+  transition: color 0.18s;
+}
+
+.ainews-item-translate:hover {
+  color: var(--lc-red);
 }
 
 .ainews-item-meta {
