@@ -2,7 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Mail } from 'lucide-react';
+import { Mail, ChevronDown, Check } from 'lucide-react';
+import { NEWS_LANGUAGES, DEFAULT_NEWS_LANGS, LANG_CODE_TO_SHORT } from './languages';
 
 type Frequency = 'daily' | 'weekly' | 'digest';
 
@@ -25,19 +26,26 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
   const hasEmailInput = email.length > 0;
 
   // News language preferences (which languages to include in newsletter)
-  const [newsLangs, setNewsLangs] = useState<Set<string>>(new Set(['de', 'en']));
+  const [newsLangs, setNewsLangs] = useState<Set<string>>(new Set(DEFAULT_NEWS_LANGS));
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
   const toggleNewsLang = (lang: string) => {
     setNewsLangs(prev => {
       const next = new Set(prev);
       if (next.has(lang)) {
-        if (next.size > 1) next.delete(lang); // Mindestens 1 Sprache
+        if (next.size > 1) next.delete(lang);
       } else {
         next.add(lang);
       }
       return next;
     });
   };
+
+  // Selected languages display string
+  const selectedLangsDisplay = NEWS_LANGUAGES
+    .filter(l => newsLangs.has(l.code))
+    .map(l => l.shortLabel)
+    .join(', ');
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -203,26 +211,49 @@ export default function AiNewsSignup({ locale, onOpenPrivacy }: Props) {
               )}
             </fieldset>
 
-            {/* News language preferences */}
+            {/* News language preferences — Dropdown */}
             <fieldset className="ainews-form-group">
               <legend className="form-label">
                 {locale === 'de' ? 'News-Sprachen' : 'News Languages'} *
               </legend>
-              <div className="ainews-news-lang-options">
-                {(['de', 'en', 'zh', 'ja', 'fr'] as const).map(lang => (
-                  <label
-                    key={lang}
-                    className={`ainews-news-lang-option${newsLangs.has(lang) ? ' selected' : ''}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={newsLangs.has(lang)}
-                      onChange={() => toggleNewsLang(lang)}
-                      className="ainews-news-lang-input"
-                    />
-                    <span className="ainews-news-lang-label">{lang.toUpperCase()}</span>
-                  </label>
-                ))}
+              <div className="ainews-lang-dropdown-wrapper">
+                <button
+                  type="button"
+                  className="ainews-lang-dropdown-trigger"
+                  onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                  aria-expanded={langDropdownOpen}
+                  aria-haspopup="listbox"
+                >
+                  <span className="ainews-lang-dropdown-value">
+                    {selectedLangsDisplay || (locale === 'de' ? 'Sprachen wählen' : 'Select languages')}
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    className={`ainews-lang-dropdown-chevron${langDropdownOpen ? ' is-open' : ''}`}
+                    aria-hidden="true"
+                  />
+                </button>
+                {langDropdownOpen && (
+                  <div className="ainews-lang-dropdown-menu" role="listbox" aria-multiselectable="true">
+                    {NEWS_LANGUAGES.map(lang => (
+                      <button
+                        key={lang.code}
+                        type="button"
+                        role="option"
+                        aria-selected={newsLangs.has(lang.code)}
+                        className={`ainews-lang-dropdown-item${newsLangs.has(lang.code) ? ' selected' : ''}`}
+                        onClick={() => toggleNewsLang(lang.code)}
+                        dir={lang.rtl ? 'rtl' : 'ltr'}
+                      >
+                        <span className="ainews-lang-dropdown-check">
+                          {newsLangs.has(lang.code) && <Check size={12} aria-hidden="true" />}
+                        </span>
+                        <span className="ainews-lang-dropdown-label">{lang.label}</span>
+                        <span className="ainews-lang-dropdown-native">{lang.nativeName}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <p className="ainews-news-lang-hint">
                 {locale === 'de'

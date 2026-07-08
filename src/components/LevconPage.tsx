@@ -5,6 +5,7 @@ import { useTranslations, useMessages } from 'next-intl';
 import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
 import AiNewsSignup from '@/components/ainews/AiNewsSignup';
 import AiNewsArchive from '@/components/ainews/AiNewsArchive';
+import { LANG_CODE_TO_SHORT } from '@/components/ainews/languages';
 import type { AiNewsData } from '@/components/ainews/data';
 
 type PanelId = 'schulungen' | 'framework' | 'privacy' | 'ainews' | 'faq' | 'kontakt' | 'impressum' | 'datenschutz';
@@ -452,7 +453,7 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
                   const langSet = new Set(todaysNews.items.map((i: AiNewsItemType) => i.languageOrig));
                   const langs = Array.from(langSet).sort();
                   if (langs.length <= 1) return null;
-                  const langLabels: Record<string, string> = { de: 'DE', en: 'EN', zh: 'ZH', ja: 'JA', fr: 'FR' };
+                  const langLabels: Record<string, string> = LANG_CODE_TO_SHORT;
                   return (
                     <div className="ainews-lang-filter" role="group" aria-label="Filter by language">
                       <button

@@ -1102,51 +1102,134 @@
   font-weight: 300;
 }
 
-/* ── NEWS LANGUAGE CHECKBOXES ────────────── */
-.ainews-news-lang-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+/* ── NEWS LANGUAGE DROPDOWN ───────────────── */
+.ainews-lang-dropdown-wrapper {
+  position: relative;
   margin-top: 0.4rem;
 }
 
-.ainews-news-lang-option {
-  display: inline-flex;
+.ainews-lang-dropdown-trigger {
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.7rem;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
   border: 1px solid var(--lc-rule);
+  background: transparent;
   cursor: pointer;
-  transition: border-color 0.18s, background 0.18s;
   font-family: var(--lc-ff-b);
-  font-size: 0.55rem;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--lc-muted);
-}
-
-.ainews-news-lang-option:hover {
-  border-color: var(--lc-ink);
+  font-size: 0.88rem;
+  font-weight: 300;
   color: var(--lc-ink);
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  min-height: 44px;
+  border-radius: 1px;
 }
 
-.ainews-news-lang-option.selected {
+.ainews-lang-dropdown-trigger:hover {
   border-color: var(--lc-ink);
-  background: var(--lc-panel-bg);
-  color: var(--lc-ink);
 }
 
-.ainews-news-lang-option:focus-within {
+.ainews-lang-dropdown-trigger:focus-visible {
   outline: 1.5px solid var(--lc-ink);
   outline-offset: 2px;
 }
 
-.ainews-news-lang-input {
+.ainews-lang-dropdown-value {
+  flex: 1;
+  text-align: left;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+}
+
+.ainews-lang-dropdown-chevron {
+  flex-shrink: 0;
+  color: var(--lc-muted);
+  transition: transform 0.2s ease;
+}
+
+.ainews-lang-dropdown-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.ainews-lang-dropdown-menu {
   position: absolute;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--lc-bg);
+  border: 1px solid var(--lc-rule);
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(28, 28, 26, 0.08);
+  border-radius: 1px;
+}
+
+.ainews-lang-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--lc-ff-b);
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: var(--lc-ink);
+  transition: background 0.15s;
+  -webkit-appearance: none;
+  text-align: left;
+}
+
+.ainews-lang-dropdown-item:hover {
+  background: var(--lc-panel-bg);
+}
+
+.ainews-lang-dropdown-item.selected {
+  background: var(--lc-panel-bg);
+}
+
+.ainews-lang-dropdown-item:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: -1px;
+}
+
+.ainews-lang-dropdown-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lc-red);
+}
+
+.ainews-lang-dropdown-label {
+  flex: 1;
+  font-weight: 400;
+}
+
+.ainews-lang-dropdown-native {
+  font-size: 0.72rem;
+  color: var(--lc-muted);
+  font-weight: 300;
+}
+
+/* Custom scrollbar for dropdown */
+.ainews-lang-dropdown-menu::-webkit-scrollbar {
+  width: 4px;
+}
+.ainews-lang-dropdown-menu::-webkit-scrollbar-thumb {
+  background: var(--lc-rule);
+}
+.ainews-lang-dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .ainews-news-lang-hint {

@@ -3,6 +3,7 @@
 import { useState, useId } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronRight, ExternalLink } from 'lucide-react';
+import { LANG_CODE_TO_SHORT } from './languages';
 
 export type AiNewsItemType = {
   id: number;
@@ -68,14 +69,8 @@ const CategoryIcon = ({ category }: { category: string | null }) => {
   );
 };
 
-// Language label mapping
-const LANG_LABELS: Record<string, string> = {
-  de: 'DE',
-  en: 'EN',
-  zh: 'ZH',
-  ja: 'JA',
-  fr: 'FR',
-};
+// Language label mapping (uses centralized config)
+const LANG_LABELS: Record<string, string> = LANG_CODE_TO_SHORT;
 
 export default function AiNewsItem({ item, locale }: Props) {
   const [expanded, setExpanded] = useState(false);

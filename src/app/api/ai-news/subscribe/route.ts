@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
     // Validate newsLanguages (comma-separated, e.g. "de,en,zh")
     let newsLanguages = 'de,en';
     if (typeof rawNewsLanguages === 'string') {
-      const validLangs = ['de', 'en', 'zh', 'ja', 'fr'];
+      const validLangs = ['de', 'en', 'zh', 'ja', 'fr', 'es', 'it', 'pt', 'ru', 'ar', 'tr', 'nl', 'pl', 'ko', 'hi'];
       const requested = rawNewsLanguages.split(',').map(l => l.trim()).filter(l => validLangs.includes(l));
       if (requested.length > 0) {
         newsLanguages = requested.join(',');
