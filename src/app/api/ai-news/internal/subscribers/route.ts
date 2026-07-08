@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
         id: true,
         email: true,
         language: true,
+        newsLanguages: true,
         frequency: true,
         confirmToken: true,
         lastSentDate: true,
