@@ -5,6 +5,7 @@ import { useTranslations, useMessages } from 'next-intl';
 import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
 import AiNewsSignup from '@/components/ainews/AiNewsSignup';
 import AiNewsArchive from '@/components/ainews/AiNewsArchive';
+import AiNewsSettings from '@/components/ainews/AiNewsSettings';
 import { LANG_CODE_TO_SHORT } from '@/components/ainews/languages';
 import type { AiNewsData } from '@/components/ainews/data';
 
@@ -41,6 +42,9 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
   // Language filter for AI News
   const [newsLangFilter, setNewsLangFilter] = useState<string>('all');
 
+  // Settings token (from URL: ?settings=<token>)
+  const [settingsToken, setSettingsToken] = useState<string | null>(null);
+
   const t = useTranslations();
   const messages = useMessages() as Record<string, unknown>;
 
@@ -74,6 +78,16 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
       const status = params.get('news');
       if (status && ['confirmed', 'unsubscribed', 'already', 'error'].includes(status)) {
         setNewsStatus(status as typeof newsStatus);
+        setActivePanel('ainews');
+        setIntroGone(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const newUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+      // Check for settings token
+      const settings = params.get('settings');
+      if (settings && settings.length >= 32) {
+        setSettingsToken(settings);
         setActivePanel('ainews');
         setIntroGone(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -491,7 +505,15 @@ export default function LevconPage({ locale, todaysNews, archivedNews }: LevconP
 
             <AiNewsArchive archive={archivedNews} locale={locale} />
 
-            <AiNewsSignup locale={locale} onOpenPrivacy={() => openPanel('datenschutz')} />
+            {settingsToken ? (
+              <AiNewsSettings
+                token={settingsToken}
+                locale={locale}
+                onUpdated={() => {}}
+              />
+            ) : (
+              <AiNewsSignup locale={locale} onOpenPrivacy={() => openPanel('datenschutz')} />
+            )}
           </div></div>
         </section>
 
