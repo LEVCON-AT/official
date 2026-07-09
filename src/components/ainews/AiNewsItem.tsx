@@ -9,6 +9,8 @@ export type AiNewsItemType = {
   id: number;
   position: number;
   headline: string;
+  headlineDe: string | null;  // Deutsche Übersetzung (null bei Legacy-Items)
+  headlineEn: string | null;  // Englische Übersetzung (null bei Legacy-Items)
   descriptionDe: string;
   descriptionEn: string | null;
   source: string;
@@ -81,6 +83,12 @@ export default function AiNewsItem({ item, locale }: Props) {
     ? item.descriptionEn
     : item.descriptionDe;
 
+  // Headline: zeige übersetzte Version je nach Locale, mit Fallback auf Original
+  // (für Legacy-Items die noch keine headlineDe/headlineEn haben)
+  const headline = locale === 'en'
+    ? (item.headlineEn || item.headline)
+    : (item.headlineDe || item.headline);
+
   const showThumbnails = process.env.NEXT_PUBLIC_SHOW_THUMBNAILS === 'true';
   const langLabel = LANG_LABELS[item.languageOrig] || item.languageOrig.toUpperCase();
   const isNonDe = item.languageOrig !== 'de';
@@ -108,7 +116,7 @@ export default function AiNewsItem({ item, locale }: Props) {
             <span className="ainews-lang-tag-inline" aria-label={`Original language: ${item.languageOrig}`}>{langLabel}</span>
           )}
           <CategoryIcon category={item.category} />
-          <span className="ainews-item-headline">{item.headline}</span>
+          <span className="ainews-item-headline">{headline}</span>
         </button>
         <div className="ainews-item-meta">
           <span className="ainews-item-source">{item.source}</span>

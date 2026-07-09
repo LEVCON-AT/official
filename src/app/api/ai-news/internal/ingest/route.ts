@@ -15,7 +15,9 @@ import { db } from '@/lib/db';
  *   "items": [
  *     {
  *       "position": 1,
- *       "headline": "...",
+ *       "headline": "...",          // Original headline
+ *       "headlineDe": "...",        // German translation (optional)
+ *       "headlineEn": "...",        // English translation (optional)
  *       "descriptionDe": "...",
  *       "descriptionEn": "...",
  *       "source": "MIT Tech Review",
@@ -79,6 +81,8 @@ export async function POST(request: NextRequest) {
           create: items.map((item: {
             position: number;
             headline: string;
+            headlineDe?: string | null;
+            headlineEn?: string | null;
             descriptionDe: string;
             descriptionEn?: string | null;
             source: string;
@@ -89,6 +93,8 @@ export async function POST(request: NextRequest) {
           }, idx: number) => ({
             position: item.position || idx + 1,
             headline: item.headline,
+            headlineDe: item.headlineDe || null,
+            headlineEn: item.headlineEn || null,
             descriptionDe: item.descriptionDe,
             descriptionEn: item.descriptionEn || null,
             source: item.source,

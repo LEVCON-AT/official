@@ -54,6 +54,8 @@ model AiNewsItem {
   summaryId       Int
   position        Int
   headline        String
+  headlineDe      String?  // Deutsche Übersetzung der Headline (für DE-Anzeige)
+  headlineEn      String?  // Englische Übersetzung der Headline (für EN-Anzeige)
   descriptionDe   String
   descriptionEn   String?
   source          String

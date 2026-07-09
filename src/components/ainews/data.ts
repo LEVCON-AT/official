@@ -10,6 +10,9 @@ export type AiNewsData = {
   items: AiNewsItemType[];
 };
 
+// Type for a single news item — includes translated headlines
+// headlineDe/headlineEn are optional (null for legacy items before v3)
+
 /**
  * Loads today's AI news from DB.
  * Returns null if no news published yet today.
@@ -98,6 +101,8 @@ function mapSummary(summary: {
     id: number;
     position: number;
     headline: string;
+    headlineDe: string | null;
+    headlineEn: string | null;
     descriptionDe: string;
     descriptionEn: string | null;
     source: string;
@@ -115,6 +120,8 @@ function mapSummary(summary: {
       id: item.id,
       position: item.position,
       headline: item.headline,
+      headlineDe: item.headlineDe,
+      headlineEn: item.headlineEn,
       descriptionDe: item.descriptionDe,
       descriptionEn: item.descriptionEn,
       source: item.source,
