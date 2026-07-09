@@ -274,40 +274,38 @@ deBucket.sort((a, b) => b._score - a._score);
 enBucket.sort((a, b) => b._score - a._score);
 
 // 6. NEU: Source-Diversity-Cap anwenden (max 2 pro Quelle)
+//    Behält die Reihenfolge nach Score bei, limitiert aber pro Quelle.
 const deDiverse = applySourceDiversity(deBucket, MAX_ITEMS_PER_SOURCE);
 const enDiverse = applySourceDiversity(enBucket, MAX_ITEMS_PER_SOURCE);
 
 console.log(`[Quota] Nach Source-Diversity (max ${MAX_ITEMS_PER_SOURCE}/Quelle): DE=${deDiverse.length}, EN=${enDiverse.length}`);
 
-// 7. Top N aus jedem Bucket
+// 7. Top N aus jedem Bucket nehmen
 let deSelected = deDiverse.slice(0, QUOTA_DE);
 let enSelected = enDiverse.slice(0, QUOTA_EN);
 
 // 8. Umverteilung freier Slots (DE ↔ EN)
-//    Wenn DE weniger als 10 hat, gehen freie DE-Slots an EN und umgekehrt
-let deFree = QUOTA_DE - deSelected.length;
-let enFree = QUOTA_EN - enSelected.length;
+//    Wenn ein Bucket weniger als sein Quota hat, wird der andere Bucket
+//    aufgefüllt — ABER mit Source-Diversity-Cap, damit nicht eine Quelle
+//    alle freien Slots bekommt.
+const deFree = QUOTA_DE - deSelected.length;
+const enFree = QUOTA_EN - enSelected.length;
 
-if (deFree > 0 && enSelected.length > QUOTA_EN) {
-  // DE hat freie Slots, EN hat mehr als 10 → EN auffüllen
-  const enFill = Math.min(deFree, enSelected.length - QUOTA_EN);
-  // EN-Items die nach dem Cap noch übrig sind (hinter Index QUOTA_EN)
-  // Aber wir haben schon den Source-Diversity-Cap angewendet — hier
-  // nehmen wir einfach die nächsten besten EN-Items
-  const enExtra = enBucket
-    .filter(i => !enSelected.includes(i))
-    .slice(0, enFill);
+if (deFree > 0) {
+  // DE hat freie Slots → EN mit zusätzlichen Items auffüllen
+  // Nimmt die nächsten EN-Items (nach Source-Diversity-Cap) die noch nicht
+  // selected sind. Respektiert MAX_ITEMS_PER_SOURCE auch bei Umverteilung.
+  const enExtraPool = enDiverse.filter(i => !enSelected.includes(i));
+  const enExtra = enExtraPool.slice(0, deFree);
   enSelected = enSelected.concat(enExtra);
-  deFree -= enExtra.length;
-  console.log(`[Quota] DE-Freiplätze → EN: +${enExtra.length}`);
+  console.log(`[Quota] DE-Freiplätze (${deFree}) → EN: +${enExtra.length}`);
 }
 
-if (enFree > 0 && deSelected.length > QUOTA_DE) {
-  const deExtra = deBucket
-    .filter(i => !deSelected.includes(i))
-    .slice(0, enFree);
+if (enFree > 0) {
+  const deExtraPool = deDiverse.filter(i => !deSelected.includes(i));
+  const deExtra = deExtraPool.slice(0, enFree);
   deSelected = deSelected.concat(deExtra);
-  console.log(`[Quota] EN-Freiplätze → DE: +${deExtra.length}`);
+  console.log(`[Quota] EN-Freiplätze (${enFree}) → DE: +${deExtra.length}`);
 }
 
 // 9. Kombinieren
