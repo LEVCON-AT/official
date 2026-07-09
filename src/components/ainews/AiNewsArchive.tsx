@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronRight, Search, X } from 'lucide-react';
 import type { AiNewsData } from './data';
@@ -11,92 +11,169 @@ type Props = {
   locale: string;
 };
 
-const PAGE_SIZE = 5;
 const MIN_CHARS_FOR_SEARCH = 2;
 
 /**
- * Archive-Accordion for past AI News editions.
- * Initially collapsed, expands on click to show past editions.
+ * 3-stufiges Archiv-Accordion:
  *
- * Features:
- * - Pagination: 5 editions visible initially, "load more" in 5er-steps
- * - "Show all" link for power users
- * - Search field: filters editions by keyword (headline, summary, source)
- * - Search matches across DE + EN + original headlines + descriptions
+ * Level 1: Haupt-Accordion (Archiv auf/zu)
+ * Level 2: Monats-Navigation (← Juli 2026 →)
+ * Level 3: Tages-Accordions (zugeklappt, klick → Items aufklappen)
+ *
+ * Suche: Filtert Editions UND Items innerhalb der Edition.
  */
 export default function AiNewsArchive({ archive, locale }: Props) {
   const [open, setOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
+  const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations('ainews');
 
-  // Filter editions based on search query
-  // Matches across: summary (DE+EN), item headlines (orig+DE+EN), descriptions, sources
+  // ── Editions nach Monat gruppieren ────────────────────────────
+  // Key: "YYYY-MM", Value: { label, editions[] }
+  const months = useMemo(() => {
+    const grouped = new Map<string, { key: string; label: string; editions: AiNewsData[] }>();
+
+    for (const edition of archive) {
+      const d = edition.date;
+      const year = d.getUTCFullYear();
+      const month = d.getUTCMonth();
+      const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+      if (!grouped.has(key)) {
+        const monthLabel = new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'de-AT', {
+          month: 'long',
+          year: 'numeric',
+        }).format(new Date(Date.UTC(year, month, 1)));
+        grouped.set(key, { key, label: monthLabel, editions: [] });
+      }
+      grouped.get(key)!.editions.push(edition);
+    }
+
+    // Nach Datum absteigend sortieren (neuester Monat zuerst)
+    return Array.from(grouped.values()).sort((a, b) => b.key.localeCompare(a.key));
+  }, [archive, locale]);
+
+  // ── Suche: Filtert Editions UND Items ─────────────────────────
   const filteredArchive = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (query.length < MIN_CHARS_FOR_SEARCH) return archive;
 
-    return archive.filter((edition) => {
-      // Search in daily summary
-      const summaryDe = edition.summaryDe.toLowerCase();
-      const summaryEn = (edition.summaryEn || '').toLowerCase();
-      if (summaryDe.includes(query) || summaryEn.includes(query)) return true;
+    return archive
+      .map((edition) => {
+        // 1. Match in Tages-Summary? → ganze Edition mit allen Items
+        const summaryDe = edition.summaryDe.toLowerCase();
+        const summaryEn = (edition.summaryEn || '').toLowerCase();
+        if (summaryDe.includes(query) || summaryEn.includes(query)) {
+          return edition;
+        }
 
-      // Search in items
-      return edition.items.some((item) => {
-        const haystack = [
-          item.headline,
-          item.headlineDe,
-          item.headlineEn,
-          item.descriptionDe,
-          item.descriptionEn,
-          item.source,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        return haystack.includes(query);
-      });
-    });
+        // 2. Match in Items? → nur matchende Items behalten
+        const matchedItems = edition.items.filter((item) => {
+          const haystack = [
+            item.headline,
+            item.headlineDe,
+            item.headlineEn,
+            item.descriptionDe,
+            item.descriptionEn,
+            item.source,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+          return haystack.includes(query);
+        });
+
+        if (matchedItems.length > 0) {
+          return { ...edition, items: matchedItems };
+        }
+        return null;
+      })
+      .filter((edition): edition is AiNewsData => edition !== null);
   }, [archive, searchQuery]);
 
-  // Determine which editions to display
-  const displayed = showAll ? filteredArchive : filteredArchive.slice(0, visibleCount);
-  const hasMore = !showAll && visibleCount < filteredArchive.length;
-  const remaining = filteredArchive.length - visibleCount;
+  // Gefilterte Monate (basierend auf filteredArchive)
+  const filteredMonths = useMemo(() => {
+    if (searchQuery.trim().length < MIN_CHARS_FOR_SEARCH) return months;
+
+    const grouped = new Map<string, { key: string; label: string; editions: AiNewsData[] }>();
+    for (const edition of filteredArchive) {
+      const d = edition.date;
+      const year = d.getUTCFullYear();
+      const month = d.getUTCMonth();
+      const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+      if (!grouped.has(key)) {
+        const monthLabel = new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'de-AT', {
+          month: 'long',
+          year: 'numeric',
+        }).format(new Date(Date.UTC(year, month, 1)));
+        grouped.set(key, { key, label: monthLabel, editions: [] });
+      }
+      grouped.get(key)!.editions.push(edition);
+    }
+    return Array.from(grouped.values()).sort((a, b) => b.key.localeCompare(a.key));
+  }, [filteredArchive, months, searchQuery, locale]);
+
+  // Reset month index when months change (z.B. bei Suche)
+  const safeMonthIndex = Math.min(currentMonthIndex, Math.max(0, filteredMonths.length - 1));
+  const currentMonth = filteredMonths[safeMonthIndex];
+
   const isSearching = searchQuery.trim().length >= MIN_CHARS_FOR_SEARCH;
 
-  // Update search query AND reset pagination to first page (avoids effect setState)
+  // ── Handlers ──────────────────────────────────────────────────
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    setVisibleCount(PAGE_SIZE);
-    setShowAll(false);
+    setCurrentMonthIndex(0);
+    setExpandedDays(new Set());
   };
 
-  // Clear search handler
   const clearSearch = () => {
     handleSearchChange('');
     searchInputRef.current?.focus();
   };
 
+  const toggleDay = useCallback((dateKey: string) => {
+    setExpandedDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(dateKey)) {
+        next.delete(dateKey);
+      } else {
+        next.add(dateKey);
+      }
+      return next;
+    });
+  }, []);
+
+  // Bei Suche: alle Tage automatisch aufklappen
+  const effectiveExpandedDays = isSearching
+    ? new Set(filteredArchive.map((e) => e.date.toISOString()))
+    : expandedDays;
+
   if (archive.length === 0) return null;
 
+  // ── Format helpers ────────────────────────────────────────────
   const dateFormat = locale === 'en' ? 'en-GB' : 'de-AT';
   const dateOptions: Intl.DateTimeFormatOptions = {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
   };
+  const weekdayOptions: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+  };
 
+  // ── Labels ────────────────────────────────────────────────────
   const searchPlaceholder = locale === 'en' ? 'Search archive…' : 'Archiv durchsuchen…';
-  const loadMoreLabel = locale === 'en' ? 'Show earlier editions' : 'Frühere Ausgaben anzeigen';
-  const showAllLabel = locale === 'en' ? `Show all ${filteredArchive.length} editions` : `Alle ${filteredArchive.length} Ausgaben anzeigen`;
-  const showLessLabel = locale === 'en' ? 'Show less' : 'Weniger anzeigen';
-  const remainingLabel = locale === 'en' ? `${remaining} more available` : `${remaining} weitere verfügbar`;
   const noResultsLabel = locale === 'en' ? 'No editions found.' : 'Keine Ausgaben gefunden.';
   const clearSearchLabel = locale === 'en' ? 'Clear search' : 'Suche zurücksetzen';
+  const prevMonthLabel = locale === 'en' ? 'Previous month' : 'Voriger Monat';
+  const nextMonthLabel = locale === 'en' ? 'Next month' : 'Nächster Monat';
+  const postsLabel = locale === 'en' ? 'posts' : 'Beiträge';
+  const editionCountLabel = (n: number) => locale === 'en'
+    ? `${n} edition${n === 1 ? '' : 's'}`
+    : `${n} Ausgabe${n === 1 ? '' : 'n'}`;
 
   return (
     <div className="ainews-archive">
@@ -147,70 +224,111 @@ export default function AiNewsArchive({ archive, locale }: Props) {
             )}
           </div>
 
-          {/* Search result count (only when searching) */}
+          {/* Search result count */}
           {isSearching && (
             <p className="ainews-archive-search-info" role="status" aria-live="polite">
               {filteredArchive.length > 0
-                ? (locale === 'en'
-                    ? `${filteredArchive.length} edition${filteredArchive.length === 1 ? '' : 's'} found`
-                    : `${filteredArchive.length} Ausgabe${filteredArchive.length === 1 ? '' : 'n'} gefunden`)
+                ? editionCountLabel(filteredArchive.length)
                 : noResultsLabel}
             </p>
           )}
 
-          {/* Editions */}
-          {displayed.map((edition) => (
-            <article key={edition.date.toISOString()} className="ainews-archive-edition">
-              <h4 className="ainews-archive-date">
-                {new Intl.DateTimeFormat(dateFormat, dateOptions).format(edition.date)}
-              </h4>
-              <p className="ainews-archive-summary">
-                {locale === 'en' && edition.summaryEn
-                  ? edition.summaryEn
-                  : edition.summaryDe}
-              </p>
-              <div className="ainews-list">
-                {edition.items.map((item) => (
-                  <AiNewsItem key={item.id} item={item} locale={locale} />
-                ))}
-              </div>
-            </article>
-          ))}
+          {/* No results — exit */}
+          {filteredArchive.length === 0 && (
+            <div className="ainews-archive-empty" />
+          )}
 
-          {/* Load more / show all controls (hidden during search — show all matches) */}
-          {!isSearching && filteredArchive.length > PAGE_SIZE && (
-            <div className="ainews-archive-controls">
-              {hasMore ? (
-                <>
+          {/* Monate + Tage */}
+          {filteredArchive.length > 0 && currentMonth && (
+            <>
+              {/* Monats-Navigation */}
+              {filteredMonths.length > 1 && (
+                <div className="ainews-archive-monthnav" role="navigation" aria-label={locale === 'en' ? 'Month navigation' : 'Monats-Navigation'}>
                   <button
                     type="button"
-                    className="ainews-archive-loadmore"
-                    onClick={() => setVisibleCount(visibleCount + PAGE_SIZE)}
+                    className="ainews-archive-monthnav-btn"
+                    onClick={() => setCurrentMonthIndex(Math.min(safeMonthIndex + 1, filteredMonths.length - 1))}
+                    disabled={safeMonthIndex >= filteredMonths.length - 1}
+                    aria-label={prevMonthLabel}
                   >
-                    {loadMoreLabel} ↓
+                    ←
                   </button>
-                  <span className="ainews-archive-remaining">{remainingLabel}</span>
+                  <span className="ainews-archive-monthnav-label">
+                    {currentMonth.label}
+                    <span className="ainews-archive-monthnav-count">
+                      {editionCountLabel(currentMonth.editions.length)}
+                    </span>
+                  </span>
                   <button
                     type="button"
-                    className="ainews-archive-showall"
-                    onClick={() => setShowAll(true)}
+                    className="ainews-archive-monthnav-btn"
+                    onClick={() => setCurrentMonthIndex(Math.max(safeMonthIndex - 1, 0))}
+                    disabled={safeMonthIndex <= 0}
+                    aria-label={nextMonthLabel}
                   >
-                    {showAllLabel}
+                    →
                   </button>
-                </>
-              ) : showAll ? (
-                <button
-                  type="button"
-                  className="ainews-archive-showall"
-                  onClick={() => {
-                    setShowAll(false);
-                    setVisibleCount(PAGE_SIZE);
-                  }}
-                >
-                  {showLessLabel} ↑
-                </button>
-              ) : null}
-            </div>
+                </div>
+              )}
+
+              {/* Einzelner Monat ohne Navigation */}
+              {filteredMonths.length === 1 && (
+                <div className="ainews-archive-monthnav-single">
+                  <span className="ainews-archive-monthnav-label">
+                    {currentMonth.label}
+                    <span className="ainews-archive-monthnav-count">
+                      {editionCountLabel(currentMonth.editions.length)}
+                    </span>
+                  </span>
+                </div>
+              )}
+
+              {/* Tages-Accordions */}
+              <div className="ainews-archive-days">
+                {currentMonth.editions.map((edition) => {
+                  const dateKey = edition.date.toISOString();
+                  const isDayExpanded = effectiveExpandedDays.has(dateKey);
+                  const itemLabel = `${edition.items.length} ${postsLabel}`;
+                  const formattedDate = new Intl.DateTimeFormat(dateFormat, dateOptions).format(edition.date);
+                  const weekday = new Intl.DateTimeFormat(dateFormat, weekdayOptions).format(edition.date);
+
+                  return (
+                    <article key={dateKey} className="ainews-archive-day">
+                      <button
+                        type="button"
+                        className="ainews-archive-day-toggle"
+                        onClick={() => toggleDay(dateKey)}
+                        aria-expanded={isDayExpanded}
+                      >
+                        <ChevronRight
+                          className={`ainews-chevron${isDayExpanded ? ' is-open' : ''}`}
+                          size={12}
+                          aria-hidden="true"
+                        />
+                        <span className="ainews-archive-day-weekday">{weekday}</span>
+                        <span className="ainews-archive-day-date">{formattedDate}</span>
+                        <span className="ainews-archive-day-count">{itemLabel}</span>
+                      </button>
+
+                      {isDayExpanded && (
+                        <div className="ainews-archive-day-body">
+                          <p className="ainews-archive-summary">
+                            {locale === 'en' && edition.summaryEn
+                              ? edition.summaryEn
+                              : edition.summaryDe}
+                          </p>
+                          <div className="ainews-list">
+                            {edition.items.map((item) => (
+                              <AiNewsItem key={item.id} item={item} locale={locale} />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
