@@ -1,0 +1,522 @@
+{
+  "name": "AI News — 01 Collect & Curate (Local LLM) copy",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "129bed07-5999-4420-809c-c7908de56293",
+      "name": "Cron Daily 06:00 Vienna",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        1056
+      ],
+      "notesInFlow": true,
+      "notes": "Täglich 06:00 Europe/Vienna.\nStartet den Curation-Workflow.\nZeitzone wird über Workflow-Settings executionTimezone gesetzt."
+    },
+    {
+      "parameters": {},
+      "id": "67bbe5ca-bdb6-4a26-baa4-cc9245f1efb4",
+      "name": "Merge RSS + Search",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        368,
+        1056
+      ],
+      "notes": "Kombiniert normalisierte RSS-Items (Input 1) mit normalisierten Web-Search-Items (Input 2)."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dedupe items by URL (normalized: strip trailing slash, query params utm_*, fbclid, gclid)\n// Also dedupe by title-similarity (lowercase, trim, first 80 chars)\n\nfunction normalizeUrl(u) {\n  try {\n    const parsed = new URL(u);\n    // Strip tracking params\n    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid', 'mc_cid', 'mc_eid'].forEach(p => parsed.searchParams.delete(p));\n    let clean = parsed.origin + parsed.pathname;\n    if (parsed.search) clean += parsed.search;\n    return clean.replace(/\\/$/, '').toLowerCase();\n  } catch (e) {\n    return (u || '').toLowerCase().trim();\n  }\n}\n\nconst seenUrl = new Set();\nconst seenTitle = new Set();\nconst deduped = [];\n\nfor (const item of items) {\n  const url = normalizeUrl(item.json.link);\n  const titleKey = (item.json.title || '').toLowerCase().replace(/[^a-z0-9\\s]/g, '').trim().substring(0, 80);\n\n  if (seenUrl.has(url) || seenTitle.has(titleKey)) continue;\n  seenUrl.add(url);\n  seenTitle.add(titleKey);\n  deduped.push(item);\n}\n\nreturn deduped;"
+      },
+      "id": "07a4af87-8633-446e-ba4a-5164a7ad79c9",
+      "name": "Dedupe by URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        1056
+      ],
+      "notes": "Dedupliziert Items nach normalisierter URL und Titel-Ähnlichkeit.\nEntfernt Tracking-Parameter (utm_*, fbclid, gclid)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:11434/api/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=={{ $json.requestBody }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "d3b2fdea-30d2-4377-b7cf-63e189408670",
+      "name": "LLM Curation (Ollama)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1008,
+        864
+      ],
+      "disabled": true,
+      "notes": "Ruft z-ai LLM Chat Completions Endpoint auf.\nCredential 'z-ai LLM' (Header Auth, Authorization: Bearer ...).\nSystem-Prompt: Kuratiere Top 5-10 KI/AI News, gib DE+EN Summary + Items als JSON zurück."
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = items[0].json;\nlet content;\n\nif (response.message && response.message.content) {\n  content = response.message.content;\n} else if (response.choices && response.choices[0] && response.choices[0].message) {\n  content = response.choices[0].message.content;\n} else if (response.response) {\n  content = response.response;\n} else {\n  content = JSON.stringify(response);\n}\n\n// Clean markdown\ncontent = content.replace(/```json\\n/g, '').replace(/```\\n/g, '').replace(/```/g, '').trim();\n\n// Auto-Repair 1: Fehlende Kommas zwischen Key-Value Paaren einfügen\n// Beispiel: \"summaryEn\": \"...\"  \"items\" -> \"summaryEn\": \"...\", \"items\"\ncontent = content.replace(/\"\\s*\\n\\s*\"/g, '\",\\n\"');\ncontent = content.replace(/}(\\s*)\"items\"/g, '},\\n\"items\"');\ncontent = content.replace(/\"\\s*\"items\"/g, '\",\\n\"items\"');\n\n// Auto-Repair 2: Fehlende schließende Klammern ergänzen\nconst openBraces = (content.match(/\\{/g) || []).length;\nconst closeBraces = (content.match(/\\}/g) || []).length;\nif (openBraces > closeBraces) {\n  content = content + '}'.repeat(openBraces - closeBraces);\n}\n\nconst openBrackets = (content.match(/\\[/g) || []).length;\nconst closeBrackets = (content.match(/\\]/g) || []).length;\nif (openBrackets > closeBrackets) {\n  content = content + ']'.repeat(openBrackets - closeBrackets) + '}'.repeat(openBraces - closeBraces);\n}\n\n// Parse JSON\nlet parsed;\ntry {\n  parsed = JSON.parse(content);\n} catch (e) {\n  const jsonMatch = content.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    try {\n      parsed = JSON.parse(jsonMatch[0]);\n    } catch (e2) {\n      throw new Error('Failed to parse LLM response as JSON. Content was: ' + content.substring(0, 500));\n    }\n  } else {\n    throw new Error('No JSON found in LLM response. Content was: ' + content.substring(0, 500));\n  }\n}\n\n// Validate structure\nif (!parsed.summaryDe) {\n  parsed.summaryDe = \"Zusammenfassung der wichtigsten KI-News des Tages.\";\n}\nif (!parsed.summaryEn) {\n  parsed.summaryEn = \"Summary of today's most important AI news.\";\n}\nif (!parsed.items || !Array.isArray(parsed.items)) {\n  throw new Error('Invalid structure: missing items array. Content: ' + content.substring(0, 500));\n}\n\nreturn [{ json: parsed }];"
+      },
+      "id": "35c9d230-19e4-4fe8-be2e-eeec49eaddba",
+      "name": "Parse LLM JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        1056
+      ],
+      "notes": "Extrahiert JSON aus LLM-Antwort (auch aus Code-Fences).\nValidiert Shape (summaryDe, summaryEn, items[]).\nFügt Position-Index und aktuelles Datum hinzu."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://levcon.ai/api/ai-news/internal/ingest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"date\": \"{{ $today.toFormat('yyyy-MM-dd') }}\",\n  \"summaryDe\": {{ JSON.stringify($json.summaryDe) }},\n  \"summaryEn\": {{ JSON.stringify($json.summaryEn) }},\n  \"items\": {{ JSON.stringify($json.items) }}\n}",
+        "options": {}
+      },
+      "id": "ca694b84-410d-415c-90f2-0694a26ced5f",
+      "name": "POST to Levcon Ingest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1488,
+        1056
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5xSRYjLkoelQeppG",
+          "name": "Levcon Internal API"
+        }
+      },
+      "notes": "POST an Levcon Internal Ingest Endpoint.\nAuth via X-Levcon-Api-Key Header (env LEVCON_INTERNAL_API_KEY).\nBody: { date, summaryDe, summaryEn, items[] }"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_BASE_URL }}/webhook/linkedin-post-levcon",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ date: $json.date, triggeredBy: 'workflow-01-collect-and-curate' }) }}",
+        "options": {}
+      },
+      "id": "3ebb5b74-39cd-4794-9dbd-937ea550c5bf",
+      "name": "Trigger LinkedIn Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1712,
+        960
+      ],
+      "notes": "Triggert Workflow 02 (LinkedIn Post) via Webhook.\nURL-Platzhalter: $env.N8N_BASE_URL + Pfad 'linkedin-post-levcon'"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://engine.levcon.at/webhook/newsletter-daily",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ date: $json.date, triggeredBy: 'workflow-01-collect-and-curate' }) }}",
+        "options": {}
+      },
+      "id": "6a8973f9-f7e7-4ec9-aa6b-7229afa7b5e0",
+      "name": "Trigger Newsletter Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1712,
+        1152
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5xSRYjLkoelQeppG",
+          "name": "Levcon Internal API"
+        }
+      },
+      "notes": "Triggert Workflow 03 (Newsletter Daily) via Webhook.\nURL-Platzhalter: $env.N8N_BASE_URL + Pfad 'newsletter-daily'"
+    },
+    {
+      "parameters": {},
+      "id": "282364f7-6e76-4020-b2cf-476c4e13cba1",
+      "name": "On Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        1760
+      ],
+      "notes": "Error-Trigger: wird aktiviert, wenn der Hauptflow fehlschlägt."
+    },
+    {
+      "parameters": {
+        "fromEmail": "admin@levcon.at",
+        "toEmail": "=admin@levcon.at",
+        "subject": "=ALERT: n8n Workflow '01 Collect & Curate' failed at {{ $now.toISO() }}",
+        "options": {}
+      },
+      "id": "0b316f89-5eb0-4dd1-9c98-d9788a2fcc26",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        1760
+      ],
+      "webhookId": "1a0626d5-7c35-4bf3-8448-6c671af83953",
+      "credentials": {
+        "smtp": {
+          "id": "YLKV9546oq7fWeXi",
+          "name": "SMTP account"
+        }
+      },
+      "notes": "Sendet Alert-Mail an ALERT_EMAIL.\nSMTP-Credential: 'SMTP Levcon'"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\n\nconst newsItems = allItems.map(function(i) {\n  return {\n    title: i.json.title || '',\n    link: i.json.link || '',\n    source: i.json.source || '',\n    pubDate: i.json.pubDate || '',\n    summary: i.json.summary || ''\n  };\n});\n\nconst topItems = newsItems.slice(0, 20);\n\nconst systemPrompt = \"You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.\\n\\nYour task: Select the 10 most relevant and impactful AI news items from today's international sources.\\n\\nRelevant topics (in priority order):\\n- AI/ML research and breakthroughs (including LLMs, SLMs, multimodal AI)\\n- AI business and industry developments (investments, products, partnerships)\\n- AI regulation and policy (EU AI Act, global regulation)\\n- AI tools and applications (productivity, automation, dev tools)\\n- AI society and ethics (impact, risks, education)\\n\\nSelection criteria:\\n1. Impact: Will this change how businesses use AI?\\n2. Novelty: Is this genuinely new, not a rehash?\\n3. Diversity: Mix of research, business, regulation, tools\\n4. International: Balance DE, EN, ZH, JA, FR perspectives\\n\\nFor the daily summary, write ANALYTICALLY — not just \\\"X happened\\\":\\n- Identify the overarching theme of the day\\n- Explain WHY these stories matter together\\n- Give the reader a reason to click and read more\\n\\nSummary tone: Professional, insightful, concise. Like a McKinsey briefing, not a press release.\\n\\nReturn JSON:\\n{\\n  \\\"summaryDe\\\": \\\"Analytische Zusammenfassung auf Deutsch (3-5 Sätze, interesseweckend)\\\",\\n  \\\"summaryEn\\\": \\\"Analytical summary in English (3-5 sentences, engaging)\\\",\\n  \\\"items\\\": [\\n    {\\n      \\\"headline\\\": \\\"Original headline (original language)\\\",\\n      \\\"descriptionDe\\\": \\\"Deutsche Zusammenfassung (1-2 Sätze)\\\",\\n      \\\"descriptionEn\\\": \\\"English summary (1-2 sentences)\\\",\\n      \\\"source\\\": \\\"Publisher name (e.g. 'Heise', 'MIT Tech Review')\\\",\\n      \\\"sourceUrl\\\": \\\"Full URL to original article\\\",\\n      \\\"thumbnailUrl\\\": \\\"Thumbnail URL or null\\\",\\n      \\\"languageOrig\\\": \\\"de|en|zh|ja|fr\\\",\\n      \\\"category\\\": \\\"research|business|regulation|tools|society\\\"\\n    }\\n  ]\\n}\\n\\nIMPORTANT: Return ONLY the JSON object. No markdown, no code blocks, no explanations.\";\n\nconst userPrompt = \"Today collected AI news items (JSON array):\\n\" + JSON.stringify(topItems, null, 2);\n\nconst requestBody = {\n  model: \"qwen3.5:2b\",\n  stream: false,\n  options: {\n    temperature: 0.3,\n    num_predict: 4096,\n    num_ctx: 32768,\n    enable_thinking: false\n  },\n  messages: [\n    { role: \"system\", content: systemPrompt },\n    { role: \"user\", content: userPrompt }\n  ],\n  \"think\": false\n};\n\nconst response = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'http://127.0.0.1:11434/api/chat',\n  headers: { 'Content-Type': 'application/json' },\n  body: requestBody,\n  json: true,\n  timeout: 600000  // 10 Minuten Timeout für den HTTP Request selbst\n});\n\nreturn [{ json: response }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        1056
+      ],
+      "id": "27655a6e-5bc4-4859-b9e6-da69e2a15ef5",
+      "name": "Build Ollama Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// SearXNG Multi-Search — 6 parallele Queries in DE, EN, ZH, FR\n// Ersetzt den einzelnen SearXNG HTTP-Request Node\n\nconst QUERIES = [\n  { query: 'KI künstliche Intelligenz news heute', lang: 'de' },\n  { query: 'artificial intelligence AI news today', lang: 'en' },\n  { query: 'LLM breakthrough research', lang: 'en' },\n  { query: 'AI regulation policy EU', lang: 'en' },\n  { query: '人工智能新闻', lang: 'zh' },\n  { query: 'intelligence artificielle actualités', lang: 'fr' }\n];\n\nconst fetchPromises = QUERIES.map(async (q) => {\n  try {\n    const response = await this.helpers.httpRequest({\n      method: 'GET',\n      url: 'http://127.0.0.1:8888/search',\n      qs: {\n        q: q.query,\n        format: 'json',\n        categories: 'news,it',\n        time_range: 'day',\n        results_on_page: '15'\n      },\n      timeout: 30000,\n      retry: 2\n    });\n\n    const results = response.results || [];\n\n    return results.map(r => {\n      let source = 'Unknown';\n      let url = r.url || '';\n\n      try {\n        if (url) {\n          const urlObj = new URL(url);\n          const host = urlObj.hostname.replace(/^www\\./, '');\n          const map = {\n            'heise.de': 'Heise',\n            'golem.de': 'Golem',\n            'tagesschau.de': 'Tagesschau',\n            'sueddeutsche.de': 'Süddeutsche Zeitung',\n            'technologyreview.com': 'MIT Tech Review',\n            'arstechnica.com': 'Ars Technica',\n            'theverge.com': 'The Verge',\n            'techcrunch.com': 'TechCrunch',\n            'venturebeat.com': 'VentureBeat',\n            'wired.com': 'Wired',\n            'nature.com': 'Nature',\n            'openai.com': 'OpenAI',\n            'huggingface.co': 'Hugging Face',\n            'zdnet.de': 'ZDNet',\n            'derstandard.at': 'Der Standard',\n            'syncedreview.com': 'Synced',\n            'pandaily.com': 'Pandaily',\n            'technode.com': 'TechNode',\n            'marktechpost.com': 'MarkTechPost'\n          };\n          source = map[host] || host;\n        }\n      } catch (e) {\n        if (url) {\n          const match = url.match(/^https?:\\/\\/([^\\/]+)/);\n          if (match) source = match[1].replace('www.', '');\n        }\n      }\n\n      return {\n        title: r.title || '',\n        link: url,\n        source: source,\n        pubDate: r.pubDate || new Date().toISOString(),\n        summary: r.content || '',\n        languageOrig: q.lang,\n        origin: 'search'\n      };\n    });\n  } catch (error) {\n    console.log(`SearXNG error for query \"${q.query}\": ${error.message}`);\n    return [];\n  }\n});\n\nconst results = await Promise.all(fetchPromises);\nconst allItems = results.flat();\n\nconsole.log(`SearXNG: ${allItems.length} items from ${QUERIES.length} queries`);\n\nreturn allItems.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        848
+      ],
+      "id": "bd16f1d4-b35f-4caa-b7cf-544cc80c85e6",
+      "name": "Fetch All RSS Feeds"
+    },
+    {
+      "parameters": {
+        "jsCode": "// SearXNG Multi-Search — 6 parallele Queries in DE, EN, ZH, FR\n// Ersetzt den einzelnen SearXNG HTTP-Request Node\n\nconst QUERIES = [\n  { query: 'KI künstliche Intelligenz', lang: 'de' },\n  { query: 'artificial intelligence AI', lang: 'en' },\n  { query: 'LLM breakthrough research', lang: 'en' },\n  { query: 'AI regulation policy EU', lang: 'en' },\n  { query: '人工智能新闻', lang: 'zh' },\n  { query: 'intelligence artificielle', lang: 'fr' }\n];\n\nconst fetchPromises = QUERIES.map(async (q) => {\n  try {\n    const response = await this.helpers.httpRequest({\n      method: 'GET',\n      url: 'http://127.0.0.1:8888/search',\n      qs: {\n        q: q.query,\n        format: 'json',\n        categories: 'news,it',\n        time_range: 'day',\n        results_on_page: '15'\n      },\n      timeout: 30000,\n      retry: 2\n    });\n\n    const results = response.results || [];\n\n    return results.map(r => {\n      let source = 'Unknown';\n      let url = r.url || '';\n\n      try {\n        if (url) {\n          const urlObj = new URL(url);\n          const host = urlObj.hostname.replace(/^www\\./, '');\n          const map = {\n            'heise.de': 'Heise',\n            'golem.de': 'Golem',\n            'tagesschau.de': 'Tagesschau',\n            'sueddeutsche.de': 'Süddeutsche Zeitung',\n            'technologyreview.com': 'MIT Tech Review',\n            'arstechnica.com': 'Ars Technica',\n            'theverge.com': 'The Verge',\n            'techcrunch.com': 'TechCrunch',\n            'venturebeat.com': 'VentureBeat',\n            'wired.com': 'Wired',\n            'nature.com': 'Nature',\n            'openai.com': 'OpenAI',\n            'huggingface.co': 'Hugging Face',\n            'zdnet.de': 'ZDNet',\n            'derstandard.at': 'Der Standard',\n            'syncedreview.com': 'Synced',\n            'pandaily.com': 'Pandaily',\n            'technode.com': 'TechNode',\n            'marktechpost.com': 'MarkTechPost'\n          };\n          source = map[host] || host;\n        }\n      } catch (e) {\n        if (url) {\n          const match = url.match(/^https?:\\/\\/([^\\/]+)/);\n          if (match) source = match[1].replace('www.', '');\n        }\n      }\n\n      return {\n        title: r.title || '',\n        link: url,\n        source: source,\n        pubDate: r.pubDate || new Date().toISOString(),\n        summary: r.content || '',\n        languageOrig: q.lang,\n        origin: 'search'\n      };\n    });\n  } catch (error) {\n    console.log(`SearXNG error for query \"${q.query}\": ${error.message}`);\n    return [];\n  }\n});\n\nconst results = await Promise.all(fetchPromises);\nconst allItems = results.flat();\n\nconsole.log(`SearXNG: ${allItems.length} items from ${QUERIES.length} queries`);\n\nreturn allItems.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        1264
+      ],
+      "id": "5779e10f-4b3e-4b08-80a7-7a5d8e1c4619",
+      "name": "SearXNG Multi-Search"
+    }
+  ],
+  "pinData": {
+    "Parse LLM JSON": [
+      {
+        "json": {
+          "summaryDe": "Der Tag wird durch die konvergente Entwicklung von KI in der Arbeitswelt, Datenschutzinnovationen bei Apple und regulatorische Hürden geprägt. Während deutsche Mittelstandskräfte massiv auf KI setzen, kämpfen Unternehmen wie Amazon mit neuen Sicherheitsrisiken und Meta über den Zugriff auf Nutzerdaten hinweg.",
+          "summaryEn": "This day is defined by the convergent development of AI in business and privacy innovations from tech giants like Apple, alongside regulatory hurdles for China's leading models. While German SMEs are aggressively adopting AI tools, companies face new security challenges as Amazon removes flawed content due to poor voice synthesis.",
+          "items": [
+            {
+              "headline": "40 Prozent des deutschen Mittelstands nutzt KI",
+              "descriptionDe": "Der Anteil der mittelständischen Unternehmen, die Künstliche Intelligenz einsetzen, ist seit 2024 um 118 Prozent angestiegen. Rund 40 Prozent nutzen KI.",
+              "descriptionEn": "The percentage of SMEs using AI has surged by over 118% since 2024, with nearly 40 percent actively utilizing it for productivity and automation.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/40-Prozent-des-deutschen-Mittelstands-nutzt-KI-11357325.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "business"
+            },
+            {
+              "headline": "Apple langt zu: Preis für neue Kamera-KI in HomeKit steht",
+              "descriptionDe": "Mit iOS 27 verbessert Apple HomeKit Secure Video – mit mehr Auflösung und KI-Erkennungsfunktionen. Nun wurde bekannt, was das kosten soll.",
+              "descriptionEn": "With iOS 27, Apple enhances HomeKit Secure Video with improved resolution and AI detection capabilities; the pricing for this new camera-based intelligence is now revealed.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/Neue-Kamera-KI-Funktionen-fuer-HomeKit-Das-wird-teuer-11356247.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "tools"
+            },
+            {
+              "headline": "Jadepuffer: Die erste KI-Ransomware-Attacke verbaselt nicht nur den Schlüssel",
+              "descriptionDe": "Forscher dokumentieren den ersten LLM-gesteuerten Ransomware-Angriff. Doch die KI scheiterte an grundlegenden Fehlern.",
+              "descriptionEn": "Researchers document the first AI-driven ransomware attack, which failed due to fundamental flaws in its logic and execution capabilities.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/Jadepuffer-Die-erste-KI-Ransomware-Attacke-verbaselt-nicht-nur-den-Schluessel-11356105.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "society"
+            },
+            {
+              "headline": "Apple holt Siri AI in neuer Beta auf die Watch",
+              "descriptionDe": "Apple hat erstmals die Smartwatch-Variante des neuen KI-Systems freigegeben. Es gibt eine neue Siri-AI-App.",
+              "descriptionEn": "For the first time, Apple has released a new beta version of its watchOS AI system featuring an enhanced Siri application on smartwatches.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/Neue-Beta-von-watchOS-27-Siri-AI-erstmals-auf-der-Apple-Watch-11356351.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "tools"
+            },
+            {
+              "headline": "Britisches Filmunternehmen will Film mit KI-Darstellerin produzieren",
+              "descriptionDe": "Das britische KI-Studio Particle 6 will einen Spielfilm mit Tilly Norwood in der Hauptrolle produzieren, nachdem die Figur umstritten wurde.",
+              "descriptionEn": "The British AI studio 'Particle' plans to produce a feature film starring the controversial character Tilly Norwood using generative AI technology.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/KI-Figur-Tilly-Norwood-bekommt-eigenen-Film-11357211.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "society"
+            },
+            {
+              "headline": "IBM bringt den Mainframe fürs Rack",
+              "descriptionDe": "IBM erweitert die z17-Mainframes um kompaktere Hardware, verbesserte KI-Funktionen und neue Verwaltungs-Tools.",
+              "descriptionEn": "IBM is upgrading its mainframe servers with more compact hardware, enhanced AI capabilities, and new management tools to support modern workloads.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/IBM-bringt-den-Mainframe-fuers-Rack-11356715.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "business"
+            },
+            {
+              "headline": "Cloud und KI befeuern deutsche Digitalwirtschaft – international abgehängt",
+              "descriptionDe": "Die deutsche Digitalwirtschaft bleibt auf solidem Wachstumskurs bleiben. International ist die Branche allerdings noch stark hinterstand.",
+              "descriptionEn": "German digital economy remains on a strong growth trajectory, though it still lags significantly behind its global peers in AI adoption and infrastructure investment.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/Deutsche-Digitalwirtschaft-waechst-weiter-11357663.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "business"
+            },
+            {
+              "headline": "Mittwoch: Smart Glasses mit Datenschutz, Qualitätssprung für Flugsimulator in VR",
+              "descriptionDe": "Datenbrillen werden dünner und leichter. Microsoft-VR-Simulationen erhalten Updates, während China KI-Risiken diskutiert.",
+              "descriptionEn": "Smart glasses are becoming lighter and more private; Microsoft's flight simulator receives quality updates while global AI regulation debates intensify in Asia.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/Mittwoch-Smart-Glasses-mit-Datenschutz-Qualitaetssprung-fuer-Flugsimulator-in-VR-11357317.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "tools"
+            },
+            {
+              "headline": "Muse Image: Metas KI-Bildgenerator kann Bilder von Instagram-Konten verändern",
+              "descriptionDe": "Meta entwickelt einen Bildgenerators mit Zugriff auf Social-Media-Inhalte, was neue Datenschutzfragen für Nutzer auslösen wird.",
+              "descriptionEn": "Meta's 'Muse' image generator now allows access to social media content from Instagram accounts, raising significant privacy concerns for users.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/Muse-Image-Metas-KI-Bildgenerator-kann-Bilder-von-Instagram-Konten-veraendern-11357345.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "society"
+            },
+            {
+              "headline": "heise+ | Proton Lumo 2.0: Wie Sie mehr aus der privaten KI rausholen",
+              "descriptionDe": "Die neue Version von Protons KI versucht, durch lokale Optimierung und spezifische Tricks die Konkurrenz zu überholen.",
+              "descriptionEn": "Proton's new AI version aims to outperform competitors like Claude and ChatGPT through advanced local optimization techniques that enhance privacy while boosting capabilities.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/ratgeber/Proton-Lumo-2-0-Wie-Sie-mehr-aus-der-privaten-KI-rausholen-11351301.html?wt_mc=rss.red.ho.ho.rdf.beitrag_plus.beitrag_plus",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "tools"
+            },
+            {
+              "headline": "Apple Siri AI greift erstmals auf Daten aus Dritt-Apps zu",
+              "descriptionDe": "Erste Tests zeigen: Siri kann Informationen abfragen, die nicht direkt in den App-Kontext passen. Apple nutzt dabei APIs.",
+              "descriptionEn": "First tests reveal that Siri can now access data from third-party applications not directly related to the current app context, utilizing available API integrations.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/Siri-AI-spricht-erstmals-mit-Dritt-Apps-Beta-3-zeigt-Apples-Strategie-11357051.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "society"
+            },
+            {
+              "headline": "KI-Synchro bei Prime Video: Amazon löscht „Deadly Patient“ wegen KI-Problemen",
+              "descriptionDe": "Monotone Stimmen und schiefe Sätze führen zu einer Entfernung des Thrillers von der Streaming-Plattform.",
+              "descriptionEn": "Amazon removed the thriller 'Deadly Patient' from its streaming service due to poor voice synthesis and AI synchronization issues that made dialogue unnatural.",
+              "source": "Heise",
+              "sourceUrl": "https://www.heise.de/news/KI-Synchronisation-Amazon-entfernt-Deadly-Patient-von-Prime-Video-11356466.html?wt_mc=rss.red.ho.ho.rdf.beitrag.beitrag",
+              "thumbnailUrl": null,
+              "languageOrig": "de",
+              "category": "tools"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "POST to Levcon Ingest": [
+      {
+        "json": {
+          "success": true,
+          "summaryId": 4,
+          "itemCount": 12
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Cron Daily 06:00 Vienna": {
+      "main": [
+        [
+          {
+            "node": "Fetch All RSS Feeds",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SearXNG Multi-Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge RSS + Search": {
+      "main": [
+        [
+          {
+            "node": "Dedupe by URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse LLM JSON": {
+      "main": [
+        [
+          {
+            "node": "POST to Levcon Ingest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST to Levcon Ingest": {
+      "main": [
+        [
+          {
+            "node": "Trigger LinkedIn Workflow",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Trigger Newsletter Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe by URL": {
+      "main": [
+        [
+          {
+            "node": "Build Ollama Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Curation (Ollama)": {
+      "main": [
+        []
+      ]
+    },
+    "Build Ollama Request": {
+      "main": [
+        [
+          {
+            "node": "Parse LLM JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All RSS Feeds": {
+      "main": [
+        [
+          {
+            "node": "Merge RSS + Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SearXNG Multi-Search": {
+      "main": [
+        [
+          {
+            "node": "Merge RSS + Search",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "e8840294-9d6e-4485-b3d3-d0c2a580463c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b2d1feb950fa85b8badf7148ff879f99d71c58371428240be6f7a49573bef211"
+  },
+  "id": "xkA2dbp6hXqy1PlO",
+  "tags": []
+}
