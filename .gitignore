@@ -65,3 +65,6 @@ db/*.db-journal
 /tool-results/
 # Dev server PID tracking
 /.zscripts/dev.pid
+
+# Agent-browser cache directory (created by Chrome refs like @e8)
+/e8/
