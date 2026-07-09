@@ -65,14 +65,11 @@ export default function AiNewsArchive({ archive, locale }: Props) {
 
     return archive
       .map((edition) => {
-        // 1. Match in Tages-Summary? → ganze Edition mit allen Items
-        const summaryDe = edition.summaryDe.toLowerCase();
-        const summaryEn = (edition.summaryEn || '').toLowerCase();
-        if (summaryDe.includes(query) || summaryEn.includes(query)) {
-          return edition;
-        }
-
-        // 2. Match in Items? → nur matchende Items behalten
+        // Items filtern: nur matchende Items behalten.
+        // WICHTIG: Die Tages-Summary wird NICHT mehr als Match-Kriterium
+        // verwendet — sonst würden bei Summary-Match alle 10 Items gezeigt
+        // (aber der User will nur die matchenden Items sehen).
+        // Die Summary selbst wird im Search-Modus ohnehin ausgeblendet.
         const matchedItems = edition.items.filter((item) => {
           const haystack = [
             item.headline,

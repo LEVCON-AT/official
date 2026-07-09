@@ -1,20 +1,19 @@
 // ═══════════════════════════════════════════════════════════════
-//  BUILD OLLAMA REQUEST (REFINED v3 — LANGUAGE QUOTA + TRANSLATED HEADLINES)
+//  BUILD OLLAMA REQUEST (REFINED v4 — DE/EN ONLY, LEANER PROMPT)
 //
-//  NEU in v3:
-//   1. Akzeptiert 30 Items (10 DE + 10 EN + 10 INTL) statt 15
-//   2. num_predict erhöht: 4096 → 8192 (für 30 Items Output)
-//   3. Prompt geändert: LLM soll NICHT kuratieren, nur summarisieren
-//      → "Keep ALL items, write summaries for each"
-//   4. Items werden im Prompt nach Bucket gruppiert (DE/EN/INTL)
-//   5. Summary-Token gekürzt: 150 → 120 Zeichen (Context sparen bei 30 Items)
-//   6. NEU: Headlines werden auch nach DE + EN übersetzt
-//      → Output enthält headline (original), headlineDe, headlineEn
+//  NEU in v4:
+//   1. 20 Items (10 DE + 10 EN) statt 30 — entlastet Qwen
+//   2. num_predict 8192 → 6144 (weniger Output nötig)
+//   3. Score + scoreReasons aus User-Prompt entfernt (Qwen soll nur
+//      summarisieren, nicht kuratieren — braucht das Ranking nicht)
+//   4. origin: 'rss' wird nicht mehr an Qwen gesendet (unnötig)
+//   5. Prompt text "Keep ALL items" angepasst auf 20 Items
 //
-//  Beibehalten aus v2:
+//  Beibehalten aus v3:
 //   - this.helpers.httpRequest (n8n Expression-Parser Workaround)
 //   - enable_thinking: false (verhindert Token-Verschwendung)
 //   - 600s Timeout für CPU-Inference
+//   - headlineDe + headlineEn Übersetzungen
 //
 //  Node-Typ: Code (n8n)
 //  Position: nach "Score & Rank", vor "Parse LLM JSON"
@@ -32,48 +31,39 @@ const newsItems = allItems.map(function(i) {
     title: i.json.title || '',
     link: i.json.link || '',
     source: i.json.source || '',
-    pubDate: i.json.pubDate || '',
     summary: i.json.summary || '',
     languageOrig: i.json.languageOrig || 'en',
-    score: i.json._score || 0,
-    bucket: i.json._bucket || 'en'  // de | en | intl
+    bucket: i.json._bucket || 'en'
   };
 });
 
-// Nach Bucket gruppieren (für strukturierten Prompt)
+// Nach Bucket gruppieren
 const deItems = newsItems.filter(i => i.bucket === 'de');
 const enItems = newsItems.filter(i => i.bucket === 'en');
-const intlItems = newsItems.filter(i => i.bucket === 'intl');
 
-console.log(`[Build Ollama] ${newsItems.length} Items für LLM (DE=${deItems.length}, EN=${enItems.length}, INTL=${intlItems.length})`);
-console.log(`[Build Ollama] Score-Range: ${Math.min(...newsItems.map(i=>i.score))}-${Math.max(...newsItems.map(i=>i.score))}`);
+console.log(`[Build Ollama] ${newsItems.length} Items für LLM (DE=${deItems.length}, EN=${enItems.length})`);
 
-// ── System Prompt (NEU: summarisieren + headline-übersetzen, nicht kuratieren) ─
-// Das kleine qwen3.5:2b-Modell ist besser im Schreiben als im Auswählen.
-// Score&Rank hat bereits die beste Auswahl getroffen — Qwen muss nur
-// noch DE+EN Headlines + Beschreibungen für jedes Item schreiben.
+// ── System Prompt (summarisieren + headline-übersetzen) ────────
 const systemPrompt = `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.
 
 Your task: Write german AND english headlines AND summaries for ALL ${newsItems.length} provided news items. The items are ALREADY pre-selected with a language quota:
 - ${deItems.length} German items (from DACH sources)
 - ${enItems.length} English items (from international sources)
-- ${intlItems.length} International items (Chinese, Japanese, French, etc.)
 
-CRITICAL: Keep ALL ${newsItems.length} items in your output. Do NOT remove, filter, or re-select items. The pre-selection is intentional for an Austrian site with international perspective.
+CRITICAL: Keep ALL ${newsItems.length} items in your output. Do NOT remove, filter, or re-select items. The pre-selection is intentional for an Austrian site.
 
 For each item, write:
 - headline: Original headline (keep as-is, do not modify)
-- headlineDe: German translation of the headline (natural, not literal — adapt for German readers)
-- headlineEn: English translation of the headline (natural, not literal — adapt for English readers)
+- headlineDe: German translation of the headline (natural, not literal)
+- headlineEn: English translation of the headline (natural, not literal)
 - descriptionDe: 1-2 sentence German summary (analytical, not just translation)
 - descriptionEn: 1-2 sentence English summary (independent, not just translation)
 - category: research | business | regulation | tools | society
-- languageOrig: keep the original language code (de, en, zh, ja, fr, etc.)
+- languageOrig: keep the original language code (de, en)
 
 Headline translation rules:
 - If original is German: headlineDe = original, headlineEn = English translation
 - If original is English: headlineDe = German translation, headlineEn = original
-- If original is Chinese/Japanese/French/etc.: translate to BOTH German and English
 - Translations should sound natural in the target language, not word-for-word
 - Keep technical terms (GPT, LLM, AI, KI) in their established form
 - Preserve proper names (OpenAI, Anthropic, companies, product names)
@@ -81,15 +71,14 @@ Headline translation rules:
 For the daily summary, write ANALYTICALLY — not just "X happened":
 - Identify the overarching theme of the day
 - Explain WHY these stories matter together
-- Give the reader a reason to click and read more
-- Consider the international perspective (DACH + global + Asian + European)
+- Consider both DACH and international perspective
 
 Summary tone: Professional, insightful, concise. Like a McKinsey briefing, not a press release.
 
 Return JSON:
 {
-  "summaryDe": "Analytische Zusammenfassung auf Deutsch (4-6 Sätze, interesseweckend, internationale Perspektive)",
-  "summaryEn": "Analytical summary in English (4-6 sentences, engaging, international perspective)",
+  "summaryDe": "Analytische Zusammenfassung auf Deutsch (4-6 Sätze, internationale Perspektive)",
+  "summaryEn": "Analytical summary in English (4-6 sentences, international perspective)",
   "items": [
     {
       "headline": "Original headline (original language, keep as-is)",
@@ -100,7 +89,7 @@ Return JSON:
       "source": "Publisher name (e.g. 'Heise', 'MIT Tech Review')",
       "sourceUrl": "Full URL to original article",
       "thumbnailUrl": "Thumbnail URL or null",
-      "languageOrig": "de|en|zh|ja|fr|es|it|pt",
+      "languageOrig": "de|en",
       "category": "research|business|regulation|tools|society"
     }
   ]
@@ -108,9 +97,8 @@ Return JSON:
 
 IMPORTANT: Return ONLY the JSON object. No markdown, no code blocks, no explanations. Keep ALL ${newsItems.length} items. Every item must have headline, headlineDe, AND headlineEn.`;
 
-// ── User Prompt (NEU: nach Bucket gruppiert) ───────────────────
-// Items nach Bucket sortiert ins Prompt aufnehmen, damit Qwen die
-// Struktur versteht. Summary auf 120 Zeichen gekürzt (Context sparen).
+// ── User Prompt (LEAN: nur title, source, language, summary — kein score, kein origin) ──
+// Reduziert Input-Tokens um ~30% vs v3.
 function formatBucket(items, label) {
   if (items.length === 0) return `${label}: (none)`;
   return `${label}:\n${JSON.stringify(items.map(i => ({
@@ -128,38 +116,35 @@ ${formatBucket(deItems, `GERMAN ITEMS (${deItems.length})`)}
 
 ${formatBucket(enItems, `ENGLISH ITEMS (${enItems.length})`)}
 
-${formatBucket(intlItems, `INTERNATIONAL ITEMS (${intlItems.length})`)}
-
 Write german + english headlines AND summaries for ALL ${newsItems.length} items. Keep every item. Do not filter or re-rank. Each item must have: headline (original), headlineDe, headlineEn, descriptionDe, descriptionEn.`;
 
-// ── Ollama Request Body (NEU: num_predict 8192 für 30 Items + headline-Übersetzung) ─
-// Token-Kalkulation mit headlineDe + headlineEn:
-//   30 Items × (headline + headlineDe + headlineEn + descDe + descEn + metadata)
-//   = 30 × ~170 Tokens = ~5.100 Output-Tokens
-//   + summaryDe + summaryEn ~400 = ~5.500 Output-Tokens gesamt
-//   num_predict 8192 gibt ausreichend Puffer.
+// ── Ollama Request Body (v4: num_predict 6144 für 20 Items) ────
+// Token-Kalkulation v4:
+//   20 Items × (headline + headlineDe + headlineEn + descDe + descEn + metadata)
+//   = 20 × ~170 Tokens = ~3.400 Output-Tokens
+//   + summaryDe + summaryEn ~400 = ~3.800 Output-Tokens gesamt
+//   num_predict 6144 gibt ausreichend Puffer.
 const requestBody = {
   model: "qwen3.5:2b",
   stream: false,
   options: {
-    temperature: 0.3,        // Deterministisch genug für JSON, kreativ genug für Summary
-    num_predict: 8192,       // Für 30 Items × 5 Text-Felder (headline, headlineDe, headlineEn, descDe, descEn)
-    num_ctx: 32768,          // Großzügiger Context (30 Items × ~100 Tokens = 3000 + Prompt)
-    enable_thinking: false   // Verhindert Token-Verschwendung im thinking mode
+    temperature: 0.3,
+    num_predict: 6144,       // v4: reduziert von 8192 (20 Items statt 30)
+    num_ctx: 32768,
+    enable_thinking: false
   },
   messages: [
     { role: "system", content: systemPrompt },
     { role: "user", content: userPrompt }
   ],
-  "think": false  // Double-Safety: thinking mode auch auf Top-Level deaktiviert
+  "think": false
 };
 
 // Token-Schätzung für Logging
 const inputTokensEst = Math.round((systemPrompt.length + userPrompt.length) / 4);
-console.log(`[Build Ollama] Request gebaut: ${newsItems.length} Items, ~${inputTokensEst} Input-Tokens geschätzt, num_predict=8192`);
+console.log(`[Build Ollama] Request gebaut: ${newsItems.length} Items, ~${inputTokensEst} Input-Tokens geschätzt, num_predict=6144`);
 
 // ── Ollama API Call (mit langem Timeout für CPU-Inference) ─────
-// Timeout 600s (10min) — Qwen3.5:2b auf CPU kann bei 30 Items 3-5min brauchen.
 const response = await this.helpers.httpRequest({
   method: 'POST',
   url: 'http://127.0.0.1:11434/api/chat',

@@ -13,19 +13,6 @@ export type NewsLanguage = {
 export const NEWS_LANGUAGES: NewsLanguage[] = [
   { code: 'de', label: 'DE - Deutsch',      shortLabel: 'DE', nativeName: 'Deutsch',     rtl: false },
   { code: 'en', label: 'EN - English',      shortLabel: 'EN', nativeName: 'English',     rtl: false },
-  { code: 'zh', label: 'CN - Chinese',      shortLabel: 'CN', nativeName: '中文',         rtl: false },
-  { code: 'ja', label: 'JP - Japanese',     shortLabel: 'JP', nativeName: '日本語',       rtl: false },
-  { code: 'fr', label: 'FR - Français',     shortLabel: 'FR', nativeName: 'Français',    rtl: false },
-  { code: 'es', label: 'ES - Español',      shortLabel: 'ES', nativeName: 'Español',     rtl: false },
-  { code: 'it', label: 'IT - Italiano',     shortLabel: 'IT', nativeName: 'Italiano',    rtl: false },
-  { code: 'pt', label: 'PT - Português',    shortLabel: 'PT', nativeName: 'Português',   rtl: false },
-  { code: 'ru', label: 'RU - Русский',      shortLabel: 'RU', nativeName: 'Русский',     rtl: false },
-  { code: 'ar', label: 'AR - العربية',      shortLabel: 'AR', nativeName: 'العربية',     rtl: true  },
-  { code: 'tr', label: 'TR - Türkçe',       shortLabel: 'TR', nativeName: 'Türkçe',      rtl: false },
-  { code: 'nl', label: 'NL - Nederlands',   shortLabel: 'NL', nativeName: 'Nederlands',  rtl: false },
-  { code: 'pl', label: 'PL - Polski',       shortLabel: 'PL', nativeName: 'Polski',      rtl: false },
-  { code: 'ko', label: 'KR - Korean',       shortLabel: 'KR', nativeName: '한국어',       rtl: false },
-  { code: 'hi', label: 'IN - Hindi',        shortLabel: 'IN', nativeName: 'हिन्दी',       rtl: false },
 ];
 
 // Quick lookup maps

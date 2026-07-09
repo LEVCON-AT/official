@@ -1,16 +1,17 @@
 // ═══════════════════════════════════════════════════════════════
-//  SCORE & RANK (REFINED v3 — LANGUAGE QUOTA)
+//  SCORE & RANK (REFINED v4 — DE/EN ONLY + SOURCE DIVERSITY)
 //
-//  NEU in v3: 3-Bucket Language-Quota-System
-//   - DE-Bucket: Top 10 deutsche Items (höchster Score)
-//   - EN-Bucket: Top 10 englische Items (höchster Score)
-//   - INTL-Bucket: Top 10 internationale Items (zh, ja, fr, es, etc.)
-//   - Total: 30 Items mit garantierter Sprach-Verteilung
-//   - Umverteilung bei knappen Buckets: DE → EN → INTL Priorität
+//  NEU in v4:
+//   - 10 DE + 10 EN, keine INTL (entlastet Qwen, klarerer Fokus)
+//   - Max-Items-per-Source-Cap: max 2 Items pro Quelle pro Sprache
+//     (verhindert Heise-Dominanz im DE-Bucket, sorgt für Diversität)
+//   - Keine INTL-Umverteilungs-Logik mehr nötig
+//   - Total: 20 Items (statt 30 in v3)
 //
-//  Beibehalten aus v2:
+//  Beibehalten aus v3:
+//   - 6-Faktor-Scoring (Source, Keywords, Frische, Länge, Klickbait, URL)
 //   - Semantic Dedup (Jaccard >60% → höchstes Score gewinnt)
-//   - Minimum-Score-Threshold (ruhiger Tag = weniger Items)
+//   - Min-Score-Threshold (ruhiger Tag = weniger Items)
 //   - Score-Distribution-Logging
 //
 //  Node-Typ: Code (n8n)
@@ -18,10 +19,12 @@
 // ═══════════════════════════════════════════════════════════════
 
 // ── KONFIGURATION ──────────────────────────────────────────────
-const QUOTA_DE    = 10;    // Top 10 deutsche Items
-const QUOTA_EN    = 10;    // Top 10 englische Items
-const QUOTA_INTL  = 10;    // Top 10 internationale Items (zh, ja, fr, es, ...)
-const TOTAL_QUOTA = QUOTA_DE + QUOTA_EN + QUOTA_INTL;  // 30
+const QUOTA_DE           = 10;    // Top 10 deutsche Items
+const QUOTA_EN           = 10;    // Top 10 englische Items
+const TOTAL_QUOTA        = QUOTA_DE + QUOTA_EN;  // 20
+
+const MAX_ITEMS_PER_SOURCE = 2;   // Max Items pro Quelle pro Sprache
+                                  // (verhindert dass Heise 8 von 10 DE-Slots belegt)
 
 const MAX_AGE_HOURS       = 48;   // Items älter als X Std. werden bestraft
 const MIN_SCORE_THRESHOLD = 20;   // Min Score für Top-N (ruhiger Tag)
@@ -52,16 +55,6 @@ const SOURCE_WEIGHTS = {
   'VentureBeat': 0.85,
   'Wired': 0.85,
   // Mittel (0.7)
-  'Synced': 0.7,
-  'Caixin Global': 0.7,
-  'Pandaily': 0.7,
-  'TechNode': 0.7,
-  'ITmedia': 0.7,
-  'Nikkei Tech': 0.7,
-  'ASCII.jp': 0.7,
-  "L'Usine Digitale": 0.7,
-  'Le Journal du Net': 0.7,
-  'ActuIA': 0.7,
   'MarkTechPost': 0.7,
   'Towards Data Science': 0.7,
   'The Information': 0.7,
@@ -80,7 +73,7 @@ const GENERAL_KI_KEYWORDS = /\b(AI|KI|ML|neural|machine learning|deep learning|g
 const CLICKBAIT_PATTERNS = /\b(you won't believe|shocking|amazing|incredible|mind-blowing|\d+ (best|top|amazing) (ai|tools)|click here|read more|sponsored|advertisement)\b/i;
 
 // ═══════════════════════════════════════════════════════════════
-//  SCORING-FUNKTION (unverändert aus v2)
+//  SCORING-FUNKTION (unverändert aus v3)
 // ═══════════════════════════════════════════════════════════════
 
 function scoreItem(item) {
@@ -178,7 +171,7 @@ function scoreItem(item) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  SEMANTIC DEDUP (unverändert aus v2)
+//  SEMANTIC DEDUP (unverändert aus v3)
 // ═══════════════════════════════════════════════════════════════
 
 function tokenize(text) {
@@ -212,7 +205,6 @@ function semanticDedup(scoredItems) {
       const sim = jaccardSimilarity(itemTokens, keptTokens[i]);
       if (sim >= DEDUP_SIMILARITY) {
         isDuplicate = true;
-        // Falls neues Item höheres Score, ersetze
         if (item._score > kept[i]._score) {
           kept[i] = item;
           keptTokens[i] = itemTokens;
@@ -231,121 +223,26 @@ function semanticDedup(scoredItems) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  NEU in v3: LANGUAGE-QUOTA BUCKETING
+//  NEU in v4: APPLY SOURCE DIVERSITY CAP
 // ═══════════════════════════════════════════════════════════════
-//  Spaltet Items in 3 Sprach-Buckets und nimmt aus jedem die
-//  Top-N (nach Score). Garantiert Sprach-Verteilung für die
-//  österreichische Seite (DE hat Vorrang).
-//
-//  Buckets:
-//    DE:   languageOrig === 'de' (Heise, Golem, Tagesschau, etc.)
-//    EN:   languageOrig === 'en' (MIT, Ars Technica, Anthropic, etc.)
-//    INTL: alles andere (zh, ja, fr, es, it, pt, ...)
-//
-//  Umverteilung bei knappen Buckets:
-//    Freie Slots gehen an: DE → EN → INTL (heimische Priorität)
+//  Limitiert wieviele Items eine einzelne Quelle beisteuern darf.
+//  Verhindert dass Heise ( prolifisch) 8 von 10 DE-Slots belegt.
+//  Nach Score sortiert — die besten Items einer Quelle gewinnen.
 // ═══════════════════════════════════════════════════════════════
 
-function bucketByLanguage(items) {
-  const de = [];
-  const en = [];
-  const intl = [];
+function applySourceDiversity(items, maxPerSource) {
+  const sourceCounts = {};
+  const result = [];
 
   for (const item of items) {
-    const lang = (item.languageOrig || 'en').toLowerCase();
-    if (lang === 'de') de.push(item);
-    else if (lang === 'en') en.push(item);
-    else intl.push(item);  // zh, ja, fr, es, it, pt, etc.
-  }
-
-  return { de, en, intl };
-}
-
-function applyLanguageQuota(scoredItems) {
-  // 1. In Buckets spalten
-  const { de: deBucket, en: enBucket, intl: intlBucket } = bucketByLanguage(scoredItems);
-
-  console.log(`[Quota] Bucket-Größen: DE=${deBucket.length}, EN=${enBucket.length}, INTL=${intlBucket.length}`);
-
-  // 2. Jeden Bucket nach Score sortieren (absteigend)
-  deBucket.sort((a, b) => b._score - a._score);
-  enBucket.sort((a, b) => b._score - a._score);
-  intlBucket.sort((a, b) => b._score - a._score);
-
-  // 3. Quota aus jedem Bucket nehmen
-  let deSelected = deBucket.slice(0, QUOTA_DE);
-  let enSelected = enBucket.slice(0, QUOTA_EN);
-  let intlSelected = intlBucket.slice(0, QUOTA_INTL);
-
-  // 4. Umverteilung freier Slots
-  //    Priorität: DE → EN → INTL (österreichische Site)
-  let deRemaining = deBucket.length - deSelected.length;  // wieviele DE noch verfügbar?
-  let enRemaining = enBucket.length - enSelected.length;
-  let intlRemaining = intlBucket.length - intlSelected.length;
-
-  let deFree = QUOTA_DE - deSelected.length;    // freie DE-Slots
-  let enFree = QUOTA_EN - enSelected.length;
-  let intlFree = QUOTA_INTL - intlSelected.length;
-
-  // Phase 1: Freie INTL-Slots → an DE, dann EN
-  if (intlFree > 0) {
-    // Erst DE auffüllen
-    const deFill = Math.min(intlFree, deRemaining);
-    if (deFill > 0) {
-      deSelected = deSelected.concat(deBucket.slice(QUOTA_DE, QUOTA_DE + deFill));
-      deRemaining -= deFill;
-      intlFree -= deFill;
-      console.log(`[Quota] INTL-Freiplätze → DE: +${deFill} (DE jetzt ${deSelected.length})`);
-    }
-    // Rest an EN
-    const enFill = Math.min(intlFree, enRemaining);
-    if (enFill > 0) {
-      enSelected = enSelected.concat(enBucket.slice(QUOTA_EN, QUOTA_EN + enFill));
-      enRemaining -= enFill;
-      intlFree -= enFill;
-      console.log(`[Quota] INTL-Freiplätze → EN: +${enFill} (EN jetzt ${enSelected.length})`);
+    const src = item.source || 'Unknown';
+    if ((sourceCounts[src] || 0) < maxPerSource) {
+      sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+      result.push(item);
     }
   }
 
-  // Phase 2: Freie DE-Slots → an EN, dann INTL
-  deFree = QUOTA_DE - deSelected.length;
-  if (deFree > 0) {
-    const enFill = Math.min(deFree, enRemaining);
-    if (enFill > 0) {
-      enSelected = enSelected.concat(enBucket.slice(QUOTA_EN, QUOTA_EN + enFill));
-      enRemaining -= enFill;
-      deFree -= enFill;
-      console.log(`[Quota] DE-Freiplätze → EN: +${enFill} (EN jetzt ${enSelected.length})`);
-    }
-    const intlFill = Math.min(deFree, intlRemaining);
-    if (intlFill > 0) {
-      intlSelected = intlSelected.concat(intlBucket.slice(QUOTA_INTL, QUOTA_INTL + intlFill));
-      intlRemaining -= intlFill;
-      deFree -= intlFill;
-      console.log(`[Quota] DE-Freiplätze → INTL: +${intlFill} (INTL jetzt ${intlSelected.length})`);
-    }
-  }
-
-  // Phase 3: Freie EN-Slots → an DE, dann INTL
-  enFree = QUOTA_EN - enSelected.length;
-  if (enFree > 0) {
-    const deFill = Math.min(enFree, deRemaining);
-    if (deFill > 0) {
-      deSelected = deSelected.concat(deBucket.slice(QUOTA_DE, QUOTA_DE + deFill));
-      deRemaining -= deFill;
-      enFree -= deFill;
-      console.log(`[Quota] EN-Freiplätze → DE: +${deFill} (DE jetzt ${deSelected.length})`);
-    }
-    const intlFill = Math.min(enFree, intlRemaining);
-    if (intlFill > 0) {
-      intlSelected = intlSelected.concat(intlBucket.slice(QUOTA_INTL, QUOTA_INTL + intlFill));
-      intlRemaining -= intlFill;
-      enFree -= intlFill;
-      console.log(`[Quota] EN-Freiplätze → INTL: +${intlFill} (INTL jetzt ${intlSelected.length})`);
-    }
-  }
-
-  return { deSelected, enSelected, intlSelected };
+  return result;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -366,24 +263,66 @@ const beforeDedupCount = scored.length;
 const dedupedScored = semanticDedup(scored);
 console.log(`[Score&Rank] Semantic Dedup: ${beforeDedupCount} → ${dedupedScored.length} (entfernt ${beforeDedupCount - dedupedScored.length} ähnliche)`);
 
-// 4. NEU: Language-Quota Bucketing
-const { deSelected, enSelected, intlSelected } = applyLanguageQuota(dedupedScored);
+// 4. In DE und EN Buckets spalten (INTL wird ignoriert)
+const deBucket = dedupedScored.filter(i => (i.languageOrig || 'en').toLowerCase() === 'de');
+const enBucket = dedupedScored.filter(i => (i.languageOrig || 'en').toLowerCase() === 'en');
 
-// 5. Kombinieren: DE + EN + INTL (für LLM)
-let finalItems = [...deSelected, ...enSelected, ...intlSelected];
+console.log(`[Quota] Bucket-Größen: DE=${deBucket.length}, EN=${enBucket.length}`);
 
-// 6. Minimum-Score-Threshold (ruhiger News-Tag)
+// 5. Beide Buckets nach Score sortieren (absteigend)
+deBucket.sort((a, b) => b._score - a._score);
+enBucket.sort((a, b) => b._score - a._score);
+
+// 6. NEU: Source-Diversity-Cap anwenden (max 2 pro Quelle)
+const deDiverse = applySourceDiversity(deBucket, MAX_ITEMS_PER_SOURCE);
+const enDiverse = applySourceDiversity(enBucket, MAX_ITEMS_PER_SOURCE);
+
+console.log(`[Quota] Nach Source-Diversity (max ${MAX_ITEMS_PER_SOURCE}/Quelle): DE=${deDiverse.length}, EN=${enDiverse.length}`);
+
+// 7. Top N aus jedem Bucket
+let deSelected = deDiverse.slice(0, QUOTA_DE);
+let enSelected = enDiverse.slice(0, QUOTA_EN);
+
+// 8. Umverteilung freier Slots (DE ↔ EN)
+//    Wenn DE weniger als 10 hat, gehen freie DE-Slots an EN und umgekehrt
+let deFree = QUOTA_DE - deSelected.length;
+let enFree = QUOTA_EN - enSelected.length;
+
+if (deFree > 0 && enSelected.length > QUOTA_EN) {
+  // DE hat freie Slots, EN hat mehr als 10 → EN auffüllen
+  const enFill = Math.min(deFree, enSelected.length - QUOTA_EN);
+  // EN-Items die nach dem Cap noch übrig sind (hinter Index QUOTA_EN)
+  // Aber wir haben schon den Source-Diversity-Cap angewendet — hier
+  // nehmen wir einfach die nächsten besten EN-Items
+  const enExtra = enBucket
+    .filter(i => !enSelected.includes(i))
+    .slice(0, enFill);
+  enSelected = enSelected.concat(enExtra);
+  deFree -= enExtra.length;
+  console.log(`[Quota] DE-Freiplätze → EN: +${enExtra.length}`);
+}
+
+if (enFree > 0 && deSelected.length > QUOTA_DE) {
+  const deExtra = deBucket
+    .filter(i => !deSelected.includes(i))
+    .slice(0, enFree);
+  deSelected = deSelected.concat(deExtra);
+  console.log(`[Quota] EN-Freiplätze → DE: +${deExtra.length}`);
+}
+
+// 9. Kombinieren
+let finalItems = [...deSelected, ...enSelected];
+
+// 10. Minimum-Score-Threshold (ruhiger News-Tag)
 const lowScoreCount = finalItems.filter(i => i._score < MIN_SCORE_THRESHOLD).length;
 if (lowScoreCount === finalItems.length && finalItems.length > 10) {
-  // Alle unter Threshold → nur Top 15 senden (aus jedem Bucket proportional)
   const keepDe = Math.min(5, deSelected.length);
   const keepEn = Math.min(5, enSelected.length);
-  const keepIntl = Math.min(5, intlSelected.length);
-  finalItems = [...deSelected.slice(0, keepDe), ...enSelected.slice(0, keepEn), ...intlSelected.slice(0, keepIntl)];
+  finalItems = [...deSelected.slice(0, keepDe), ...enSelected.slice(0, keepEn)];
   console.log(`[Score&Rank] ⚠️ Ruhiger News-Tag: Alle unter ${MIN_SCORE_THRESHOLD}P → reduziere auf ${finalItems.length} Items`);
 }
 
-// 7. Score-Distribution-Logging
+// 11. Score-Distribution-Logging
 const scores = finalItems.map(i => i._score);
 const avgScore = scores.length > 0 ? Math.round(scores.reduce((s, i) => s + i, 0) / scores.length) : 0;
 const allScores = scored.map(i => i._score).sort((a, b) => b - a);
@@ -391,32 +330,36 @@ const allScores = scored.map(i => i._score).sort((a, b) => b - a);
 console.log(`\n═══ SCORE DISTRIBUTION REPORT ═══`);
 console.log(`Input (nach URL-Dedup):     ${allItems.length}`);
 console.log(`Nach Semantic Dedup:        ${dedupedScored.length}`);
-console.log(`Bucket-Größen (verfügbar):  DE=${dedupedScored.filter(i=>i.languageOrig==='de').length}, EN=${dedupedScored.filter(i=>i.languageOrig==='en').length}, INTL=${dedupedScored.filter(i=>!['de','en'].includes(i.languageOrig)).length}`);
-console.log(`Final Output:               ${finalItems.length} (Quota: DE=${deSelected.length}, EN=${enSelected.length}, INTL=${intlSelected.length})`);
+console.log(`Bucket-Größen (verfügbar):  DE=${deBucket.length}, EN=${enBucket.length}`);
+console.log(`Nach Source-Diversity:      DE=${deDiverse.length} (max ${MAX_ITEMS_PER_SOURCE}/Quelle), EN=${enDiverse.length}`);
+console.log(`Final Output:               ${finalItems.length} (Quota: DE=${deSelected.length}, EN=${enSelected.length})`);
 console.log(`Avg Score (Final):          ${avgScore}`);
 console.log(`Highest Score:              ${scores[0] || 0}`);
 console.log(`Lowest Score (Final):       ${scores[scores.length - 1] || 0}`);
-console.log(`Items unter Threshold:      ${lowScoreCount}/${finalItems.length} (< ${MIN_SCORE_THRESHOLD}P)`);
 console.log(`════════════════════════════════\n`);
 
-// 8. Sprach-Verteilung im Final-Output
+// 12. Sprach- + Source-Verteilung im Final-Output
 const langCounts = {};
+const sourceCounts = {};
 finalItems.forEach(i => {
   const lang = i.languageOrig || 'en';
   langCounts[lang] = (langCounts[lang] || 0) + 1;
+  sourceCounts[i.source] = (sourceCounts[i.source] || 0) + 1;
 });
 console.log('[Score&Rank] Sprach-Verteilung im Output:');
 Object.entries(langCounts).sort((a, b) => b[1] - a[1]).forEach(([lang, count]) => {
   console.log(`  ${lang.toUpperCase()}: ${count}x`);
 });
+console.log('[Score&Rank] Source-Verteilung im Output:');
+Object.entries(sourceCounts).sort((a, b) => b[1] - a[1]).forEach(([src, count]) => {
+  console.log(`  ${src}: ${count}x`);
+});
 
 console.log('\n[Score&Rank] Top 3 pro Bucket:');
 console.log('  DE:', deSelected.slice(0, 3).map(i => `[${i._score}P] ${i.source} — "${(i.title||'').substring(0,50)}..."`).join('\n      '));
 console.log('  EN:', enSelected.slice(0, 3).map(i => `[${i._score}P] ${i.source} — "${(i.title||'').substring(0,50)}..."`).join('\n      '));
-console.log('  INTL:', intlSelected.slice(0, 3).map(i => `[${i._score}P] ${i.source} — "${(i.title||'').substring(0,50)}..."`).join('\n      '));
 
-// 9. Cleanup-Felder vor Rückgabe
-//    _bucket wird für Build Ollama Request benötigt (annotiert Prompt)
+// 13. Cleanup-Felder vor Rückgabe
 const cleanOutput = finalItems.map(item => ({
   json: {
     title: item.title,
@@ -425,10 +368,9 @@ const cleanOutput = finalItems.map(item => ({
     pubDate: item.pubDate,
     summary: item.summary,
     languageOrig: item.languageOrig || 'en',
-    origin: item.origin || 'rss',
     _score: item._score,
     _scoreReasons: item._scoreReasons,
-    _bucket: item.languageOrig === 'de' ? 'de' : (item.languageOrig === 'en' ? 'en' : 'intl'),
+    _bucket: item.languageOrig === 'de' ? 'de' : 'en',
   }
 }));
 
