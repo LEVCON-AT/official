@@ -62,6 +62,34 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
     };
   }, []);
 
+  // Sync activePanel with initialPanel prop when it changes.
+  //
+  // WICHTIG: Die Komponente bleibt beim Panel-Wechsel gemounted (key={locale}
+  // in [panel]/page.tsx, nicht key={locale-panelId}). Dadurch wird beim
+  // Client-Side Navigation die Komponente NICHT neu gemounted — aber
+  // useState ignoriert Prop-Änderungen nach dem Mount. Dieser useEffect
+  // synced den State manuell, damit Browser-Back/Forward und direkte
+  // URL-Wechsel (z.B. von /ai-news zu /ki-schulungen) den korrekten
+  // Panel-State zeigen OHNE Flackern (kein Re-Mount = keine CSS-Transition
+  // die neu startet).
+  useEffect(() => {
+    const target = initialPanel || null;
+    // Cancel any pending fade timer to avoid race conditions
+    if (fadeTimer.current) {
+      clearTimeout(fadeTimer.current);
+      fadeTimer.current = null;
+    }
+    setActivePanel(target);
+    if (target) {
+      setIntroGone(true);
+      setIntroHiding(false);
+    } else {
+      // Navigating to home — show intro again
+      setIntroGone(false);
+      setIntroHiding(false);
+    }
+  }, [initialPanel]);
+
   // Handle browser back/forward — sync state with URL
   useEffect(() => {
     const handlePopState = () => {

@@ -130,7 +130,7 @@ export default async function PanelPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
       />
       <LevconPage
-        key={locale + '-' + panelId}
+        key={locale}
         locale={locale}
         todaysNews={todaysNews}
         archivedNews={archivedNews}
