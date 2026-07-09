@@ -2,13 +2,12 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations, useMessages } from 'next-intl';
-import { Link, useRouter } from '@/i18n/navigation';
 import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
 import AiNewsSignup from '@/components/ainews/AiNewsSignup';
 import AiNewsArchive from '@/components/ainews/AiNewsArchive';
 import AiNewsSettings from '@/components/ainews/AiNewsSettings';
 import { LANG_CODE_TO_SHORT } from '@/components/ainews/languages';
-import { getPanelSlug, type PanelId } from '@/components/panel-routing';
+import { getPanelSlug, getPanelFromSlug, PANEL_META, type PanelId } from '@/components/panel-routing';
 import type { AiNewsData } from '@/components/ainews/data';
 
 const FADE_MS = 320;
@@ -21,7 +20,6 @@ type LevconPageProps = {
 };
 
 export default function LevconPage({ locale, todaysNews, archivedNews, initialPanel }: LevconPageProps) {
-  const router = useRouter();
   const [activePanel, setActivePanel] = useState<PanelId | null>(initialPanel || null);
   const [introHiding, setIntroHiding] = useState(false);
   const [introGone, setIntroGone] = useState(!!initialPanel);
@@ -62,48 +60,81 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
     };
   }, []);
 
-  // Sync activePanel with initialPanel prop when it changes.
-  //
-  // WICHTIG: Die Komponente bleibt beim Panel-Wechsel gemounted (key={locale}
-  // in [panel]/page.tsx, nicht key={locale-panelId}). Dadurch wird beim
-  // Client-Side Navigation die Komponente NICHT neu gemounted — aber
-  // useState ignoriert Prop-Änderungen nach dem Mount. Dieser useEffect
-  // synced den State manuell, damit Browser-Back/Forward und direkte
-  // URL-Wechsel (z.B. von /ai-news zu /ki-schulungen) den korrekten
-  // Panel-State zeigen OHNE Flackern (kein Re-Mount = keine CSS-Transition
-  // die neu startet).
-  useEffect(() => {
-    const target = initialPanel || null;
-    // Cancel any pending fade timer to avoid race conditions
-    if (fadeTimer.current) {
-      clearTimeout(fadeTimer.current);
-      fadeTimer.current = null;
+  // Build the correct URL for a panel (or home) in the current locale.
+  // DE: /slug  (e.g. /ai-news, /ki-schulungen, / for home)
+  // EN: /en/slug (e.g. /en/ai-news, /en for home)
+  const buildPanelUrl = useCallback((target: PanelId | null): string => {
+    if (target === null) {
+      return locale === 'en' ? '/en' : '/';
     }
-    setActivePanel(target);
-    if (target) {
-      setIntroGone(true);
-      setIntroHiding(false);
-    } else {
-      // Navigating to home — show intro again
-      setIntroGone(false);
-      setIntroHiding(false);
-    }
-  }, [initialPanel]);
+    const slug = getPanelSlug(target, locale);
+    return locale === 'en' ? `/en/${slug}` : `/${slug}`;
+  }, [locale]);
 
-  // Handle browser back/forward — sync state with URL
+  // Update browser URL + document title WITHOUT triggering Next.js navigation.
+  // Uses pushState so no RSC fetch happens → component stays mounted → no
+  // CSS animation replay → no flicker. Title is updated for UX (SEO uses
+  // server-rendered title on direct access/refresh).
+  const navigateToUrl = useCallback((target: PanelId | null) => {
+    const url = buildPanelUrl(target);
+    window.history.pushState({}, '', url);
+    if (target === null) {
+      document.title = locale === 'en'
+        ? 'Levcon.ai — AI Consulting & Training from Vienna'
+        : 'Levcon.ai — KI-Beratung & Schulungen aus Wien';
+    } else {
+      const meta = PANEL_META[target];
+      document.title = locale === 'en' ? meta.titleEn : meta.titleDe;
+    }
+  }, [buildPanelUrl, locale]);
+
+  // Handle browser back/forward — sync state with URL.
+  //
+  // WICHTIG: Wir verwenden window.history.pushState für Panel-Wechsel (nicht
+  // router.push), um RSC-Fetch + Component-Remount zu vermeiden (das war die
+  // Ursache des Flackerns). Daher müssen wir popstate selbst behandeln: bei
+  // Back/Forward lesen wir die URL und setzen den korrekten Panel-State.
   useEffect(() => {
     const handlePopState = () => {
-      // Next.js router handles this automatically via Link navigation
-      // This is just a fallback for direct URL changes
-      if (window.location.pathname === '/' || window.location.pathname === '/en') {
+      const path = window.location.pathname;
+      // Determine locale from path
+      const isEn = path === '/en' || path.startsWith('/en/');
+      const currentLocale = isEn ? 'en' : 'de';
+      // If locale changed, let Next.js handle it (full page navigation via <a> tag)
+      if (currentLocale !== locale) return;
+
+      // Strip locale prefix to get the slug
+      const stripped = isEn ? (path.replace('/en', '') || '/') : path;
+      const slug = stripped === '/' ? '' : stripped.replace(/^\//, '');
+
+      // Cancel any pending fade timer
+      if (fadeTimer.current) {
+        clearTimeout(fadeTimer.current);
+        fadeTimer.current = null;
+      }
+
+      if (!slug) {
+        // Home
         setActivePanel(null);
         setIntroHiding(false);
         setIntroGone(false);
+        document.title = locale === 'en'
+          ? 'Levcon.ai — AI Consulting & Training from Vienna'
+          : 'Levcon.ai — KI-Beratung & Schulungen aus Wien';
+      } else {
+        const panel = getPanelFromSlug(slug, locale);
+        if (panel) {
+          setActivePanel(panel);
+          setIntroGone(true);
+          setIntroHiding(false);
+          const meta = PANEL_META[panel];
+          document.title = locale === 'en' ? meta.titleEn : meta.titleDe;
+        }
       }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [locale]);
 
   // Check URL for news status params (after confirm/unsubscribe redirect)
   useEffect(() => {
@@ -184,8 +215,11 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
     setIntroHiding(false);
     setIntroGone(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    router.push('/');
-  }, [router]);
+    // Use pushState instead of router.push to avoid RSC fetch + component
+    // remount (which caused the panel-switch flicker). URL changes for SEO,
+    // but Next.js doesn't navigate — component stays mounted, no re-render.
+    navigateToUrl(null);
+  }, [navigateToUrl]);
 
   const openPanel = useCallback((target: PanelId) => {
     if (activePanel === target) {
@@ -207,10 +241,12 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Also update URL for SEO + shareability
-    const slug = getPanelSlug(target, locale);
-    router.push('/' + slug);
-  }, [activePanel, introGone, locale, router, goHome]);
+    // Update URL for SEO + shareability WITHOUT triggering Next.js navigation.
+    // router.push would fetch RSC payload and remount LevconPage, causing the
+    // CSS fadePanel animation to replay (= flicker). pushState changes only
+    // the URL — component stays mounted, state drives the transition smoothly.
+    navigateToUrl(target);
+  }, [activePanel, introGone, navigateToUrl, goHome]);
 
   const handleNavClick = useCallback((target: string) => {
     if (target === 'home') {
