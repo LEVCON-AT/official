@@ -308,7 +308,9 @@ export default function AiNewsArchive({ archive, locale }: Props) {
                 {currentMonth.editions.map((edition) => {
                   const dateKey = edition.date.toISOString();
                   const isDayExpanded = effectiveExpandedDays.has(dateKey);
-                  const itemLabel = `${edition.items.length} ${postsLabel}`;
+                  // Im Search-Modus: keine "N Beiträge"-Anzeige (nur matchende Items,
+                  // die Anzahl wäre verwirrend). Im Browse-Modus: volle Anzahl zeigen.
+                  const itemLabel = isSearching ? null : `${edition.items.length} ${postsLabel}`;
                   const formattedDate = new Intl.DateTimeFormat(dateFormat, dateOptions).format(edition.date);
                   const weekday = new Intl.DateTimeFormat(dateFormat, weekdayOptions).format(edition.date);
 
@@ -327,16 +329,22 @@ export default function AiNewsArchive({ archive, locale }: Props) {
                         />
                         <span className="ainews-archive-day-weekday">{weekday}</span>
                         <span className="ainews-archive-day-date">{formattedDate}</span>
-                        <span className="ainews-archive-day-count">{itemLabel}</span>
+                        {itemLabel && (
+                          <span className="ainews-archive-day-count">{itemLabel}</span>
+                        )}
                       </button>
 
                       {isDayExpanded && (
                         <div className="ainews-archive-day-body">
-                          <p className="ainews-archive-summary">
-                            {locale === 'en' && edition.summaryEn
-                              ? edition.summaryEn
-                              : edition.summaryDe}
-                          </p>
+                          {/* Im Search-Modus: keine Tages-Zusammenfassung anzeigen.
+                              Nur die matchenden Items sind relevant. */}
+                          {!isSearching && (
+                            <p className="ainews-archive-summary">
+                              {locale === 'en' && edition.summaryEn
+                                ? edition.summaryEn
+                                : edition.summaryDe}
+                            </p>
+                          )}
                           <div className="ainews-list">
                             {edition.items.map((item) => (
                               <AiNewsItem key={item.id} item={item} locale={locale} />
