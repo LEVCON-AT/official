@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" width="200" height="56">
+  <!-- Levcon.ai — Full Logo (Symbol + Wordmark) -->
+  <!-- Designed for levcon.ai · Crafted with care and AI -->
+
+  <!-- Bildmarke: L in square frame -->
+  <rect x="4" y="4" width="48" height="48" fill="none" stroke="#1C1C1A" stroke-width="1.2" opacity="0.75"/>
+  <text x="28" y="40" font-family="Georgia, 'Times New Roman', serif" font-size="32" font-weight="500" fill="#1C1C1A" text-anchor="middle" opacity="0.75">L</text>
+
+  <!-- Wortmarke: LEVCON.AI -->
+  <text x="64" y="36" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="400" letter-spacing="3.5" fill="#1C1C1A" opacity="0.6">LEVCON.AI</text>
+</svg>

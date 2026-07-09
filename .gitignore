@@ -60,3 +60,8 @@ db/*.db-journal
 *.png
 # Allow favicons and OG images in public/
 !public/*.png
+
+# Tool results (temporary agent artifacts)
+/tool-results/
+# Dev server PID tracking
+/.zscripts/dev.pid

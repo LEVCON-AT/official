@@ -320,3 +320,49 @@ Stage Summary:
 - 5 Sprints geplant (Modell-Upgrade, Internationale Quellen, Frontend, Newsletter Bulk, Polish)
 - Backlog um 7 Punkte erweitert
 - Konzept deckt alle Owner-Anforderungen ab (A1-A4, B1-B6, C, Übersetzungen)
+
+---
+Task ID: 11
+Agent: main (Z.ai Code)
+Task: Bug fix — DE Panel-Switch funktioniert nicht (nur URL ändert sich, Inhalt bleibt gleich)
+
+Work Log:
+- Root Cause Analysis durchgeführt:
+  - Middleware-Matcher `['/', '/(de|en)/:path*']` war zu restriktiv
+  - Mit `localePrefix: 'as-needed'` haben DE-URLs KEINEN Prefix (z.B. `/ai-news`, `/ki-schulungen`)
+  - Der Matcher hat diese DE-Routen NICHT abgefangen → next-intl Middleware lief nie für DE-Panel-Routen
+  - Dadurch konnte next-intl die Locale nicht erkennen und Next.js konnte Route `[locale]/[panel]` nicht matchen
+  - Ergebnis: URL änderte sich (via router.push), aber Server returned 404/fehlerhaft → Inhalt wechselte nicht
+  - EN funktionierte weil `/en/ai-news` den Matcher `/(de|en)/:path*` matcht
+
+- Zweiter Bug: Zwei Middleware-Dateien (`middleware.ts` + `proxy.ts`)
+  - Next.js 16 hat `middleware.ts` DEPRECATED zugunsten von `proxy.ts`
+  - `proxy.ts` (mit NEXT_LOCALE Cookie-Löschung) war die aktive Datei
+  - `middleware.ts` wurde ignoriert → NEXT_LOCALE Cookie wurde nie gelöscht
+  - Das erklärte den DE-Sprachbutton-Bug aus der vorherigen Session
+
+- Fix durchgeführt:
+  1. `src/middleware.ts` → `src/proxy.ts` umbenannt (Next.js 16 Konvention)
+  2. Matcher geändert von `['/', '/(de|en)/:path*']` → `['/((?!api|_next|_vercel|.*\\..*).*)']`
+     (Standard next-intl Matcher: fängt ALLE Seitenrouten ab, außer api/_next/_vercel/statische Dateien)
+  3. NEXT_LOCALE Cookie-Löschung in proxy.ts konsolidiert
+  4. Alte doppelte proxy.ts-Logik entfernt
+
+- Verifikation (via curl + HTML-Inspektion + Agent Browser):
+  - `GET /` → HTTP 200, Title "Levcon.ai — KI-Beratung & Schulungen aus Wien", DE-Button active ✓
+  - `GET /ai-news` → HTTP 200, `<section class="panel open" id="ainews">`, Title "AI News — Tägliche KI-News kuratiert" ✓
+  - `GET /ki-schulungen` → HTTP 200, `<section class="panel open" id="schulungen">`, Title "KI Schulungen — Levcon.ai" ✓
+  - `GET /en` → HTTP 200 ✓
+  - `GET /en/ai-news` → HTTP 200 ✓
+  - Dev-Log zeigt `proxy.ts: Xms` für JEDEN Request (Middleware läuft überall)
+  - Agent Browser: Klick auf "AI NEWS" Button → URL wechselt zu `/ai-news`, Title ändert sich, AI NEWS Button wird `expanded=true`, AI News Panel-Inhalt wird sichtbar ✓
+  - NEXT_LOCALE Cookie nicht in Response-Headern (wird gelöscht) ✓
+  - Lint: 0 Errors, 1 harmlose Warning (unused eslint-disable)
+
+Stage Summary:
+- 3 Bugs behoben:
+  1. ✅ Panel-Switch in DE funktioniert jetzt (URL UND Inhalt wechseln)
+  2. ✅ DE-Sprachbutton ist "active" auf allen DE-Seiten
+  3. ✅ AI-News steht in Navigation an Position 2 (nach Home) — war bereits korrekt
+- Root Cause war der zu restriktive Middleware-Matcher + Next.js 16 proxy.ts-Konvention
+- Datei: `/home/z/my-project/src/proxy.ts` (umbenannt von middleware.ts, fixiert)
