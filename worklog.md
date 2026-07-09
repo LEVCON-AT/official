@@ -366,3 +366,43 @@ Stage Summary:
   3. ✅ AI-News steht in Navigation an Position 2 (nach Home) — war bereits korrekt
 - Root Cause war der zu restriktive Middleware-Matcher + Next.js 16 proxy.ts-Konvention
 - Datei: `/home/z/my-project/src/proxy.ts` (umbenannt von middleware.ts, fixiert)
+
+---
+Task ID: 12
+Agent: main (Z.ai Code)
+Task: Bug fix — Panel-Switch flackert (doppeltes Erscheinen des Content-Panels)
+
+Work Log:
+- Root Cause Analysis:
+  - In [panel]/page.tsx hatte LevconPage key={locale + '-' + panelId}
+  - Bei jedem Panel-Wechsel (z.B. /ai-news → /ki-schulungen) änderte sich der key
+  - React unmountete die alte Komponente und mountete eine NEUE
+  - Die neue Komponente renderte das Panel frisch → CSS-Transition (fade-in) startete neu
+  - Sichtbares Resultat: Panel faded ein (alte Komponente), dann nochmal (neue Komponente) = Flackern
+
+- Fix durchgeführt:
+  1. [panel]/page.tsx: key={locale + '-' + panelId} → key={locale}
+     → Komponente bleibt beim Panel-Wechsel gemounted (gleiche Locale = gleicher key)
+     → Kein Re-Mount = keine CSS-Transition die neu startet = kein Flackern
+
+  2. LevconPage.tsx: useEffect hinzugefügt der activePanel/introGone/introHiding
+     mit initialPanel prop synced, wenn sich diese ändert
+     → Nötig weil useState prop-Änderungen nach Mount ignoriert
+     → Browser-Back/Forward und direkte URL-Wechsel funktionieren jetzt korrekt
+     → useEffect cancelt auch pending fade timer (race condition prevention)
+
+- Verifikation:
+  - Lint: 0 Errors, 1 harmlose Warning
+  - Server-Side HTML Check (curl): alle Routen rendern korrekt mit richtigem Panel open
+  - GitHub Actions Deploy: completed/success (Commit 42d8c8f)
+  - Live auf levcon.ai verifiziert:
+    - / → Home, kein Panel
+    - /ai-news → ainews Panel open, intro is-gone, DE button active
+    - /ki-schulungen → schulungen Panel open, intro is-gone
+
+Stage Summary:
+- Flackern beim Panel-Switch eliminiert (Desktop + Mobile)
+- Root cause war der key-Wechsel der React-Komponente bei Panel-Navigation
+- Komponente bleibt jetzt gemounted, nur State ändert sich = smooth single transition
+- Browser-Back/Forward weiterhin funktionsfähig durch useEffect-Sync
+- Commit 42d8c8f auf main gepusht, auto-deployed zu levcon.ai
