@@ -27,6 +27,9 @@ export default function AiNewsArchive({ archive, locale }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
+  // Merkt sich den Monats-Index vor der Suche, damit beim Löschen
+  // der Suche zurück zum ursprünglichen Monat gesprungen wird.
+  const preSearchMonthIndex = useRef(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations('ainews');
 
@@ -124,8 +127,23 @@ export default function AiNewsArchive({ archive, locale }: Props) {
 
   // ── Handlers ──────────────────────────────────────────────────
   const handleSearchChange = (value: string) => {
+    const wasNotSearching = searchQuery.trim().length < MIN_CHARS_FOR_SEARCH;
+    const willSearch = value.trim().length >= MIN_CHARS_FOR_SEARCH;
+
+    // Beim Übergang von Browse → Search: aktuellen Monat merken
+    if (wasNotSearching && willSearch) {
+      preSearchMonthIndex.current = currentMonthIndex;
+    }
+
     setSearchQuery(value);
-    setCurrentMonthIndex(0);
+
+    // Bei Suche: auf ersten Treffer-Monat springen
+    // Beim Löschen: zurück zum gemerkten Monat
+    if (willSearch) {
+      setCurrentMonthIndex(0);
+    } else {
+      setCurrentMonthIndex(preSearchMonthIndex.current);
+    }
     setExpandedDays(new Set());
   };
 
@@ -228,7 +246,9 @@ export default function AiNewsArchive({ archive, locale }: Props) {
           {isSearching && (
             <p className="ainews-archive-search-info" role="status" aria-live="polite">
               {filteredArchive.length > 0
-                ? editionCountLabel(filteredArchive.length)
+                ? (locale === 'en'
+                    ? `${filteredArchive.length} edition${filteredArchive.length === 1 ? '' : 's'} found in ${filteredMonths.length} month${filteredMonths.length === 1 ? '' : 's'}`
+                    : `${filteredArchive.length} Ausgabe${filteredArchive.length === 1 ? '' : 'n'} in ${filteredMonths.length} Monat${filteredMonths.length === 1 ? '' : 'en'} gefunden`)
                 : noResultsLabel}
             </p>
           )}
