@@ -112,6 +112,37 @@ Mit 30 Items in 3 Sprach-Gruppen werden die Filter-Tags sinnvoll nutzbar:
 Der User kann nach Sprache filtern und sieht eine ausgewogene Mischung
 statt 28 EN + 1 DE + 1 ZH wie bisher.
 
+## Newsletter Render Node (v2 — Sprint 14b+c)
+
+Die Datei `04-render-newsletter.code.js` ersetzt den "Render Newsletter HTML"
+Code-Node im Workflow 03 (newsletter-send). Sie implementiert:
+
+### Sprint 14b: Vereinfachung
+- Daily/Weekly/Digest senden alle die gleichen **Tagesnews** (keine Aggregation)
+- `lastSentDate` Check: falls heute schon gesendet → Subscriber wird übersprungen
+  (verhindert Doppelversand wenn Daily und Digest am selben Tag feuern)
+
+### Sprint 14c: 2-Block-Struktur + Translate-Links
+- Newsletter hat **2 Blöcke**:
+  1. "AI News International" — alle EN-Items (zuerst, da höheres Interesse)
+  2. "KI-News aus dem DACH-Raum" — alle DE-Items (als Bonus)
+- Translate-Link bei jedem Item dessen Original-Sprache ≠ Newsletter-Sprache:
+  - DE-Newsletter + EN-Item → "Auf Deutsch lesen →" (Google Translate)
+  - EN-Newsletter + DE-Item → "Read in English →" (Google Translate)
+- Summary in Newsletter-Sprache (summaryDe für DE, summaryEn für EN)
+- Block-Überschriften sind sprachneutral ("AI News International" / "KI-News aus dem DACH-Raum")
+
+### Sprach-Logik
+- Newsletter-Sprache = Signup-Sprache (wird in DB als `language` gespeichert)
+- DE-Site (/) → Subscriber bekommt `language: 'de'` → DE-Newsletter
+- EN-Site (/en) → Subscriber bekommt `language: 'en'` → EN-Newsletter
+- Änderbar in den Einstellungen (Settings-Seite mit Token)
+
+### Import in n8n
+1. Workflow 03 (newsletter-send) öffnen
+2. Code-Node "Render Newsletter HTML" anklicken
+3. Inhalt ersetzen durch `04-render-newsletter.code.js`
+
 ## Import in n8n
 
 1. n8n öffnen → Workflow "AI News — 01 Collect & Curate" bearbeiten
