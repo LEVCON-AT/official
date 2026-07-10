@@ -356,11 +356,22 @@ if (errors.length > 0) {
   console.log(`[Build Ollama v5] ⚠️ Partial failure: ${errors.map(e => e.run).join(', ')} failed but other run succeeded`);
 }
 
-// 7. Return als synthetische Ollama-Response (kompatibel mit Parse LLM JSON Node)
-return [{
-  json: {
-    message: {
-      content: JSON.stringify(mergedJson)
-    }
-  }
-}];
+// 7. Return: direkt das geparste JSON-Objekt zurückgeben.
+//    WICHTIG: Der Build Ollama v5 Node hat bereits:
+//    - Ollama-Call gemacht
+//    - JSON geparst (mit Auto-Repair)
+//    - Items mit Originaldaten angereichert (Enrichment)
+//    - Zu einem gemergeden JSON kombiniert
+//
+//    Ein separater "Parse LLM JSON" Node ist NICHT MEHR NÖTIG.
+//    Dieser Node gibt direkt das fertige Objekt zurück, das die Ingest-API
+//    erwartet: { summaryDe, summaryEn, items[] }
+//
+//    Falls der alte "Parse LLM JSON" Node noch in der Workflow-Canvas
+//    existiert, kann er GELÖSCHT werden. Die Ingest-API direkt nach
+//    Build Ollama verbinden.
+//
+//    Alternativ: Falls der Parse Node als Validierungs-Passthrough
+//    erhalten bleiben soll, muss sein Code angepasst werden auf:
+//    return items;  (einfach durchreichen)
+return [{ json: mergedJson }];

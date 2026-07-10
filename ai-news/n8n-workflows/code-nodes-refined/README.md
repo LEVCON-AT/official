@@ -72,25 +72,33 @@ nur noch schreiben. Bessere Qualität bei gleichem Modell.
 - Output: 30 Items × ~120 Tokens + 2 Summaries ~400 = ~4.000
 - **Gesamt: ~7.500 Tokens von 32.768 (23% Auslastung)** ✓
 
-## Pipeline-Übersicht (v3)
+## Pipeline-Übersicht (v5)
 
 ```
 Schedule Trigger (06:00 Vienna)
     ↓
-[01-fetch-all-rss.code.js]  ← 35 Feeds, max 30/Feed, Promise.allSettled
+[01-fetch-all-rss.code.js]  ← 35 Feeds, max 30/Feed, UTF-8, HTML-Entities dekodiert
     ↓ ~200-400 KI-Items
 [Dedupe by URL]  ← bestehender Code-Node (URL + Titel-Dedup)
     ↓ ~150-250 Items
-[02-score-and-rank.code.js]  ← 6-Faktor-Scoring + Semantic Dedup + 3-Bucket Quota
-    ↓ 30 Items (10 DE + 10 EN + 10 INTL, garantierte Sprach-Verteilung)
-[03-build-ollama-request.code.js]  ← Prompt "keep all" + Ollama API Call
-    ↓ Ollama Response (30 items mit DE+EN summaries)
-[Parse LLM JSON]  ← bestehender Code-Node (JSON-Extraction + Auto-Repair)
-    ↓ Parsed {summaryDe, summaryEn, items[30]}
+[02-score-and-rank.code.js]  ← 6-Faktor-Scoring + Semantic Dedup + 2-Bucket Quota (DE+EN)
+    ↓ 20 Items (10 DE + 10 EN, max 2 pro Quelle pro Sprache)
+[03-build-ollama-request.code.js]  ← 2 SERIELLE Ollama-Calls + Merge + Enrichment
+    ↓ Direkt geparstes JSON: { summaryDe, summaryEn, items[20] }
+    ↓ (KEIN separater Parse LLM JSON Node mehr nötig!)
 [POST /api/ai-news/internal/ingest]  ← bestehender HTTP-Request-Node
     ↓
 [Trigger Workflow 02 + 03]  ← LinkedIn + Newsletter
 ```
+
+### WICHTIG: Parse LLM JSON Node
+
+Der v5 Build Ollama Node macht das JSON-Parsing **intern** (inkl. Auto-Repair
+und Enrichment). Der alte "Parse LLM JSON" Code-Node ist **nicht mehr nötig**.
+
+**Optionen:**
+1. **Parse Node löschen** — Build Ollama direkt mit Ingest verbinden (empfohlen)
+2. **Parse Node als Passthrough** — Code ersetzen durch `return items;`
 
 ## Frontend-Auswirkung
 
