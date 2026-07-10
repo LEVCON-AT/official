@@ -116,8 +116,8 @@ function renderItem(it, lang) {
                       <tr>
                         ${thumbHtml}
                         <td style="vertical-align:top;" ${headlineColspan}>
-                          <h2 class="lc-item-headline" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:500;line-height:1.3;color:#1C1C1A;">
-                            <a href="${url}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:none;font-weight:500;">
+                          <h2 class="lc-item-headline" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:500;line-height:1.3;color:#464644;">
+                            <a href="${url}" rel="noopener noreferrer" style="color:#464644;text-decoration:none;font-weight:500;">
                               ${headline}
                             </a>
                           </h2>
@@ -125,7 +125,7 @@ function renderItem(it, lang) {
                       </tr>
                     </table>
 
-                    <p style="margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#1C1C1A;font-weight:300;">
+                    <p style="margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#464644;font-weight:300;">
                       ${desc}
                     </p>
 
@@ -188,7 +188,7 @@ function renderDe(news, unsubUrl, settingsUrl, dateDe) {
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background-color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#1C1C1A;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;line-height:1.5;">
+<body style="margin:0;padding:0;background-color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#464644;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;line-height:1.5;">
 
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#F0EFEC;">
     ${escapeHtml(news.summaryDe || '').substring(0, 100)}
@@ -213,7 +213,7 @@ function renderDe(news, unsubUrl, settingsUrl, dateDe) {
               <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#8A8A85;margin-bottom:14px;font-weight:400;">
                 KI-News des Tages
               </div>
-              <h1 class="lc-date" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#1C1C1A;line-height:1.2;letter-spacing:-0.01em;">
+              <h1 class="lc-date" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#464644;line-height:1.2;letter-spacing:-0.01em;">
                 ${escapeHtml(dateDe)}
               </h1>
             </td>
@@ -221,7 +221,7 @@ function renderDe(news, unsubUrl, settingsUrl, dateDe) {
 
           <tr>
             <td class="lc-pad-h" style="padding:28px 32px 8px 32px;">
-              <p class="lc-summary" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;">
+              <p class="lc-summary" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#464644;font-weight:400;">
                 ${escapeHtml(news.summaryDe || '')}
               </p>
             </td>
@@ -239,13 +239,13 @@ function renderDe(news, unsubUrl, settingsUrl, dateDe) {
                 Sie erhalten diese E-Mail, weil Sie Levcon AI News abonniert haben.
               </p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
-                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Levcon.ai</a>
+                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#464644;text-decoration:underline;">Levcon.ai</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-                <a href="${escapeHtml(settingsUrl)}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Einstellungen</a>
+                <a href="${escapeHtml(settingsUrl)}" rel="noopener noreferrer" style="color:#464644;text-decoration:underline;">Einstellungen</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-                <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Datenschutz</a>
+                <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#464644;text-decoration:underline;">Datenschutz</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-                <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Impressum</a>
+                <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#464644;text-decoration:underline;">Impressum</a>
               </p>
             </td>
           </tr>
@@ -291,7 +291,7 @@ function renderEn(news, unsubUrl, settingsUrl, dateEn) {
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background-color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#1C1C1A;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;line-height:1.5;">
+<body style="margin:0;padding:0;background-color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#464644;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;line-height:1.5;">
 
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#F0EFEC;">
     ${escapeHtml(news.summaryEn || '').substring(0, 100)}
@@ -316,7 +316,7 @@ function renderEn(news, unsubUrl, settingsUrl, dateEn) {
               <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#8A8A85;margin-bottom:14px;font-weight:400;">
                 AI News of the Day
               </div>
-              <h1 class="lc-date" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#1C1C1A;line-height:1.2;letter-spacing:-0.01em;">
+              <h1 class="lc-date" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#464644;line-height:1.2;letter-spacing:-0.01em;">
                 ${escapeHtml(dateEn)}
               </h1>
             </td>
@@ -324,7 +324,7 @@ function renderEn(news, unsubUrl, settingsUrl, dateEn) {
 
           <tr>
             <td class="lc-pad-h" style="padding:28px 32px 8px 32px;">
-              <p class="lc-summary" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;">
+              <p class="lc-summary" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#464644;font-weight:400;">
                 ${escapeHtml(news.summaryEn || '')}
               </p>
             </td>
@@ -342,13 +342,13 @@ function renderEn(news, unsubUrl, settingsUrl, dateEn) {
                 You are receiving this email because you subscribed to Levcon AI News.
               </p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
-                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Levcon.ai</a>
+                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#464644;text-decoration:underline;">Levcon.ai</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-                <a href="${escapeHtml(settingsUrl)}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Settings</a>
+                <a href="${escapeHtml(settingsUrl)}" rel="noopener noreferrer" style="color:#464644;text-decoration:underline;">Settings</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-                <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Privacy</a>
+                <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#464644;text-decoration:underline;">Privacy</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-                <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Legal Notice</a>
+                <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#464644;text-decoration:underline;">Legal Notice</a>
               </p>
             </td>
           </tr>
