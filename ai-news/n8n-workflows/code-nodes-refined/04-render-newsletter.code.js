@@ -32,12 +32,18 @@ if (!news || !news.items || !Array.isArray(news.items)) {
   throw new Error('No news data available from Fetch Today News node. Check if today\'s news were ingested.');
 }
 
-const today = news.date || new Date().toISOString().substring(0, 10);
+// Datum robust parsen — kann als ISO String oder YYYY-MM-DD kommen.
+// Verwende getUTC* Methoden um Timezone-Probleme zu vermeiden.
+const rawDate = news.date || new Date().toISOString();
+const d = new Date(rawDate);
+if (isNaN(d.getTime())) {
+  throw new Error(`Invalid date from news data: ${rawDate}`);
+}
+const today = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
 const lastSentDate = today;
 
 const DE_MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const d = new Date(today + 'T00:00:00Z');
 const dateDe = `${d.getUTCDate()}. ${DE_MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 const dateEn = `${EN_MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
 
