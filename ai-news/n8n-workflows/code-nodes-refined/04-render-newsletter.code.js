@@ -76,6 +76,7 @@ function translateUrl(originalUrl, targetLang) {
 // ── ITEM RENDERING (mit Translate-Link) ────────────────────────
 // Basiert 1:1 auf dem Levcon-Template (Table-Layout, gleiche Styles).
 // NEU: Translate-Link dezent im Source-Line angefügt.
+// NEU (Sprint 15a): Schriftart auf Arial umgestellt (wie Weiterlesen/Quelle/Description)
 
 function renderItem(it, lang) {
   const isDe = lang === 'de';
@@ -115,7 +116,7 @@ function renderItem(it, lang) {
                       <tr>
                         ${thumbHtml}
                         <td style="vertical-align:top;" ${headlineColspan}>
-                          <h2 class="lc-item-headline" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:19px;font-weight:500;line-height:1.3;color:#1C1C1A;">
+                          <h2 class="lc-item-headline" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:500;line-height:1.3;color:#1C1C1A;">
                             <a href="${url}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:none;font-weight:500;">
                               ${headline}
                             </a>
@@ -219,8 +220,8 @@ function renderDe(news, unsubUrl, settingsUrl, dateDe) {
           </tr>
 
           <tr>
-            <td class="lc-pad-h" style="padding:28px 40px 8px 40px;">
-              <p class="lc-summary" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;">
+            <td class="lc-pad-h" style="padding:28px 32px 8px 32px;">
+              <p class="lc-summary" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;">
                 ${escapeHtml(news.summaryDe || '')}
               </p>
             </td>
@@ -322,8 +323,8 @@ function renderEn(news, unsubUrl, settingsUrl, dateEn) {
           </tr>
 
           <tr>
-            <td class="lc-pad-h" style="padding:28px 40px 8px 40px;">
-              <p class="lc-summary" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;">
+            <td class="lc-pad-h" style="padding:28px 32px 8px 32px;">
+              <p class="lc-summary" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;">
                 ${escapeHtml(news.summaryEn || '')}
               </p>
             </td>
