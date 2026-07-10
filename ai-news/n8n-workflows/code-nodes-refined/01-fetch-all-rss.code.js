@@ -82,6 +82,36 @@ function stripTags(s) {
   return s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 }
 
+// HTML-Entities dekodieren: &#8217; → ', &amp; → &, &quot; → ", etc.
+// RSS-Feeds enthalten oft HTML-Entities die wir sauber als UTF-8 wollen.
+function decodeHtmlEntities(s) {
+  if (!s) return s;
+  return s
+    // Numeric entities: &#8217; → '
+    .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)))
+    // Hex entities: &#x2019; → '
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    // Named entities (common ones)
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&copy;/g, '©')
+    .replace(/&reg;/g, '®')
+    .replace(/&trade;/g, '™')
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&hellip;/g, '…')
+    .replace(/&laquo;/g, '«')
+    .replace(/&raquo;/g, '»')
+    .replace(/&lsquo;/g, '\'')
+    .replace(/&rsquo;/g, '\'')
+    .replace(/&ldquo;/g, '"')
+    .replace(/&rdquo;/g, '"');
+}
+
 function parseDate(dateStr) {
   if (!dateStr) return 0;
   const d = new Date(dateStr);
@@ -115,7 +145,7 @@ const fetchPromises = RSS_FEEDS.map(async (feed) => {
       const block = match[1];
 
       const titleM = block.match(/<title[^>]*>([\s\S]*?)<\/title>/);
-      const title = titleM ? stripTags(stripCdata(titleM[1])) : '';
+      const title = titleM ? decodeHtmlEntities(stripTags(stripCdata(titleM[1]))) : '';
 
       const linkM = block.match(/<link[^>]*?href="([^"]+)"[^>]*\/?\s*>/) || block.match(/<link[^>]*>([\s\S]*?)<\/link>/);
       const link = linkM ? (linkM[1] || '').trim() : '';
@@ -124,7 +154,7 @@ const fetchPromises = RSS_FEEDS.map(async (feed) => {
       const pubDate = pubM ? pubM[1].trim() : new Date().toISOString();
 
       const descM = block.match(/<description[^>]*>([\s\S]*?)<\/description>/) || block.match(/<summary[^>]*>([\s\S]*?)<\/summary>/);
-      let summary = descM ? stripTags(stripCdata(descM[1])) : '';
+      let summary = descM ? decodeHtmlEntities(stripTags(stripCdata(descM[1]))) : '';
       if (summary.length > 300) summary = summary.substring(0, 297) + '...';
 
       if (title && link && (AI_KEYWORDS.test(title) || AI_KEYWORDS.test(summary))) {

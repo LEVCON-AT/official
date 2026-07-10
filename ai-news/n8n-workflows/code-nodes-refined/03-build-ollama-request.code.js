@@ -267,7 +267,10 @@ function enrichItems(llmItems, originalItems, defaultLang) {
     if (orig.title) byTitle.set(orig.title.toLowerCase().trim(), orig);
   }
 
-  return llmItems.map((item, idx) => {
+  const enriched = [];
+  const dropped = [];
+
+  for (const item of llmItems) {
     // Versuche Match via sourceUrl (bevorzugt) oder headline (Fallback)
     let original = null;
     if (item.sourceUrl && byUrl.has(item.sourceUrl)) {
@@ -288,20 +291,38 @@ function enrichItems(llmItems, originalItems, defaultLang) {
       }
     }
 
+    // KEIN Match gefunden → Item verwerfen (verhindert "Unknown" Items im Frontend)
+    // Diese Items haben keine verlässliche sourceUrl und würden die Archiv-Suche
+    // und das Frontend verfälschen. Besser weglassen als Müll zeigen.
+    if (!original) {
+      dropped.push({
+        headline: (item.headline || '').substring(0, 60),
+        reason: 'no match to original input'
+      });
+      continue;
+    }
+
     // Enrichment: LLM-Daten haben Vorrang, aber wenn Feld fehlt → Original
-    return {
-      headline: item.headline || original?.title || `Item ${idx + 1}`,
-      headlineDe: item.headlineDe || item.headline || original?.title || null,
-      headlineEn: item.headlineEn || item.headline || original?.title || null,
+    enriched.push({
+      headline: item.headline || original.title,
+      headlineDe: item.headlineDe || item.headline || original.title || null,
+      headlineEn: item.headlineEn || item.headline || original.title || null,
       descriptionDe: item.descriptionDe || 'Keine Zusammenfassung verfügbar.',
       descriptionEn: item.descriptionEn || 'No summary available.',
-      source: item.source || original?.source || 'Unknown',
-      sourceUrl: item.sourceUrl || original?.link || '',
+      source: item.source || original.source,
+      sourceUrl: item.sourceUrl || original.link,
       thumbnailUrl: item.thumbnailUrl || null,
-      languageOrig: item.languageOrig || original?.languageOrig || defaultLang,
+      languageOrig: item.languageOrig || original.languageOrig || defaultLang,
       category: item.category || null,
-    };
-  });
+    });
+  }
+
+  if (dropped.length > 0) {
+    console.log(`[Build Ollama v5] ⚠️ ${dropped.length} Items verworfen (kein Match zu Original-Input):`);
+    dropped.forEach(d => console.log(`   - "${d.headline}..." (${d.reason})`));
+  }
+
+  return enriched;
 }
 
 const deItemsEnriched = enrichItems(deJson?.items, deItems, 'de');

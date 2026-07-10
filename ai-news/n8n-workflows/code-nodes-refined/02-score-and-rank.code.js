@@ -339,18 +339,22 @@ console.log(`══════════════════════�
 // 12. Sprach- + Source-Verteilung im Final-Output
 const langCounts = {};
 const sourceCounts = {};
+const sourceByLang = {};  // source → { de: N, en: N }
 finalItems.forEach(i => {
   const lang = i.languageOrig || 'en';
   langCounts[lang] = (langCounts[lang] || 0) + 1;
   sourceCounts[i.source] = (sourceCounts[i.source] || 0) + 1;
+  if (!sourceByLang[i.source]) sourceByLang[i.source] = { de: 0, en: 0 };
+  sourceByLang[i.source][lang] = (sourceByLang[i.source][lang] || 0) + 1;
 });
 console.log('[Score&Rank] Sprach-Verteilung im Output:');
 Object.entries(langCounts).sort((a, b) => b[1] - a[1]).forEach(([lang, count]) => {
   console.log(`  ${lang.toUpperCase()}: ${count}x`);
 });
-console.log('[Score&Rank] Source-Verteilung im Output:');
+console.log('[Score&Rank] Source-Verteilung im Output (Cap ist pro Sprache, daher kann eine Quelle in DE+EN je 2x vorkommen):');
 Object.entries(sourceCounts).sort((a, b) => b[1] - a[1]).forEach(([src, count]) => {
-  console.log(`  ${src}: ${count}x`);
+  const split = sourceByLang[src];
+  console.log(`  ${src}: ${count}x (DE: ${split.de}, EN: ${split.en})`);
 });
 
 console.log('\n[Score&Rank] Top 3 pro Bucket:');
