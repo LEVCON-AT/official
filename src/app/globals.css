@@ -2045,7 +2045,7 @@ a.contact-row:hover { opacity: 0.5; }
   font-size: 0.875rem;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--lc-ink);
+  color: #464644; /* matches website .logo-wordmark */
   font-weight: 400;
 }
 
