@@ -2141,3 +2141,164 @@ a.contact-row:hover { opacity: 0.5; }
     font-size: 0.9375rem;
   }
 }
+
+/* ── SETTINGS: ABMELDUNG ─────────────────────── */
+.ainews-settings-unsubscribe {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--lc-rule);
+  text-align: center;
+}
+
+.ainews-settings-unsubscribe-link {
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  color: var(--lc-muted);
+  font-family: var(--lc-ff-b);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-color: transparent;
+  transition: color 0.2s, text-decoration-color 0.2s;
+  -webkit-appearance: none;
+  min-height: 44px;
+}
+
+.ainews-settings-unsubscribe-link:hover {
+  color: var(--lc-red);
+  text-decoration-color: var(--lc-rule);
+}
+
+.ainews-settings-unsubscribe-link:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 4px;
+}
+
+.ainews-settings-unsubscribe-error {
+  margin-top: 0.75rem;
+  font-family: var(--lc-ff-b);
+  font-size: 0.75rem;
+  color: var(--lc-red);
+  font-weight: 400;
+}
+
+/* ── BESTÄTIGUNGS-DIALOG ────────────────────── */
+.ainews-settings-unsubscribe-confirm {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--lc-rule);
+  text-align: center;
+}
+
+.ainews-settings-unsubscribe-question {
+  margin: 0 0 1.25rem 0;
+  font-family: var(--lc-ff-d);
+  font-size: 1.05rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--lc-ink);
+  line-height: 1.4;
+}
+
+.ainews-settings-unsubscribe-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ainews-settings-unsubscribe-cancel {
+  background: none;
+  border: 1px solid var(--lc-rule);
+  padding: 0.65rem 1.5rem;
+  cursor: pointer;
+  color: var(--lc-muted);
+  font-family: var(--lc-ff-b);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.2s, border-color 0.2s;
+  -webkit-appearance: none;
+  min-height: 44px;
+}
+
+.ainews-settings-unsubscribe-cancel:hover {
+  color: var(--lc-ink);
+  border-color: var(--lc-ink);
+}
+
+.ainews-settings-unsubscribe-cancel:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 2px;
+}
+
+.ainews-settings-unsubscribe-confirm-btn {
+  background: var(--lc-red);
+  border: 1px solid var(--lc-red);
+  padding: 0.65rem 1.5rem;
+  cursor: pointer;
+  color: #FFFFFF;
+  font-family: var(--lc-ff-b);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
+  -webkit-appearance: none;
+  min-height: 44px;
+}
+
+.ainews-settings-unsubscribe-confirm-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.ainews-settings-unsubscribe-confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ainews-settings-unsubscribe-confirm-btn:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 2px;
+}
+
+/* ── ERFOLGS-MELDUNG ────────────────────────── */
+.ainews-settings-unsubscribed {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--lc-rule);
+  text-align: center;
+}
+
+.ainews-settings-unsubscribed-title {
+  margin: 0 0 0.75rem 0;
+  font-family: var(--lc-ff-d);
+  font-size: 1.15rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--lc-ink);
+}
+
+.ainews-settings-unsubscribed-body {
+  margin: 0;
+  font-family: var(--lc-ff-b);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--lc-muted);
+  font-weight: 300;
+}
+
+@media (max-width: 480px) {
+  .ainews-settings-unsubscribe-actions {
+    flex-direction: column;
+  }
+  .ainews-settings-unsubscribe-cancel,
+  .ainews-settings-unsubscribe-confirm-btn {
+    width: 100%;
+  }
+}

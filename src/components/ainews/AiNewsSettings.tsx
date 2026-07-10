@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 import { ChevronDown, Check, Loader2 } from 'lucide-react';
 import { NEWS_LANGUAGES } from './languages';
 
+type UnsubscribeStatus = 'idle' | 'confirming' | 'unsubscribing' | 'success' | 'error';
+
 type SubscriberData = {
   id: number;
   email: string;
@@ -32,6 +34,9 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
   const [frequency, setFrequency] = useState('daily');
   const [newsLangs, setNewsLangs] = useState<Set<string>>(new Set(['de', 'en']));
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+
+  // Unsubscribe state
+  const [unsubscribeStatus, setUnsubscribeStatus] = useState<UnsubscribeStatus>('idle');
 
   // Refs for click-outside + scroll
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -122,6 +127,21 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
     }
     setSaving(false);
   }, [token, language, frequency, newsLangs, locale, onUpdated]);
+
+  // Unsubscribe handler — calls /api/ai-news/unsubscribe?token=xxx
+  const handleUnsubscribe = useCallback(async () => {
+    setUnsubscribeStatus('unsubscribing');
+    try {
+      const res = await fetch(`/api/ai-news/unsubscribe?token=${token}`, { method: 'POST' });
+      if (res.ok) {
+        setUnsubscribeStatus('success');
+      } else {
+        setUnsubscribeStatus('error');
+      }
+    } catch {
+      setUnsubscribeStatus('error');
+    }
+  }, [token]);
 
   if (loading) {
     return (
@@ -268,6 +288,60 @@ export default function AiNewsSettings({ token, locale, onUpdated }: Props) {
           </div>
         )}
       </div>
+
+      {/* Abmeldung — dezent am Ende, Trennlinie wie im Newsletter */}
+      {unsubscribeStatus === 'success' ? (
+        <div className="ainews-settings-unsubscribed" role="status">
+          <p className="ainews-settings-unsubscribed-title">
+            {locale === 'de' ? 'Abmeldung erfolgreich' : 'Unsubscribed successfully'}
+          </p>
+          <p className="ainews-settings-unsubscribed-body">
+            {locale === 'de'
+              ? 'Sie erhalten ab sofort keine Levcon AI News mehr. Ihre Daten werden gemäß DSGVO nach 30 Tagen gelöscht.'
+              : 'You will no longer receive Levcon AI News. Your data will be deleted after 30 days according to GDPR.'}
+          </p>
+        </div>
+      ) : unsubscribeStatus === 'confirming' ? (
+        <div className="ainews-settings-unsubscribe-confirm">
+          <p className="ainews-settings-unsubscribe-question">
+            {locale === 'de' ? 'Möchten Sie sich wirklich abmelden?' : 'Do you really want to unsubscribe?'}
+          </p>
+          <div className="ainews-settings-unsubscribe-actions">
+            <button
+              type="button"
+              className="ainews-settings-unsubscribe-cancel"
+              onClick={() => setUnsubscribeStatus('idle')}
+            >
+              {locale === 'de' ? 'Abbrechen' : 'Cancel'}
+            </button>
+            <button
+              type="button"
+              className="ainews-settings-unsubscribe-confirm-btn"
+              onClick={handleUnsubscribe}
+              disabled={unsubscribeStatus === 'unsubscribing'}
+            >
+              {unsubscribeStatus === 'unsubscribing'
+                ? (locale === 'de' ? 'Abmelden…' : 'Unsubscribing…')
+                : (locale === 'de' ? 'Ja, abmelden' : 'Yes, unsubscribe')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="ainews-settings-unsubscribe">
+          <button
+            type="button"
+            className="ainews-settings-unsubscribe-link"
+            onClick={() => setUnsubscribeStatus('confirming')}
+          >
+            {locale === 'de' ? 'Abonnement abbestellen' : 'Unsubscribe'}
+          </button>
+          {unsubscribeStatus === 'error' && (
+            <p className="ainews-settings-unsubscribe-error" role="alert">
+              {locale === 'de' ? 'Abmeldung fehlgeschlagen. Bitte später erneut versuchen.' : 'Unsubscribe failed. Please try again later.'}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
