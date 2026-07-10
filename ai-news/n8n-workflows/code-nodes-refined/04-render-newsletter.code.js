@@ -19,9 +19,17 @@
 //  Output: ein Item pro Subscriber mit email + subject + html + headers
 // ═══════════════════════════════════════════════════════════════
 
-const news = $("Fetch Today News").first().json;
-if (!news || !news.items) {
-  throw new Error('No news data available from Fetch Today News node');
+// News-Daten vom "Fetch Today News" Node holen.
+// Der Node kann 2 Formate liefern:
+//   1. Direkt: { date, summaryDe, summaryEn, items }
+//   2. Gewrappt: { news: { date, summaryDe, summaryEn, items } }
+// Wir unterstützen beide — robust gegen API-Formatänderungen.
+const rawNews = $("Fetch Today News").first().json;
+const news = rawNews?.news || rawNews;
+
+if (!news || !news.items || !Array.isArray(news.items)) {
+  console.log('[Newsletter] ⚠️ Fetch Today News Output:', JSON.stringify(rawNews).substring(0, 500));
+  throw new Error('No news data available from Fetch Today News node. Check if today\'s news were ingested.');
 }
 
 const today = news.date || new Date().toISOString().substring(0, 10);
