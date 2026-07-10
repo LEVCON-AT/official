@@ -1,19 +1,21 @@
 // ═══════════════════════════════════════════════════════════════
-//  BUILD OLLAMA REQUEST (REFINED v4 — DE/EN ONLY, LEANER PROMPT)
+//  BUILD OLLAMA REQUEST (REFINED v5 — 2 SERielle LÄUFE DE + EN)
 //
-//  NEU in v4:
-//   1. 20 Items (10 DE + 10 EN) statt 30 — entlastet Qwen
-//   2. num_predict 8192 → 6144 (weniger Output nötig)
-//   3. Score + scoreReasons aus User-Prompt entfernt (Qwen soll nur
-//      summarisieren, nicht kuratieren — braucht das Ranking nicht)
-//   4. origin: 'rss' wird nicht mehr an Qwen gesendet (unnötig)
-//   5. Prompt text "Keep ALL items" angepasst auf 20 Items
+//  NEU in v5:
+//   - 2 separate Ollama-Läufe (DE zuerst, dann EN) SERIELL
+//     → entlastet CPU (kein paralleler Ollama-Stress)
+//     → entlastet Qwen (nur 10 Items pro Run statt 20)
+//     → kein Ermüdungseffekt bei letzten Items
+//   - DE-Run schreibt summaryDe + alle DE-Items (headlineEn als Übersetzung)
+//   - EN-Run schreibt summaryEn + alle EN-Items (headlineDe als Übersetzung)
+//   - Merge: kombiniert DE-Result + EN-Result zu einem JSON für Ingest
+//   - Partial-Failure: wenn ein Run failed, wird der andere trotzdem gespeichert
 //
-//  Beibehalten aus v3:
+//  Beibehalten aus v4:
 //   - this.helpers.httpRequest (n8n Expression-Parser Workaround)
 //   - enable_thinking: false (verhindert Token-Verschwendung)
-//   - 600s Timeout für CPU-Inference
-//   - headlineDe + headlineEn Übersetzungen
+//   - 600s Timeout pro Run (CPU-Inference)
+//   - Leaner Prompt (nur title, source, language, summary)
 //
 //  Node-Typ: Code (n8n)
 //  Position: nach "Score & Rank", vor "Parse LLM JSON"
@@ -23,7 +25,7 @@ const allItems = $input.all();
 
 // ── Fallback: Keine Items → Fehler mit Kontext ─────────────────
 if (!allItems || allItems.length === 0) {
-  throw new Error('Build Ollama Request: Keine Items vom Score&Rank-Node erhalten. Prüfe ob RSS-Feeds erreichbar waren und Score&Rank korrekt lief.');
+  throw new Error('Build Ollama: Keine Items vom Score&Rank-Node erhalten. Prüfe RSS-Feeds und Score&Rank.');
 }
 
 const newsItems = allItems.map(function(i) {
@@ -41,119 +43,213 @@ const newsItems = allItems.map(function(i) {
 const deItems = newsItems.filter(i => i.bucket === 'de');
 const enItems = newsItems.filter(i => i.bucket === 'en');
 
-console.log(`[Build Ollama] ${newsItems.length} Items für LLM (DE=${deItems.length}, EN=${enItems.length})`);
+console.log(`[Build Ollama v5] ${newsItems.length} Items für 2 Läufe (DE=${deItems.length}, EN=${enItems.length})`);
 
-// ── System Prompt (summarisieren + headline-übersetzen) ────────
-const systemPrompt = `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.
+// ═══════════════════════════════════════════════════════════════
+//  HELPER: Ollama-Call für einen Bucket
+// ═══════════════════════════════════════════════════════════════
 
-Your task: Write german AND english headlines AND summaries for ALL ${newsItems.length} provided news items. The items are ALREADY pre-selected with a language quota:
-- ${deItems.length} German items (from DACH sources)
-- ${enItems.length} English items (from international sources)
+async function callOllama(items, bucket) {
+  if (items.length === 0) {
+    console.log(`[Build Ollama v5] ${bucket}-Run übersprungen (keine Items)`);
+    return null;
+  }
 
-CRITICAL: Keep ALL ${newsItems.length} items in your output. Do NOT remove, filter, or re-select items. The pre-selection is intentional for an Austrian site.
+  const isDe = bucket === 'de';
+
+  // ── System Prompt (sprachspezifisch) ────────────────────────
+  // DE-Run: schreibt summaryDe + headlineEn (Übersetzung DE→EN)
+  // EN-Run: schreibt summaryEn + headlineDe (Übersetzung EN→DE)
+  const systemPrompt = isDe
+    ? `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.
+
+Your task: Process ALL ${items.length} GERMAN AI news items from DACH sources.
 
 For each item, write:
-- headline: Original headline (keep as-is, do not modify)
-- headlineDe: German translation of the headline (natural, not literal)
+- headline: Original German headline (keep as-is)
+- headlineDe: Same as headline (it's already German)
 - headlineEn: English translation of the headline (natural, not literal)
-- descriptionDe: 1-2 sentence German summary (analytical, not just translation)
+- descriptionDe: 1-2 sentence German summary (analytical)
 - descriptionEn: 1-2 sentence English summary (independent, not just translation)
-- category: research | business | regulation | tools | society
-- languageOrig: keep the original language code (de, en)
+- source, sourceUrl, thumbnailUrl, languageOrig, category (research|business|regulation|tools|society)
 
-Headline translation rules:
-- If original is German: headlineDe = original, headlineEn = English translation
-- If original is English: headlineDe = German translation, headlineEn = original
-- Translations should sound natural in the target language, not word-for-word
-- Keep technical terms (GPT, LLM, AI, KI) in their established form
-- Preserve proper names (OpenAI, Anthropic, companies, product names)
+Also write summaryDe: Analytische Zusammenfassung der heutigen DACH KI-News (3-4 Sätze, interesseweckend).
 
-For the daily summary, write ANALYTICALLY — not just "X happened":
-- Identify the overarching theme of the day
-- Explain WHY these stories matter together
-- Consider both DACH and international perspective
-
-Summary tone: Professional, insightful, concise. Like a McKinsey briefing, not a press release.
+Summary tone: Professional, insightful, concise. Like a McKinsey briefing.
 
 Return JSON:
 {
-  "summaryDe": "Analytische Zusammenfassung auf Deutsch (4-6 Sätze, internationale Perspektive)",
-  "summaryEn": "Analytical summary in English (4-6 sentences, international perspective)",
+  "summaryDe": "...",
   "items": [
-    {
-      "headline": "Original headline (original language, keep as-is)",
-      "headlineDe": "Deutsche Übersetzung des Titels (natürlich, nicht wörtlich)",
-      "headlineEn": "English translation of the headline (natural, not literal)",
-      "descriptionDe": "Deutsche Zusammenfassung (1-2 Sätze)",
-      "descriptionEn": "English summary (1-2 sentences)",
-      "source": "Publisher name (e.g. 'Heise', 'MIT Tech Review')",
-      "sourceUrl": "Full URL to original article",
-      "thumbnailUrl": "Thumbnail URL or null",
-      "languageOrig": "de|en",
-      "category": "research|business|regulation|tools|society"
-    }
+    { "headline": "...", "headlineDe": "...", "headlineEn": "...", "descriptionDe": "...", "descriptionEn": "...", "source": "...", "sourceUrl": "...", "thumbnailUrl": null, "languageOrig": "de", "category": "..." }
   ]
 }
 
-IMPORTANT: Return ONLY the JSON object. No markdown, no code blocks, no explanations. Keep ALL ${newsItems.length} items. Every item must have headline, headlineDe, AND headlineEn.`;
+IMPORTANT: Return ONLY the JSON object. No markdown, no code blocks. Keep ALL ${items.length} items.`
+    : `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.
 
-// ── User Prompt (LEAN: nur title, source, language, summary — kein score, kein origin) ──
-// Reduziert Input-Tokens um ~30% vs v3.
-function formatBucket(items, label) {
-  if (items.length === 0) return `${label}: (none)`;
-  return `${label}:\n${JSON.stringify(items.map(i => ({
-    title: i.title,
-    link: i.link,
-    source: i.source,
-    language: i.languageOrig,
-    summary: i.summary.substring(0, 120)
-  })), null, 2)}`;
+Your task: Process ALL ${items.length} ENGLISH AI news items from international sources.
+
+For each item, write:
+- headline: Original English headline (keep as-is)
+- headlineDe: German translation of the headline (natural, not literal)
+- headlineEn: Same as headline (it's already English)
+- descriptionDe: 1-2 sentence German summary (analytical, not just translation)
+- descriptionEn: 1-2 sentence English summary (independent)
+- source, sourceUrl, thumbnailUrl, languageOrig, category (research|business|regulation|tools|society)
+
+Also write summaryEn: Analytical summary of today's international AI news (3-4 sentences, engaging).
+
+Summary tone: Professional, insightful, concise. Like a McKinsey briefing.
+
+Return JSON:
+{
+  "summaryEn": "...",
+  "items": [
+    { "headline": "...", "headlineDe": "...", "headlineEn": "...", "descriptionDe": "...", "descriptionEn": "...", "source": "...", "sourceUrl": "...", "thumbnailUrl": null, "languageOrig": "en", "category": "..." }
+  ]
 }
 
-const userPrompt = `Today's ${newsItems.length} pre-selected AI news items (language quota applied, all must be included in output):
+IMPORTANT: Return ONLY the JSON object. No markdown, no code blocks. Keep ALL ${items.length} items.`;
 
-${formatBucket(deItems, `GERMAN ITEMS (${deItems.length})`)}
+  // ── User Prompt (lean: nur title, source, language, summary) ──
+  const userPrompt = `${bucket} ITEMS (${items.length}):
+${JSON.stringify(items.map(i => ({
+  title: i.title,
+  link: i.link,
+  source: i.source,
+  language: i.languageOrig,
+  summary: i.summary.substring(0, 120)
+})), null, 2)}
 
-${formatBucket(enItems, `ENGLISH ITEMS (${enItems.length})`)}
+Process ALL ${items.length} items. Each must have: headline, headlineDe, headlineEn, descriptionDe, descriptionEn.`;
 
-Write german + english headlines AND summaries for ALL ${newsItems.length} items. Keep every item. Do not filter or re-rank. Each item must have: headline (original), headlineDe, headlineEn, descriptionDe, descriptionEn.`;
+  // ── Request Body (pro Run kleinere num_predict, da nur 10 Items) ──
+  const requestBody = {
+    model: "qwen3.5:2b",
+    stream: false,
+    options: {
+      temperature: 0.3,
+      num_predict: 4096,       // v5: 10 Items × 5 Felder = ~1.700 Output-Tokens, 4096 reicht
+      num_ctx: 32768,
+      enable_thinking: false
+    },
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ],
+    "think": false
+  };
 
-// ── Ollama Request Body (v4: num_predict 6144 für 20 Items) ────
-// Token-Kalkulation v4:
-//   20 Items × (headline + headlineDe + headlineEn + descDe + descEn + metadata)
-//   = 20 × ~170 Tokens = ~3.400 Output-Tokens
-//   + summaryDe + summaryEn ~400 = ~3.800 Output-Tokens gesamt
-//   num_predict 6144 gibt ausreichend Puffer.
-const requestBody = {
-  model: "qwen3.5:2b",
-  stream: false,
-  options: {
-    temperature: 0.3,
-    num_predict: 6144,       // v4: reduziert von 8192 (20 Items statt 30)
-    num_ctx: 32768,
-    enable_thinking: false
-  },
-  messages: [
-    { role: "system", content: systemPrompt },
-    { role: "user", content: userPrompt }
-  ],
-  "think": false
+  console.log(`[Build Ollama v5] ${bucket}-Run startet (${items.length} Items, num_predict=4096)`);
+  const runStart = Date.now();
+
+  const response = await this.helpers.httpRequest({
+    method: 'POST',
+    url: 'http://127.0.0.1:11434/api/chat',
+    headers: { 'Content-Type': 'application/json' },
+    body: requestBody,
+    json: true,
+    timeout: 600000  // 10min für CPU-Inference
+  });
+
+  const duration = ((Date.now() - runStart) / 1000).toFixed(1);
+  console.log(`[Build Ollama v5] ${bucket}-Run fertig in ${duration}s (${response.message?.content?.length || 0} chars)`);
+
+  return response;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MAIN: 2 SERIELLE LÄUFE (DE zuerst, dann EN)
+// ═══════════════════════════════════════════════════════════════
+//  Seriell weil:
+//  - Ollama auf CPU nicht gut parallel kann (RLY belastet)
+//  - Qwen-Modell wird beim 2. Run aus RAM geladen (schneller)
+//  - Einfacher zu debuggen, klare Reihenfolge im Log
+
+let deResult = null;
+let enResult = null;
+const errors = [];
+
+// 1. DE-Run
+try {
+  deResult = await callOllama(deItems, 'de');
+} catch (err) {
+  console.error(`[Build Ollama v5] ❌ DE-Run failed: ${err.message}`);
+  errors.push({ run: 'de', error: err.message });
+}
+
+// 2. EN-Run (nur starten wenn DE fertig — seriell)
+try {
+  enResult = await callOllama(enItems, 'en');
+} catch (err) {
+  console.error(`[Build Ollama v5] ❌ EN-Run failed: ${err.message}`);
+  errors.push({ run: 'en', error: err.message });
+}
+
+// 3. Beide Runs failed → harter Fehler
+if (!deResult && !enResult) {
+  throw new Error(`Build Ollama v5: Beide Läufe failed. Errors: ${JSON.stringify(errors)}`);
+}
+
+// 4. Parse + Merge: kombiniere DE-Result + EN-Result
+//    Der Parse LLM JSON Node weiter unten erwartet { message: { content: "..." } }
+//    Wir bauen hier ein synthetisches Response-Objekt das beide Runs merged.
+
+function extractContent(resp) {
+  if (!resp) return null;
+  if (resp.message && resp.message.content) return resp.message.content;
+  if (resp.choices && resp.choices[0] && resp.choices[0].message) return resp.choices[0].message.content;
+  if (resp.response) return resp.response;
+  return null;
+}
+
+function parseJson(content) {
+  if (!content) return null;
+  // Clean markdown
+  let cleaned = content.replace(/```json\n/g, '').replace(/```\n/g, '').replace(/```/g, '').trim();
+  // Auto-Repair: fehlende Kommas
+  cleaned = cleaned.replace(/"\s*\n\s*"/g, '",\n"');
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (match) {
+      try { return JSON.parse(match[0]); } catch (e2) { return null; }
+    }
+    return null;
+  }
+}
+
+const deJson = parseJson(extractContent(deResult));
+const enJson = parseJson(extractContent(enResult));
+
+console.log(`[Build Ollama v5] Parse: DE=${deJson ? 'OK' : 'FAIL'}, EN=${enJson ? 'OK' : 'FAIL'}`);
+
+// 5. Merge zu kombiniertem JSON
+const mergedJson = {
+  summaryDe: deJson?.summaryDe || '',
+  summaryEn: enJson?.summaryEn || '',
+  items: [
+    ...(deJson?.items || []),
+    ...(enJson?.items || [])
+  ]
 };
 
-// Token-Schätzung für Logging
-const inputTokensEst = Math.round((systemPrompt.length + userPrompt.length) / 4);
-console.log(`[Build Ollama] Request gebaut: ${newsItems.length} Items, ~${inputTokensEst} Input-Tokens geschätzt, num_predict=6144`);
+console.log(`[Build Ollama v5] Merge: ${mergedJson.items.length} Items (DE=${deJson?.items?.length || 0}, EN=${enJson?.items?.length || 0})`);
+console.log(`[Build Ollama v5] summaryDe: ${mergedJson.summaryDe ? '✓' : '✗'}, summaryEn: ${mergedJson.summaryEn ? '✓' : '✗'}`);
 
-// ── Ollama API Call (mit langem Timeout für CPU-Inference) ─────
-const response = await this.helpers.httpRequest({
-  method: 'POST',
-  url: 'http://127.0.0.1:11434/api/chat',
-  headers: { 'Content-Type': 'application/json' },
-  body: requestBody,
-  json: true,
-  timeout: 600000
-});
+if (errors.length > 0) {
+  console.log(`[Build Ollama v5] ⚠️ Partial failure: ${errors.map(e => e.run).join(', ')} failed but other run succeeded`);
+}
 
-console.log(`[Build Ollama] Ollama-Antwort erhalten (${response.message?.content?.length || 0} chars)`);
-
-return [{ json: response }];
+// 6. Return als synthetische Ollama-Response (kompatibel mit Parse LLM JSON Node)
+//    Der Parse Node weiter unten extrahiert JSON aus message.content.
+//    Wir geben ihm direkt das gemergede JSON als content (als JSON-String).
+return [{
+  json: {
+    message: {
+      content: JSON.stringify(mergedJson)
+    }
+  }
+}];
