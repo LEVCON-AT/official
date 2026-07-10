@@ -2014,3 +2014,130 @@ a.contact-row:hover { opacity: 0.5; }
   .ainews-signup-reveal,
   .ainews-signup-reveal-inner { transition: none; }
 }
+
+/* ── CONFIRM PAGE (Newsletter Bestätigung) ─── */
+.confirm-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--lc-bg);
+  padding: 2rem 1rem;
+}
+
+.confirm-card {
+  max-width: 540px;
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid var(--lc-rule);
+  padding: clamp(2.5rem, 6vw, 3.5rem) clamp(1.5rem, 5vw, 3rem);
+  text-align: center;
+}
+
+.confirm-logo {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--lc-rule);
+  margin-bottom: 2rem;
+}
+
+.confirm-wordmark {
+  font-family: var(--lc-ff-b);
+  font-size: 0.875rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--lc-ink);
+  font-weight: 400;
+}
+
+.confirm-ai {
+  color: var(--lc-red);
+}
+
+.confirm-label {
+  font-family: var(--lc-ff-b);
+  font-size: 0.6875rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+  margin-bottom: 0.875rem;
+  font-weight: 400;
+}
+
+.confirm-title {
+  margin: 0 0 1.5rem 0;
+  font-family: var(--lc-ff-d);
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--lc-ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.confirm-message {
+  margin: 0 0 2rem 0;
+  font-family: var(--lc-ff-b);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--lc-ink);
+  font-weight: 300;
+}
+
+.confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--lc-rule);
+}
+
+.confirm-btn {
+  display: inline-block;
+  background: var(--lc-ink);
+  color: var(--lc-bg);
+  font-family: var(--lc-ff-b);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.875rem 2rem;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-btn:hover {
+  opacity: 0.85;
+}
+
+.confirm-link {
+  font-family: var(--lc-ff-b);
+  font-size: 0.75rem;
+  color: var(--lc-muted);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  transition: color 0.2s;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.confirm-link:hover {
+  color: var(--lc-ink);
+}
+
+@media (max-width: 480px) {
+  .confirm-card {
+    padding: 2rem 1.25rem;
+  }
+  .confirm-title {
+    font-size: 1.75rem;
+  }
+  .confirm-message {
+    font-size: 0.9375rem;
+  }
+}

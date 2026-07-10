@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import nodemailer from 'nodemailer';
 import { db } from '@/lib/db';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 // SMTP config (shared with contact form)
 const SMTP_HOST = process.env.SMTP_HOST || 'localhost';
@@ -58,99 +60,43 @@ function checkRateLimit(email: string): boolean {
 }
 
 /**
- * Generates HTML for the double-opt-in confirmation email.
- * Inline-CSS, email-client-compatible, Levcon-branded.
+ * Loads the confirmation email HTML template from ai-news/templates/
+ * and replaces placeholders with actual values.
+ *
+ * Templates: ai-news/templates/confirmation-html-de.html (+ en.html)
+ * Placeholders: {{SUBSCRIBER_EMAIL}}, {{CONFIRM_URL}}
  */
 function buildConfirmationEmail(
   confirmUrl: string,
   email: string,
   language: 'de' | 'en',
 ): { subject: string; html: string; text: string } {
-  if (language === 'en') {
-    return {
-      subject: 'Confirm your Levcon AI News subscription',
-      text: `Please confirm your subscription to Levcon AI News.\n\nClick the link below:\n${confirmUrl}\n\nIf you didn't sign up, you can ignore this email.\n\n— Levcon.ai`,
-      html: `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#1C1C1A;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F0EFEC;padding:40px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#FFFFFF;max-width:600px;width:100%;padding:48px 40px;">
-        <tr><td style="text-align:center;padding-bottom:32px;border-bottom:1px solid #D8D7D3;">
-          <span style="font-size:14px;letter-spacing:0.26em;font-weight:500;color:#1C1C1A;">LEVCON<span style="color:#C8102E;">.AI</span></span>
-        </td></tr>
-        <tr><td style="padding:32px 0 24px;font-family:Georgia,serif;font-size:28px;font-weight:500;">Confirm your subscription</td></tr>
-        <tr><td style="font-size:15px;line-height:1.6;padding-bottom:24px;color:#1C1C1A;">
-          <p style="margin:0 0 16px;">Please confirm your subscription to <strong>Levcon AI News</strong>.</p>
-          <p style="margin:0;">Email: <strong>${email}</strong></p>
-        </td></tr>
-        <tr><td style="padding:16px 0 32px;">
-          <a href="${confirmUrl}" style="display:inline-block;background:#1C1C1A;color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;padding:14px 32px;text-decoration:none;">Confirm subscription</a>
-        </td></tr>
-        <tr><td style="padding-top:24px;border-top:1px solid #D8D7D3;font-size:13px;line-height:1.6;color:#8A8A85;">
-          <p style="margin:0 0 8px;">Or copy this link into your browser:</p>
-          <p style="margin:0 0 16px;word-break:break-all;"><a href="${confirmUrl}" style="color:#1C1C1A;">${confirmUrl}</a></p>
-          <p style="margin:0;">If you didn't sign up, you can safely ignore this email.</p>
-        </td></tr>
-        <tr><td style="padding-top:32px;border-top:1px solid #D8D7D3;font-size:12px;color:#8A8A85;">
-          <p style="margin:0;">
-            <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Levcon.ai</a>
-            <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-            <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Privacy</a>
-            <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-            <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Legal Notice</a>
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`,
-    };
+  // Load template from filesystem
+  const templateFile = language === 'en' ? 'confirmation-html-en.html' : 'confirmation-html-de.html';
+  const templatePath = join(process.cwd(), 'ai-news', 'templates', templateFile);
+  let htmlTemplate = '';
+  try {
+    htmlTemplate = readFileSync(templatePath, 'utf-8');
+  } catch (err) {
+    console.error('Failed to load confirmation template:', err);
+    throw new Error('Confirmation email template not found');
   }
 
-  return {
-    subject: 'Bestätigen Sie Ihr Levcon AI News Abonnement',
-    text: `Bitte bestätigen Sie Ihr Abonnement der Levcon AI News.\n\nKlicken Sie auf den Link unten:\n${confirmUrl}\n\nFalls Sie sich nicht angemeldet haben, können Sie diese E-Mail ignorieren.\n\n— Levcon.ai`,
-    html: `<!DOCTYPE html>
-<html lang="de">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#1C1C1A;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F0EFEC;padding:40px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#FFFFFF;max-width:600px;width:100%;padding:48px 40px;">
-        <tr><td style="text-align:center;padding-bottom:32px;border-bottom:1px solid #D8D7D3;">
-          <span style="font-size:14px;letter-spacing:0.26em;font-weight:500;color:#1C1C1A;">LEVCON<span style="color:#C8102E;">.AI</span></span>
-        </td></tr>
-        <tr><td style="padding:32px 0 24px;font-family:Georgia,serif;font-size:28px;font-weight:500;">Bestätigung erforderlich</td></tr>
-        <tr><td style="font-size:15px;line-height:1.6;padding-bottom:24px;color:#1C1C1A;">
-          <p style="margin:0 0 16px;">Bitte bestätigen Sie Ihr Abonnement der <strong>Levcon AI News</strong>.</p>
-          <p style="margin:0;">E-Mail: <strong>${email}</strong></p>
-        </td></tr>
-        <tr><td style="padding:16px 0 32px;">
-          <a href="${confirmUrl}" style="display:inline-block;background:#1C1C1A;color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;padding:14px 32px;text-decoration:none;">Abonnement bestätigen</a>
-        </td></tr>
-        <tr><td style="padding-top:24px;border-top:1px solid #D8D7D3;font-size:13px;line-height:1.6;color:#8A8A85;">
-          <p style="margin:0 0 8px;">Oder kopieren Sie diesen Link in Ihren Browser:</p>
-          <p style="margin:0 0 16px;word-break:break-all;"><a href="${confirmUrl}" style="color:#1C1C1A;">${confirmUrl}</a></p>
-          <p style="margin:0;">Falls Sie sich nicht angemeldet haben, können Sie diese E-Mail ignorieren.</p>
-        </td></tr>
-        <tr><td style="padding-top:32px;border-top:1px solid #D8D7D3;font-size:12px;color:#8A8A85;">
-          <p style="margin:0;">
-            <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Levcon.ai</a>
-            <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-            <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Datenschutz</a>
-            <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-            <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Impressum</a>
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`,
-  };
+  // Replace placeholders
+  const html = htmlTemplate
+    .replace(/\{\{SUBSCRIBER_EMAIL\}\}/g, email)
+    .replace(/\{\{CONFIRM_URL\}\}/g, confirmUrl);
+
+  // Plain text version (for spam filters and non-HTML clients)
+  const text = language === 'en'
+    ? `Please confirm your subscription to Levcon AI News.\n\nClick the link below:\n${confirmUrl}\n\nIf you didn't sign up, you can ignore this email.\n\n— Levcon.ai`
+    : `Bitte bestätigen Sie Ihr Abonnement der Levcon AI News.\n\nKlicken Sie auf den Link unten:\n${confirmUrl}\n\nFalls Sie sich nicht angemeldet haben, können Sie diese E-Mail ignorieren.\n\n— Levcon.ai`;
+
+  const subject = language === 'en'
+    ? 'Confirm your Levcon AI News subscription'
+    : 'Bestätigen Sie Ihr Levcon AI News Abonnement';
+
+  return { subject, html, text };
 }
 
 export async function POST(request: NextRequest) {
@@ -250,7 +196,9 @@ async function sendConfirmationEmail(
   language: 'de' | 'en',
 ): Promise<void> {
   const localePath = language === 'en' ? '/en' : '';
-  const confirmUrl = `${SITE_URL}${localePath}/api/ai-news/confirm?token=${token}`;
+  // Confirm-URL: /confirm page (not /api/ai-news/confirm) — looks cleaner
+  // for spam filters like Sophos, no /api/ path that triggers warnings.
+  const confirmUrl = `${SITE_URL}${localePath}/confirm?token=${token}`;
 
   const { subject, html, text } = buildConfirmationEmail(confirmUrl, email, language);
 
