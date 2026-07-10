@@ -226,26 +226,95 @@ const enJson = parseJson(extractContent(enResult));
 
 console.log(`[Build Ollama v5] Parse: DE=${deJson ? 'OK' : 'FAIL'}, EN=${enJson ? 'OK' : 'FAIL'}`);
 
-// 5. Merge zu kombiniertem JSON
+// ═══════════════════════════════════════════════════════════════
+//  5. ENRICHMENT: LLM-Items mit Originaldaten anreichern
+// ═══════════════════════════════════════════════════════════════
+//  Qwen3.5:2b vergisst manchmal Felder (source, sourceUrl, languageOrig)
+//  besonders bei den letzten Items (Ermüdungseffekt). Wir reichern
+//  jedes LLM-Item mit den Originaldaten an, damit Prisma nie
+//  "Argument source is missing" wirft.
+//
+//  Matching: LLM-Item.sourceUrl === Original-Item.link
+//  Falls kein Match (LLM hat URL vergessen): versuche Match via headline.
+//  Falls immer noch kein Match: behalte LLM-Daten, fülle Pflichtfelder
+//  mit Fallbacks.
+
+function enrichItems(llmItems, originalItems, defaultLang) {
+  if (!llmItems || !Array.isArray(llmItems)) return [];
+
+  // Lookup-Map: sourceUrl → originalItem (für schnelles Matchen)
+  const byUrl = new Map();
+  const byTitle = new Map();
+  for (const orig of originalItems) {
+    if (orig.link) byUrl.set(orig.link, orig);
+    if (orig.title) byTitle.set(orig.title.toLowerCase().trim(), orig);
+  }
+
+  return llmItems.map((item, idx) => {
+    // Versuche Match via sourceUrl (bevorzugt) oder headline (Fallback)
+    let original = null;
+    if (item.sourceUrl && byUrl.has(item.sourceUrl)) {
+      original = byUrl.get(item.sourceUrl);
+    } else if (item.headline) {
+      // Versuche exakte Titel-Match
+      const key = (item.headline || '').toLowerCase().trim();
+      if (byTitle.has(key)) {
+        original = byTitle.get(key);
+      } else {
+        // Versuche Titel-Match via erste 50 Zeichen (Qwen might have shortened)
+        for (const [titleKey, origItem] of byTitle) {
+          if (titleKey.includes(key.substring(0, 50)) || key.includes(titleKey.substring(0, 50))) {
+            original = origItem;
+            break;
+          }
+        }
+      }
+    }
+
+    // Enrichment: LLM-Daten haben Vorrang, aber wenn Feld fehlt → Original
+    return {
+      headline: item.headline || original?.title || `Item ${idx + 1}`,
+      headlineDe: item.headlineDe || item.headline || original?.title || null,
+      headlineEn: item.headlineEn || item.headline || original?.title || null,
+      descriptionDe: item.descriptionDe || 'Keine Zusammenfassung verfügbar.',
+      descriptionEn: item.descriptionEn || 'No summary available.',
+      source: item.source || original?.source || 'Unknown',
+      sourceUrl: item.sourceUrl || original?.link || '',
+      thumbnailUrl: item.thumbnailUrl || null,
+      languageOrig: item.languageOrig || original?.languageOrig || defaultLang,
+      category: item.category || null,
+    };
+  });
+}
+
+const deItemsEnriched = enrichItems(deJson?.items, deItems, 'de');
+const enItemsEnriched = enrichItems(enJson?.items, enItems, 'en');
+
+// 6. Merge zu kombiniertem JSON
 const mergedJson = {
   summaryDe: deJson?.summaryDe || '',
   summaryEn: enJson?.summaryEn || '',
   items: [
-    ...(deJson?.items || []),
-    ...(enJson?.items || [])
+    ...deItemsEnriched,
+    ...enItemsEnriched
   ]
 };
 
-console.log(`[Build Ollama v5] Merge: ${mergedJson.items.length} Items (DE=${deJson?.items?.length || 0}, EN=${enJson?.items?.length || 0})`);
+console.log(`[Build Ollama v5] Merge: ${mergedJson.items.length} Items (DE=${deItemsEnriched.length}, EN=${enItemsEnriched.length})`);
 console.log(`[Build Ollama v5] summaryDe: ${mergedJson.summaryDe ? '✓' : '✗'}, summaryEn: ${mergedJson.summaryEn ? '✓' : '✗'}`);
+
+// Validierung: jedes Item muss source und sourceUrl haben
+const missingSource = mergedJson.items.filter(i => !i.source);
+const missingUrl = mergedJson.items.filter(i => !i.sourceUrl);
+if (missingSource.length > 0 || missingUrl.length > 0) {
+  console.log(`[Build Ollama v5] ⚠️ Validierung: ${missingSource.length} Items ohne source, ${missingUrl.length} ohne sourceUrl`);
+}
 
 if (errors.length > 0) {
   console.log(`[Build Ollama v5] ⚠️ Partial failure: ${errors.map(e => e.run).join(', ')} failed but other run succeeded`);
 }
 
-// 6. Return als synthetische Ollama-Response (kompatibel mit Parse LLM JSON Node)
-//    Der Parse Node weiter unten extrahiert JSON aus message.content.
-//    Wir geben ihm direkt das gemergede JSON als content (als JSON-String).
+// 7. Return als synthetische Ollama-Response (kompatibel mit Parse LLM JSON Node)
 return [{
   json: {
     message: {
