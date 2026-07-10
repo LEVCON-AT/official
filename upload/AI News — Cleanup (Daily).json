@@ -1,0 +1,126 @@
+{
+  "name": "AI News — Cleanup (Daily)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cd356fd8-e1a5-4c22-b526-dddd7f073a9d",
+      "name": "Cron Daily 03:00 Vienna",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://levcon.ai/api/ai-news/internal/cleanup",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"olderThanDays\": {\n    \"unconfirmed\": 7,\n    \"unsubscribed\": 30,\n    \"workflowRuns\": 90\n  }\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "bac93de3-fbcb-44dd-b48b-a293c10377ca",
+      "name": "POST Cleanup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5xSRYjLkoelQeppG",
+          "name": "Levcon Internal API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "fa08dddd-83bb-45dc-943b-0c667a2e7f98",
+      "name": "On Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "admin@levcon.at",
+        "toEmail": "admin@levcon.at",
+        "subject": "=Levcon AI News — Cleanup Failed",
+        "text": "=Cleanup workflow failed at {{ $now.toISO() }}\n\nError: {{ $json.error?.message || 'Unknown' }}\n\nCheck n8n logs: https://engine.levcon.at",
+        "options": {}
+      },
+      "id": "f40cd208-7509-4c09-9f4c-b4de1a3f4544",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        448,
+        240
+      ],
+      "webhookId": "0f96d26f-b35a-455f-a8a5-5506900e0972",
+      "credentials": {
+        "smtp": {
+          "id": "YLKV9546oq7fWeXi",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron Daily 03:00 Vienna": {
+      "main": [
+        [
+          {
+            "node": "POST Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "ac880918-cc8e-49bb-b489-ae465710b3bc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b2d1feb950fa85b8badf7148ff879f99d71c58371428240be6f7a49573bef211"
+  },
+  "id": "SQoRo1juTWBfcqjG",
+  "tags": []
+}

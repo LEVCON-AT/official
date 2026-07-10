@@ -1,0 +1,388 @@
+{
+  "name": "AI News — 03 Newsletter Send (Local) - Refined",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "newsletter-daily",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "073b9251-e1b6-4e22-919e-cc92c948a98f",
+      "name": "Webhook: Newsletter Daily",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "newsletter-daily-unique-placeholder",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5xSRYjLkoelQeppG",
+          "name": "Levcon Internal API"
+        }
+      },
+      "notes": "Webhook-Trigger für Daily-Versand.\nWird von Workflow 01 aufgerufen.\nPath: newsletter-daily"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set frequency = 'daily' for the downstream subscriber fetch\nreturn [{\n  json: {\n    frequency: 'daily',\n    date: ($json.body && $json.body.date) || new Date().toISOString().substring(0, 10),\n    source: 'webhook'\n  }\n}];"
+      },
+      "id": "3c74d1ae-9be9-47cd-9198-3031762f6f18",
+      "name": "Set Frequency: Daily",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        0
+      ],
+      "disabled": true,
+      "notes": "Markiert diesen Lauf als 'daily'. Wird im Fetch Subscribers als Query-Param verwendet."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 0"
+            }
+          ]
+        }
+      },
+      "id": "8d5ca422-8eda-43fb-a478-87ea213aec67",
+      "name": "Cron Weekly Sunday 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        304
+      ],
+      "notes": "Cron: jeden Sonntag 08:00 Europe/Vienna.\nTriggert Weekly-Newsletter-Versand."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set frequency = 'weekly' for the downstream subscriber fetch\nreturn [{\n  json: {\n    frequency: 'weekly',\n    date: new Date().toISOString().substring(0, 10),\n    source: 'cron-weekly'\n  }\n}];"
+      },
+      "id": "87ef0bfc-c9bd-4e71-80cb-43ee6f34fcbd",
+      "name": "Set Frequency: Weekly",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        304
+      ],
+      "disabled": true,
+      "notes": "Markiert diesen Lauf als 'weekly'."
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 1 * *"
+            }
+          ]
+        }
+      },
+      "id": "546453e5-36a2-48c0-9e61-7a76de20822d",
+      "name": "Cron Digest 1st of Month 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        608
+      ],
+      "notes": "Cron: 1. des Monats 08:00 Europe/Vienna.\nTriggert Digest-Newsletter-Versand."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set frequency = 'digest' for the downstream subscriber fetch\nreturn [{\n  json: {\n    frequency: 'digest',\n    date: new Date().toISOString().substring(0, 10),\n    source: 'cron-digest'\n  }\n}];"
+      },
+      "id": "8ebdd2b3-ea43-4826-b95a-ed7b4768e3fe",
+      "name": "Set Frequency: Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        608
+      ],
+      "disabled": true,
+      "notes": "Markiert diesen Lauf als 'digest' (monatlich)."
+    },
+    {
+      "parameters": {
+        "url": "https://levcon.ai/api/ai-news/today",
+        "options": {}
+      },
+      "id": "07466cbe-e153-4179-ad87-17a720ffcb04",
+      "name": "Fetch Today News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        304
+      ],
+      "notes": "GET Levcon API: heutige AI-News-Ausgabe.\nResponse: { date, summaryDe, summaryEn, items[] }"
+    },
+    {
+      "parameters": {
+        "url": "=https://levcon.ai/api/ai-news/internal/subscribers?frequency={{ $json.frequency || \"daily\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "options": {}
+      },
+      "id": "3b297a77-8914-4bc1-9fc0-29ded4fedd8b",
+      "name": "Fetch Subscribers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        928,
+        304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5xSRYjLkoelQeppG",
+          "name": "Levcon Internal API"
+        }
+      },
+      "notes": "GET Subscribers gefiltert nach Frequency (daily/weekly/digest).\nResponse: Liste von { id, email, language, frequency, unsubscribeToken, lastSentDate }.\nFrequency stammt aus vorgelagertem Set-Node."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════\n//  RENDER NEWSLETTER HTML (v4 — Echtes Levcon Template)\n//\n//  Verwendet das original Levcon-Newsletter-Template aus\n//  ai-news/templates/newsletter-html-de.html (+ en.html) mit:\n//    - Table-Layout (bulletproof für alle Mail-Clients)\n//    - LEVCON.AI Header (zentriert, Letter-Spacing)\n//    - \"KI-News des Tages\" / \"AI News of the Day\" Label\n//    - Datum in Georgia Italic Serif\n//    - Weiße Karte auf cream Background (#F0EFEC)\n//    - Artikel mit border-top Trennlinien (#D8D7D3)\n//    - Footer mit Adresse + Links\n//\n//  NEUE Features (Sprint 14c):\n//    1. 2 Blöcke: DE-Items (DACH) zuerst, EN-Items (International) danach\n//    2. Translate-Link bei fremdsprachigen Items\n//    3. headlineDe/headlineEn Übersetzungen verwenden\n//\n//  Bug-Fixes:\n//    - news.data unwrap (rawNews.news || rawNews)\n//    - Datum robust parsen (kein NaN)\n//    - Subscriber aus API-Wrapper extrahieren\n//    - confirmToken als Unsubscribe-Token\n//    - lastSentDate Skip-Logik\n// ═══════════════════════════════════════════════════════════════\n\n// ── News-Daten holen (mit Unwrap-Fallback) ─────────────────────\nconst rawNews = $(\"Fetch Today News\").first().json;\nconst news = rawNews?.news || rawNews;\n\nif (!news || !news.items || !Array.isArray(news.items)) {\n  console.log('[Newsletter] ⚠️ Fetch Today News Output:', JSON.stringify(rawNews).substring(0, 500));\n  throw new Error('No news data available from Fetch Today News node. Check if today\\'s news were ingested.');\n}\n\n// ── Datum robust parsen ────────────────────────────────────────\nconst rawDate = news.date || new Date().toISOString();\nconst d = new Date(rawDate);\nif (isNaN(d.getTime())) {\n  throw new Error(`Invalid date from news data: ${rawDate}`);\n}\nconst today = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;\nconst lastSentDate = today;\n\nconst DE_MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];\nconst EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst dateDe = `${d.getUTCDate()}. ${DE_MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;\nconst dateEn = `${EN_MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;\n\n// ── Helper ─────────────────────────────────────────────────────\nfunction escapeHtml(s) {\n  return (s || '').toString()\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#039;');\n}\n\nfunction cleanUrl(u) {\n  try {\n    const p = new URL(u);\n    ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid'].forEach(k => p.searchParams.delete(k));\n    let c = p.origin + p.pathname;\n    if (p.search) c += p.search;\n    return c;\n  } catch (e) {\n    return u || '';\n  }\n}\n\nfunction translateUrl(originalUrl, targetLang) {\n  return `https://translate.google.com/translate?sl=auto&tl=${targetLang}&u=${encodeURIComponent(originalUrl)}`;\n}\n\n// ── ITEM RENDERING (mit Translate-Link) ────────────────────────\n// Basiert 1:1 auf dem Levcon-Template (Table-Layout, gleiche Styles).\n// NEU: Translate-Link dezent im Source-Line angefügt.\n// NEU (Sprint 15a): Schriftart auf Arial umgestellt (wie Weiterlesen/Quelle/Description)\n\nfunction renderItem(it, lang) {\n  const isDe = lang === 'de';\n  const headline = escapeHtml(isDe ? (it.headlineDe || it.headline || '') : (it.headlineEn || it.headline || ''));\n  const source = escapeHtml(it.source || '');\n  const url = escapeHtml(cleanUrl(it.sourceUrl || it.url || ''));\n  const desc = escapeHtml(isDe ? (it.descriptionDe || it.summary || '') : (it.descriptionEn || it.summary || ''));\n  const itemLang = (it.languageOrig || 'en').toLowerCase();\n\n  // Translate-Link: nur wenn Original-Sprache ≠ Newsletter-Sprache\n  let translateLink = '';\n  if (itemLang !== lang) {\n    const tUrl = escapeHtml(translateUrl(it.sourceUrl || it.url || '', lang));\n    const tLabel = isDe ? 'Auf Deutsch lesen&nbsp;→' : 'Read in English&nbsp;→';\n    translateLink = `\n                      <span style=\"color:#D8D7D3;margin:0 8px;\" aria-hidden=\"true\">·</span>\n                      <a href=\"${tUrl}\" rel=\"noopener noreferrer\" style=\"color:#C8102E;text-decoration:none;font-weight:500;\">${tLabel}</a>`;\n  }\n\n  const readMoreLabel = isDe ? 'Weiterlesen&nbsp;→' : 'Read&nbsp;more&nbsp;→';\n  const sourceLabel = isDe ? 'Quelle' : 'Source';\n\n  // Thumbnail nur wenn vorhanden\n  const thumbHtml = it.thumbnailUrl\n    ? `<td class=\"lc-item-thumb-cell\" style=\"width:76px;vertical-align:top;padding-right:16px;\">\n                          <img src=\"${escapeHtml(it.thumbnailUrl)}\" alt=\"Vorschaubild\" width=\"60\" height=\"60\" style=\"display:block;width:60px;height:60px;border:1px solid #D8D7D3;outline:none;text-decoration:none;\" />\n                        </td>`\n    : '';\n\n  const headlineColspan = it.thumbnailUrl ? '' : 'colspan=\"2\"';\n\n  return `<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-top:1px solid #D8D7D3;\">\n                <tr>\n                  <td style=\"padding:26px 0 26px 0;\">\n\n                    <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                      <tr>\n                        ${thumbHtml}\n                        <td style=\"vertical-align:top;\" ${headlineColspan}>\n                          <h2 class=\"lc-item-headline\" style=\"margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:500;line-height:1.3;color:#1C1C1A;\">\n                            <a href=\"${url}\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:none;font-weight:500;\">\n                              ${headline}\n                            </a>\n                          </h2>\n                        </td>\n                      </tr>\n                    </table>\n\n                    <p style=\"margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#1C1C1A;font-weight:300;\">\n                      ${desc}\n                    </p>\n\n                    <p style=\"margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#8A8A85;letter-spacing:0.02em;\">\n                      <a href=\"${url}\" rel=\"noopener noreferrer\" style=\"color:#C8102E;text-decoration:none;font-weight:500;\">${readMoreLabel}</a>\n                      <span style=\"color:#D8D7D3;margin:0 8px;\" aria-hidden=\"true\">·</span>\n                      ${sourceLabel}: ${source}${translateLink}\n                    </p>\n\n                  </td>\n                </tr>\n              </table>`;\n}\n\n// ── BLOCK SEPARATOR (Sprint 15b — elegante Trennung) ──────────\n// Gleiche Schriftart wie \"KI-News des Tages\" Label: Arial 11px,\n// letter-spacing 0.32em, uppercase, muted color #8A8A85.\n// Mehr Abstand (32px oben, 16px unten), keine Hintergrundfarbe.\nfunction blockSeparator(labelText) {\n  return `<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td style=\"padding:32px 0 16px 0;text-align:center;\">\n                    <span style=\"font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#8A8A85;font-weight:400;\">\n                      ${escapeHtml(labelText)}\n                    </span>\n                  </td>\n                </tr>\n              </table>`;\n}\n\n// ── RENDER DE NEWSLETTER ───────────────────────────────────────\n// 2 Blöcke: DE-Items (DACH) zuerst, dann EN-Items (International)\nfunction renderDe(news, unsubUrl, settingsUrl, dateDe) {\n  const allItems = news.items || [];\n  const deItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'de');\n  const enItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'en');\n\n  const deBlock = deItems.map(it => renderItem(it, 'de')).join('');\n  const enBlock = enItems.length > 0\n    ? blockSeparator('International') + enItems.map(it => renderItem(it, 'de')).join('')\n    : '';\n\n  return `<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n  <meta name=\"color-scheme\" content=\"light only\">\n  <meta name=\"supported-color-schemes\" content=\"light\">\n  <title>KI-News des Tages — Levcon.ai</title>\n  <style>\n    @media only screen and (max-width: 600px) {\n      .lc-card { width: 100% !important; }\n      .lc-pad-h { padding-left: 20px !important; padding-right: 20px !important; }\n      .lc-item-thumb-cell { display: none !important; }\n      .lc-date { font-size: 24px !important; }\n      .lc-summary { font-size: 16px !important; }\n      .lc-item-headline { font-size: 17px !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#1C1C1A;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;line-height:1.5;\">\n\n  <div style=\"display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#F0EFEC;\">\n    ${escapeHtml(news.summaryDe || '').substring(0, 100)}\n  </div>\n\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#F0EFEC;\">\n    <tr>\n      <td align=\"center\" style=\"padding:32px 16px;\">\n\n        <table role=\"presentation\" class=\"lc-card\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;width:100%;background-color:#FFFFFF;border:1px solid #D8D7D3;\">\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:36px 32px 20px 32px;text-align:center;border-bottom:1px solid #D8D7D3;\">\n              <div style=\"font-family:Arial,Helvetica,sans-serif;font-size:14px;letter-spacing:0.26em;text-transform:uppercase;color:#464644;font-weight:400;\">\n                LEVCON<span style=\"color:#C8102E;\">.AI</span>\n              </div>\n            </td>\n          </tr>\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:40px 32px 0 32px;text-align:center;\">\n              <div style=\"font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#8A8A85;margin-bottom:14px;font-weight:400;\">\n                KI-News des Tages\n              </div>\n              <h1 class=\"lc-date\" style=\"margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#1C1C1A;line-height:1.2;letter-spacing:-0.01em;\">\n                ${escapeHtml(dateDe)}\n              </h1>\n            </td>\n          </tr>\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:28px 32px 8px 32px;\">\n              <p class=\"lc-summary\" style=\"margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;\">\n                ${escapeHtml(news.summaryDe || '')}\n              </p>\n            </td>\n          </tr>\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:28px 32px 0 32px;\">\n              ${deBlock}${enBlock}\n            </td>\n          </tr>\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:32px 32px 36px 32px;border-top:1px solid #D8D7D3;\">\n              <p style=\"margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#8A8A85;font-weight:300;\">\n                Sie erhalten diese E-Mail, weil Sie Levcon AI News abonniert haben.\n              </p>\n              <p style=\"margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;\">\n                <a href=\"https://levcon.ai\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:underline;\">Levcon.ai</a>\n                <span style=\"color:#D8D7D3;margin:0 6px;\" aria-hidden=\"true\">·</span>\n                <a href=\"${escapeHtml(settingsUrl)}\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:underline;\">Einstellungen</a>\n                <span style=\"color:#D8D7D3;margin:0 6px;\" aria-hidden=\"true\">·</span>\n                <a href=\"https://levcon.ai/datenschutz\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:underline;\">Datenschutz</a>\n                <span style=\"color:#D8D7D3;margin:0 6px;\" aria-hidden=\"true\">·</span>\n                <a href=\"https://levcon.ai/impressum\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:underline;\">Impressum</a>\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>`;\n}\n\n// ── RENDER EN NEWSLETTER ───────────────────────────────────────\nfunction renderEn(news, unsubUrl, settingsUrl, dateEn) {\n  const allItems = news.items || [];\n  const deItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'de');\n  const enItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'en');\n\n  const deBlock = deItems.map(it => renderItem(it, 'en')).join('');\n  const enBlock = enItems.length > 0\n    ? blockSeparator('International') + enItems.map(it => renderItem(it, 'en')).join('')\n    : '';\n\n  return `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n  <meta name=\"color-scheme\" content=\"light only\">\n  <meta name=\"supported-color-schemes\" content=\"light\">\n  <title>AI News of the Day — Levcon.ai</title>\n  <style>\n    @media only screen and (max-width: 600px) {\n      .lc-card { width: 100% !important; }\n      .lc-pad-h { padding-left: 20px !important; padding-right: 20px !important; }\n      .lc-item-thumb-cell { display: none !important; }\n      .lc-date { font-size: 24px !important; }\n      .lc-summary { font-size: 16px !important; }\n      .lc-item-headline { font-size: 17px !important; }\n    }\n  </style>\n</head>\n<body style=\"margin:0;padding:0;background-color:#F0EFEC;font-family:Arial,Helvetica,sans-serif;color:#1C1C1A;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;line-height:1.5;\">\n\n  <div style=\"display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#F0EFEC;\">\n    ${escapeHtml(news.summaryEn || '').substring(0, 100)}\n  </div>\n\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#F0EFEC;\">\n    <tr>\n      <td align=\"center\" style=\"padding:32px 16px;\">\n\n        <table role=\"presentation\" class=\"lc-card\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;width:100%;background-color:#FFFFFF;border:1px solid #D8D7D3;\">\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:36px 32px 20px 32px;text-align:center;border-bottom:1px solid #D8D7D3;\">\n              <div style=\"font-family:Arial,Helvetica,sans-serif;font-size:14px;letter-spacing:0.26em;text-transform:uppercase;color:#464644;font-weight:400;\">\n                LEVCON<span style=\"color:#C8102E;\">.AI</span>\n              </div>\n            </td>\n          </tr>\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:40px 32px 0 32px;text-align:center;\">\n              <div style=\"font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#8A8A85;margin-bottom:14px;font-weight:400;\">\n                AI News of the Day\n              </div>\n              <h1 class=\"lc-date\" style=\"margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#1C1C1A;line-height:1.2;letter-spacing:-0.01em;\">\n                ${escapeHtml(dateEn)}\n              </h1>\n            </td>\n          </tr>\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:28px 32px 8px 32px;\">\n              <p class=\"lc-summary\" style=\"margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#1C1C1A;font-weight:400;\">\n                ${escapeHtml(news.summaryEn || '')}\n              </p>\n            </td>\n          </tr>\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:28px 32px 0 32px;\">\n              ${deBlock}${enBlock}\n            </td>\n          </tr>\n\n          <tr>\n            <td class=\"lc-pad-h\" style=\"padding:32px 32px 36px 32px;border-top:1px solid #D8D7D3;\">\n              <p style=\"margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#8A8A85;font-weight:300;\">\n                You are receiving this email because you subscribed to Levcon AI News.\n              </p>\n              <p style=\"margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;\">\n                <a href=\"https://levcon.ai\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:underline;\">Levcon.ai</a>\n                <span style=\"color:#D8D7D3;margin:0 6px;\" aria-hidden=\"true\">·</span>\n                <a href=\"${escapeHtml(settingsUrl)}\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:underline;\">Settings</a>\n                <span style=\"color:#D8D7D3;margin:0 6px;\" aria-hidden=\"true\">·</span>\n                <a href=\"https://levcon.ai/datenschutz\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:underline;\">Privacy</a>\n                <span style=\"color:#D8D7D3;margin:0 6px;\" aria-hidden=\"true\">·</span>\n                <a href=\"https://levcon.ai/impressum\" rel=\"noopener noreferrer\" style=\"color:#1C1C1A;text-decoration:underline;\">Legal Notice</a>\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>`;\n}\n\n// ═══════════════════════════════════════════════════════════════\n//  MAIN\n// ═══════════════════════════════════════════════════════════════\n\nconst siteUrl = 'https://levcon.ai';\nconst out = [];\n\n// Subscriber-Liste aus API-Wrapper extrahieren\nlet subscribers = [];\nif (items.length === 1 && items[0].json?.subscribers) {\n  subscribers = items[0].json.subscribers;\n} else if (items.length > 0 && items[0].json?.email) {\n  subscribers = items.map(i => i.json);\n} else {\n  console.log('[Newsletter] ⚠️ Fetch Subscribers Output:', JSON.stringify(items[0]?.json).substring(0, 500));\n  throw new Error('No subscribers found. Check Fetch Subscribers node output.');\n}\n\nconsole.log(`[Newsletter] ${subscribers.length} Subscriber vom API erhalten`);\n\nfor (const s of subscribers) {\n  const lang = (s.language || 'de').toLowerCase();\n  const unsubToken = s.unsubscribeToken || s.confirmToken || s.id;\n  const unsubUrl = `${siteUrl}/api/ai-news/unsubscribe?token=${encodeURIComponent(unsubToken)}`;\n  // Settings-URL: öffnet /ai-news?settings=<token> — User kann dort\n  // Sprache, Frequenz, News-Sprachen ändern ODER abbesteln.\n  const settingsUrl = `${siteUrl}/ai-news?settings=${encodeURIComponent(unsubToken)}`;\n\n  // Skip wenn heute schon gesendet\n  if (s.lastSentDate) {\n    const lastSent = new Date(s.lastSentDate);\n    const todayDate = new Date(today + 'T00:00:00Z');\n    if (lastSent.getTime() === todayDate.getTime()) {\n      console.log(`[Newsletter] Skip ${s.email} — already sent today`);\n      continue;\n    }\n  }\n\n  let html, subject;\n  if (lang === 'en') {\n    html = renderEn(news, unsubUrl, settingsUrl, dateEn);\n    subject = `AI News · ${dateEn}`;\n  } else {\n    html = renderDe(news, unsubUrl, settingsUrl, dateDe);\n    subject = `KI-News · ${dateDe}`;\n  }\n\n  out.push({\n    json: {\n      email: s.email,\n      subject,\n      html,\n      subscriberId: s.id,\n      subscriberLanguage: lang,\n      listUnsubscribe: `<mailto:news@levcon.ai?subject=Unsubscribe>, <${unsubUrl}>`,\n      listUnsubscribePost: 'List-Unsubscribe=One-Click',\n      lastSentDate\n    }\n  });\n}\n\nconsole.log(`[Newsletter] ${out.length} E-Mails gerendert (${subscribers.length - out.length} skipped wegen lastSentDate)`);\nreturn out;\n"
+      },
+      "id": "485e7c68-f0ab-4022-9685-de2ff75c80a7",
+      "name": "Render Newsletter HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        304
+      ],
+      "notes": "Erzeugt pro Subscriber ein HTML-Email (DE oder EN).\nVerwendet News-Daten aus 'Fetch Today News' via $('Fetch Today News').first().json.\nBaut List-Unsubscribe Header mit subscriber-spezifischer URL (RFC 8058 One-Click).\nBetreff sprachabhängig: 'KI-News · DD. MMMM YYYY' (DE) oder 'AI News · MMMM D, YYYY' (EN).\nTemplate referenziert templates/newsletter-html-de.html und newsletter-html-en.html (später austauschbar)."
+    },
+    {
+      "parameters": {
+        "fromEmail": "Levcon AI News <admin@levcon.at>",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "cb449dfd-5bfc-4279-b97d-3ba14fa98093",
+      "name": "Send Newsletter Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1360,
+        304
+      ],
+      "webhookId": "964351b0-f7db-4e6f-93ca-0302f05554cf",
+      "credentials": {
+        "smtp": {
+          "id": "YLKV9546oq7fWeXi",
+          "name": "SMTP account"
+        }
+      },
+      "notes": "SMTP-Versand pro Subscriber-Item (n8n iteriert automatisch).\nFrom: 'Levcon AI News <news@levcon.ai>'\nCustom Headers: List-Unsubscribe + List-Unsubscribe-Post (RFC 8058 One-Click).\nCredential: 'SMTP Levcon'"
+    },
+    {
+      "parameters": {},
+      "id": "64622b1a-fa3e-4021-9476-e767b218480e",
+      "name": "On Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1008
+      ],
+      "notes": "Error-Trigger: wird aktiviert, wenn der Hauptflow fehlschlägt."
+    },
+    {
+      "parameters": {
+        "fromEmail": "admin@levcon.at",
+        "toEmail": "=admin@levcon.at",
+        "subject": "=ALERT: n8n Workflow '03 Newsletter Send' failed at {{ $now.toISO() }}",
+        "options": {}
+      },
+      "id": "92f8e0bf-8acd-494b-891d-14703dcf5f4a",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        304,
+        1008
+      ],
+      "webhookId": "6b62b29e-1308-4929-84b7-f719e5e534b4",
+      "credentials": {
+        "smtp": {
+          "id": "YLKV9546oq7fWeXi",
+          "name": "SMTP account"
+        }
+      },
+      "notes": "Sendet Alert-Mail an ALERT_EMAIL.\nSMTP-Credential: 'SMTP Levcon'"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════\n//  UPDATE SUBSCRIBER LAST SENT (v2 — Sprint 14b)\n//\n//  Ersetzt beide Nodes im originalen Workflow:\n//    - \"Update Subscriber Last Sent ERSATZ, API!\" (Code Node)\n//    - \"Update Subscriber Last Sent\" (HTTP Request Node)\n//\n//  Was es macht:\n//  - Für jedes gesendete Newsletter-Item: PATCH an Levcon API\n//  - Setzt lastSentDate auf heute (verhindert Doppelversand)\n//\n//  WICHTIG: API-Key wird aus n8n Credentials gezogen, NICHT hardcodiert.\n//  In n8n: Dem Code-Node die HTTP Header Auth Credential \"Levcon Internal API\"\n//  zuweisen (oder den Key manuell als Variable setzen).\n//\n//  Alternative falls Credentials nicht verfügbar: Key hier eintragen.\n//  const API_KEY = 'your-key-here';\n// ═══════════════════════════════════════════════════════════════\n\n// API-Key: aus n8n Credentials oder hier eintragen\n// Falls in n8n Credential \"Levcon Internal API\" zugewiesen:\n// const API_KEY = \\$env.LEVCON_INTERNAL_API_KEY;  // funktioniert nur mit env-access\n// Ohne env-access (Standard): Key hier eintragen:\nconst API_KEY = 'f6dab8144e7b1e1a0e8772c05b56446f';\n\nconst siteUrl = 'https://levcon.ai';\nconst results = [];\n\nfor (const item of items) {\n  const subscriberId = item.json.subscriberId;\n\n  if (!subscriberId) {\n    console.log(`[Update] ⚠️ Keine subscriberId für ${item.json.email || 'unknown'}`);\n    results.push({ json: { success: false, error: 'no subscriberId', email: item.json.email } });\n    continue;\n  }\n\n  try {\n    const response = await this.helpers.httpRequest({\n      method: 'PATCH',\n      url: `${siteUrl}/api/ai-news/internal/subscribers?id=${subscriberId}`,\n      headers: {\n        'Content-Type': 'application/json',\n        'X-Levcon-Api-Key': API_KEY,\n      },\n      body: {\n        lastSentDate: item.json.lastSentDate || new Date().toISOString(),\n      },\n      json: true,\n      timeout: 30000,\n    });\n\n    results.push({\n      json: {\n        success: true,\n        subscriberId,\n        email: item.json.email,\n        response: response,\n      },\n    });\n  } catch (error) {\n    console.log(`[Update] ❌ Fehler für ${item.json.email}: ${error.message}`);\n    results.push({\n      json: {\n        success: false,\n        error: error.message,\n        subscriberId,\n        email: item.json.email,\n      },\n    });\n  }\n}\n\nconst successCount = results.filter(r => r.json.success).length;\nconst failCount = results.length - successCount;\nconsole.log(`[Update] ${successCount}/${results.length} Subscriber aktualisiert${failCount > 0 ? ` (${failCount} fehlgeschlagen)` : ''}`);\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        304
+      ],
+      "id": "efe1ba95-96b4-4b93-a145-b3e01cd975d9",
+      "name": "Update Subscriber Last Sent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook: Newsletter Daily": {
+      "main": [
+        [
+          {
+            "node": "Set Frequency: Daily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron Weekly Sunday 08:00": {
+      "main": [
+        [
+          {
+            "node": "Set Frequency: Weekly",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron Digest 1st of Month 08:00": {
+      "main": [
+        [
+          {
+            "node": "Set Frequency: Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Frequency: Daily": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Frequency: Weekly": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Frequency: Digest": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Today News": {
+      "main": [
+        [
+          {
+            "node": "Fetch Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Subscribers": {
+      "main": [
+        [
+          {
+            "node": "Render Newsletter HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render Newsletter HTML": {
+      "main": [
+        [
+          {
+            "node": "Send Newsletter Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Newsletter Email": {
+      "main": [
+        [
+          {
+            "node": "Update Subscriber Last Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Subscriber Last Sent": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "a445027e-2c1b-4b9d-a0f4-9d8783805ba1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b2d1feb950fa85b8badf7148ff879f99d71c58371428240be6f7a49573bef211"
+  },
+  "id": "W2oAiJWIPaQJ2iyc",
+  "tags": []
+}
