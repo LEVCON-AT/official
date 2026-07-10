@@ -60,10 +60,16 @@ async function callOllama(items, bucket) {
   // ── System Prompt (sprachspezifisch) ────────────────────────
   // DE-Run: schreibt summaryDe + headlineEn (Übersetzung DE→EN)
   // EN-Run: schreibt summaryEn + headlineDe (Übersetzung EN→DE)
+  //
+  // WICHTIG: Kleine Modelle (2B) neigen dazu, JSON-Output früh
+  // abzuschließen wenn sie "denken" es reicht. Deshalb:
+  // 1. Explizite Ansage: "Process ALL N items, do not stop early"
+  // 2. Item-Nummerierung im User-Prompt (Qwen sieht: "Item 1 von 10")
+  // 3. "format: json_object" in Ollama-Options (erzwingt JSON-Mode)
   const systemPrompt = isDe
     ? `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.
 
-Your task: Process ALL ${items.length} GERMAN AI news items from DACH sources.
+Your task: Process ALL ${items.length} GERMAN AI news items from DACH sources. You MUST process every single item — do NOT stop early, do NOT skip items, do NOT truncate the output.
 
 For each item, write:
 - headline: Original German headline (keep as-is)
@@ -73,7 +79,7 @@ For each item, write:
 - descriptionEn: 1-2 sentence English summary (independent, not just translation)
 - source, sourceUrl, thumbnailUrl, languageOrig, category (research|business|regulation|tools|society)
 
-Also write summaryDe: Analytische Zusammenfassung der heutigen DACH KI-News (3-4 Sätze, interesseweckend).
+Also write summaryDe: Analytische Zusammenfassung der heutigen DACH KI-News (3-4 Sätze).
 
 Summary tone: Professional, insightful, concise. Like a McKinsey briefing.
 
@@ -85,10 +91,10 @@ Return JSON:
   ]
 }
 
-IMPORTANT: Return ONLY the JSON object. No markdown, no code blocks. Keep ALL ${items.length} items.`
+CRITICAL: You MUST return ALL ${items.length} items in the items array. If you return fewer, the workflow will fail. Process every item, then close the JSON with } and ].`
     : `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.
 
-Your task: Process ALL ${items.length} ENGLISH AI news items from international sources.
+Your task: Process ALL ${items.length} ENGLISH AI news items from international sources. You MUST process every single item — do NOT stop early, do NOT skip items, do NOT truncate the output.
 
 For each item, write:
 - headline: Original English headline (keep as-is)
@@ -98,7 +104,7 @@ For each item, write:
 - descriptionEn: 1-2 sentence English summary (independent)
 - source, sourceUrl, thumbnailUrl, languageOrig, category (research|business|regulation|tools|society)
 
-Also write summaryEn: Analytical summary of today's international AI news (3-4 sentences, engaging).
+Also write summaryEn: Analytical summary of today's international AI news (3-4 sentences).
 
 Summary tone: Professional, insightful, concise. Like a McKinsey briefing.
 
@@ -110,27 +116,38 @@ Return JSON:
   ]
 }
 
-IMPORTANT: Return ONLY the JSON object. No markdown, no code blocks. Keep ALL ${items.length} items.`;
+CRITICAL: You MUST return ALL ${items.length} items in the items array. If you return fewer, the workflow will fail. Process every item, then close the JSON with } and ].`;
 
-  // ── User Prompt (lean: nur title, source, language, summary) ──
-  const userPrompt = `${bucket} ITEMS (${items.length}):
-${JSON.stringify(items.map(i => ({
-  title: i.title,
-  link: i.link,
-  source: i.source,
-  language: i.languageOrig,
-  summary: i.summary.substring(0, 120)
-})), null, 2)}
+  // ── User Prompt (mit Item-Nummerierung für bessere Vollständigkeit) ──
+  // Item 1/N, 2/N, ... — das hilft Qwen zu sehen wie viele Items kommen
+  // und nicht mittendrin abzubrechen.
+  const itemsNumbered = items.map((i, idx) => ({
+    [`Item ${idx + 1} of ${items.length}`]: {
+      title: i.title,
+      link: i.link,
+      source: i.source,
+      language: i.languageOrig,
+      summary: i.summary.substring(0, 120)
+    }
+  }));
 
-Process ALL ${items.length} items. Each must have: headline, headlineDe, headlineEn, descriptionDe, descriptionEn.`;
+  const userPrompt = `${bucket} ITEMS (${items.length} total — process ALL ${items.length}):
+${JSON.stringify(itemsNumbered, null, 2)}
 
-  // ── Request Body (pro Run kleinere num_predict, da nur 10 Items) ──
+Process EVERY item from 1 to ${items.length}. Do not stop after item 6 or 7. Output ALL ${items.length} items in the JSON array.`;
+
+  // ── Request Body (v5.1: format=json_object erzwingt JSON-Output) ──
+  // format: "json_object" zwingt Ollama/Qwen zu validem JSON — verhindert
+  // dass Qwen mittendrin abbricht und invalides JSON zurückgibt.
+  // num_predict: 6144 als Sicherheitspuffer (10 Items × 5 Felder ≈ 3.200 Tokens
+  // + summary ~200 + JSON-Overhead ~300 = ~3.700, Puffer bis 6144)
   const requestBody = {
     model: "qwen3.5:2b",
     stream: false,
+    format: "json_object",   // NEU: erzwingt JSON-Mode (verhindert early abort)
     options: {
       temperature: 0.3,
-      num_predict: 4096,       // v5: 10 Items × 5 Felder = ~1.700 Output-Tokens, 4096 reicht
+      num_predict: 6144,      // v5.1: erhöht von 4096 (Sicherheitspuffer)
       num_ctx: 32768,
       enable_thinking: false
     },
@@ -141,7 +158,7 @@ Process ALL ${items.length} items. Each must have: headline, headlineDe, headlin
     "think": false
   };
 
-  console.log(`[Build Ollama v5] ${bucket}-Run startet (${items.length} Items, num_predict=4096)`);
+  console.log(`[Build Ollama v5] ${bucket}-Run startet (${items.length} Items, num_predict=6144, format=json_object)`);
   const runStart = Date.now();
 
   const response = await this.helpers.httpRequest({
@@ -289,6 +306,10 @@ function enrichItems(llmItems, originalItems, defaultLang) {
 
 const deItemsEnriched = enrichItems(deJson?.items, deItems, 'de');
 const enItemsEnriched = enrichItems(enJson?.items, enItems, 'en');
+
+// Logging: Item-Count-Check (Qwen könnte Items vergessen haben)
+console.log(`[Build Ollama v5] Item-Count: DE-Input=${deItems.length}, DE-Output=${deItemsEnriched.length}${deItems.length !== deItemsEnriched.length ? ' ⚠️ MISMATCH' : ''}`);
+console.log(`[Build Ollama v5] Item-Count: EN-Input=${enItems.length}, EN-Output=${enItemsEnriched.length}${enItems.length !== enItemsEnriched.length ? ' ⚠️ MISMATCH' : ''}`);
 
 // 6. Merge zu kombiniertem JSON
 const mergedJson = {

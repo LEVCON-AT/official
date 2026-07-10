@@ -101,10 +101,12 @@ const fetchPromises = RSS_FEEDS.map(async (feed) => {
       method: 'GET',
       url: feed.url,
       timeout: FETCH_TIMEOUT_MS,
-      retry: FETCH_RETRIES
+      retry: FETCH_RETRIES,
+      encoding: 'utf-8',        // NEU: UTF-8 erzwingen (verhindert Latin-1 Fehlinterpretation)
+      responseType: 'text'      // NEU: immer als Text zurückgeben (nicht auto-detect JSON)
     });
 
-    const xml = typeof response === 'string' ? response : JSON.stringify(response);
+    const xml = typeof response === 'string' ? response : String(response);
     const items = [];
 
     const itemRegex = /<(?:item|entry)[\s\S]*?>([\s\S]*?)<\/(?:item|entry)>/g;
