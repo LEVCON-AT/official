@@ -1,142 +1,69 @@
-# n8n Workflows — AI News
+# n8n Workflows — Levcon AI News
 
-**Status:** Templates v1.0 (ready to import, mit Platzhaltern)
-**Last Updated:** 2025-06-25
+**Stand:** Juli 2026
+**Status:** Alle 4 Workflows sind `active: true` (produktiv auf VPS)
 
----
+Diese JSON-Dateien sind exportierte n8n-Workflows und stellen die **Source of Truth** dar. Die Code-Nodes in `code-nodes-refined/` dienen als Referenz für die Code-Node-Inhalte.
 
-## Übersicht
+## Workflows
 
-| # | Datei | Zweck | Cron |
-|---|---|---|---|
-| 01 | `workflow-01-collect-and-curate.json` | RSS + Web-Search sammeln, LLM kuratieren, in DB speichern, Webhooks an 02+03 | Täglich 06:00 CET |
-| 02 | `workflow-02-linkedin-post.json` | Daily AI Update auf LinkedIn posten (DE) | Via Webhook aus 01 |
-| 03 | `workflow-03-newsletter-send.json` | Newsletter an alle Subscriber (nach Sprache & Frequenz) | Via Webhook aus 01 + Extra-Cron für Weekly/Digest |
+| Datei | Name | Cron | Zweck |
+|-------|------|------|-------|
+| `workflow-01-collect-and-curate.json` | AI News — 01 Collect & Curate | 06:00 Europe/Vienna | RSS fetchen, Score & Rank (10 DE + 10 EN), 2 serielle Ollama-Läufe, Ingest |
+| `workflow-02-linkedin-post.json` | AI News — 02 LinkedIn Post | Webhook | Heute-News abholen, LinkedIn-Post formatieren, posten |
+| `workflow-03-newsletter-send.json` | AI News — 03 Newsletter Send | Daily Webhook + Weekly + Digest | Tagesnews an Subscriber senden (DE/EN, 2 Blöcke: DACH + International) |
+| `workflow-04-cleanup.json` | AI News — Cleanup (Daily) | Täglich | Unconfirmed (7 Tage) und Unsubscribed (30 Tage) löschen |
 
----
+## Code-Nodes Referenz
 
-## Import-Anleitung
+Die Code-Node-Inhalte der Workflows sind in `code-nodes-refined/` als separate `.js`-Dateien abgelegt für bessere Wartbarkeit und Versionierung:
 
-1. n8n-UI öffnen (z.B. https://n8n.levcon.ai)
-2. Workflows → "Import from File"
-3. JSON-Datei hochladen
-4. Workflow öffnen — Credentials sind als Platzhalter hinterlegt
-5. Jeder Credential-Node: Klicken → Credential zuweisen (vorher in Credentials anlegen)
-6. Workflow speichern
-7. Aktivieren (Toggle oben rechts)
+| Datei | Workflow | Node |
+|-------|----------|------|
+| `01-fetch-all-rss.code.js` | 01 | Fetch All RSS |
+| `02-score-and-rank.code.js` | 01 | Score & Rank |
+| `03-build-ollama-request.code.js` | 01 | Build Ollama Request (2 serielle Läufe) |
+| `04-render-newsletter.code.js` | 03 | Render Newsletter HTML |
+| `05-update-subscriber-last-sent.code.js` | 03 | Update Subscriber Last Sent |
 
----
+**WICHTIG:** Bei Änderungen an Code-Nodes: zuerst die `.js`-Datei in `code-nodes-refined/` aktualisieren, dann den Code in n8n kopieren, testen, und den Workflow-Export als JSON zurück ins Repo committen.
 
-## Erforderliche Credentials
-
-Vor dem Import folgende Credentials in n8n anlegen (Settings → Credentials → Add):
-
-### 1. `Levcon Internal API` (Header Auth)
-- **Typ:** Header Auth
-- **Name:** `Levcon Internal API`
-- **Header Name:** `X-Levcon-Api-Key`
-- **Value:** `<LEVCON_INTERNAL_API_KEY>` (aus .env)
-
-### 2. `z-ai LLM` (HTTP Header Auth)
-- **Typ:** HTTP Header Auth (oder Generic Credential)
-- **Name:** `z-ai LLM`
-- **Header Name:** `Authorization`
-- **Value:** `Bearer <ZAI_API_KEY>`
-
-### 3. `LinkedIn Levcon` (OAuth2 API)
-- **Typ:** LinkedIn OAuth2 API
-- **Name:** `LinkedIn Levcon`
-- **Client ID:** `<LINKEDIN_CLIENT_ID>`
-- **Client Secret:** `<LINKEDIN_CLIENT_SECRET>`
-- **Scopes:** `w_member_social` (für Post als Person) oder `w_organization_social` (als Organization)
-- **Redirect URI:** `https://n8n.levcon.ai/rest/oauth2-credential/callback`
-
-### 4. `SMTP Levcon` (SMTP)
-- **Typ:** SMTP
-- **Name:** `SMTP Levcon`
-- **Host:** `<SMTP_HOST>` (z.B. smtp.mailgun.org)
-- **Port:** 587
-- **User:** `<SMTP_USER>`
-- **Password:** `<SMTP_PASS>`
-- **TLS:** eingeschaltet
-
----
-
-## Erforderliche Environment-Variab in n8n
-
-Diese müssen in der n8n-Docker-Umgebung gesetzt sein (siehe VPS-SETUP.md):
+## Pipeline-Übersicht (v5)
 
 ```
-LEVCON_API_BASE=https://levcon.ai
-LEVCON_INTERNAL_API_KEY=<gleicher-wie-nextjs>
-ZAI_API_KEY=<dein-z-ai-key>
-ZAI_API_ENDPOINT=https://api.z.ai/api/paas/v4
-ALERT_EMAIL=ops@levcon.ai
+Workflow 01 (06:00 Vienna):
+  Schedule Trigger
+    → Fetch All RSS (35 Feeds, max 30/Feed, UTF-8, HTML-Entities dekodiert)
+    → Dedupe by URL
+    → Score & Rank (6-Faktor-Scoring + Semantic Dedup + 2-Bucket Quota: 10 DE + 10 EN)
+    → Build Ollama Request (2 serielle Läufe: DE dann EN, format=json_object)
+    → POST /api/ai-news/internal/ingest
+    → Trigger Workflow 02 (LinkedIn) + Workflow 03 (Newsletter)
+
+Workflow 03 (Newsletter):
+  Trigger (Daily Webhook / Weekly Cron / Digest Cron)
+    → Fetch Today News
+    → Fetch Subscribers
+    → Render Newsletter HTML (2 Blöcke: DACH zuerst, International danach)
+    → Send Email (SMTP)
+    → Update Subscriber Last Sent
 ```
 
----
+## Credentials (in n8n Credential Store)
 
-## Workflow-Abhängigkeiten
+- **SMTP Levcon** — IONOS SMTP für Newsletter-Versand
+- **Levcon Internal API** — X-Levcon-Api-Key Header Auth für /api/ai-news/internal/*
+- **LinkedIn Levcon** — OAuth2 für LinkedIn Posts (falls aktiviert)
 
+## Environment Variables (VPS .env)
+
+```env
+LEVCON_INTERNAL_API_KEY=<key>
+NEXT_PUBLIC_SITE_URL=https://levcon.ai
+SMTP_HOST=smtp.ionos.at
+SMTP_PORT=587
+SMTP_USER=admin@levcon.at
+SMTP_PASS=<password>
+SMTP_FROM="Levcon AI News" <admin@levcon.at>
+SMTP_REPLY_TO=hello@levcon.ai
 ```
-[01: Collect & Curate]
-        │
-        ├── Webhook → [02: LinkedIn Post]
-        │
-        └── Webhook → [03: Newsletter Send (Daily)]
-                          │
-                          └── Cron (Sonntags 08:00) → [03: Newsletter Send (Weekly)]
-                          │
-                          └── Cron (1. des Monats 08:00) → [03: Newsletter Send (Digest)]
-```
-
-Workflow 02 und 03 sind unabhängig voneinander — wenn LinkedIn fehlschlägt, bekommt der Newsletter trotzdem seine News.
-
----
-
-## Test-Modus
-
-Jeder Workflow hat einen manuellen Trigger (Trigger Node "On clicking 'Execute'"):
-1. Workflow öffnen
-2. "Execute"-Button klicken
-3. Run-Logs prüfen
-
-Für Workflow 01: Test-Run schreibt in DB. Vor Test: `lastTestRun=true` als Query-Parameter, um Test-Daten zu markieren.
-
----
-
-## Fehlerbehandlung
-
-- Jeder Workflow hat Error-Trigger am Ende
-- Bei Fehler: Mail an `ALERT_EMAIL`
-- Error-Workflow wird automatisch aktiviert nach Import
-
----
-
-## Workflow-Anpassungen
-
-Häufige Anpassungen nach Import:
-
-### RSS-Quellen ändern
-- Workflow 01 → Node "Fetch RSS Feeds"
-- URL-Liste bearbeiten
-
-### LLM-Prompt anpassen
-- Workflow 01 → Node "LLM Curation"
-- System-Prompt bearbeiten
-
-### LinkedIn-Post-Format
-- Workflow 02 → Node "Format LinkedIn Post"
-- Template bearbeiten
-
-### Newsletter-HTML
-- Workflow 03 → Node "Build Newsletter HTML"
-- Template bearbeiten (oder externes HTML-File referenzieren)
-
----
-
-## Maintenance
-
-- n8n-Updates: `docker-compose pull && docker-compose up -d` (im /var/lib/n8n/)
-- Workflow-Export: nach jeder Änderung JSON exportieren → commit ins Git-Repo
-- Logs: `docker logs n8n --tail 100 -f`

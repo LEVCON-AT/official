@@ -5,23 +5,21 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "linkedin-post-levcon",
-        "responseMode": "onReceived",
         "options": {}
       },
-      "id": "b2c3d4e5-0002-4000-8000-000000000001",
+      "id": "d0c6164a-cc91-4741-8baf-c446ec686d40",
       "name": "Webhook: LinkedIn Post",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
       "position": [
-        -400,
-        400
+        0,
+        0
       ],
       "webhookId": "linkedin-post-levcon-unique-placeholder",
       "notes": "Webhook-Trigger: wird von Workflow 01 aufgerufen.\nPath: linkedin-post-levcon\nMethode: POST\nGibt 200 zurück, sobald der Workflow startet."
     },
     {
       "parameters": {
-        "method": "GET",
         "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/today",
         "sendHeaders": true,
         "headerParameters": {
@@ -34,13 +32,13 @@
         },
         "options": {}
       },
-      "id": "b2c3d4e5-0002-4000-8000-000000000002",
+      "id": "14cb1bfd-c436-4d9b-a4bb-4ae54b4fbcc7",
       "name": "Fetch Today's News",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -100,
-        400
+        304,
+        0
       ],
       "notes": "GET Levcon API: heutige AI-News-Ausgabe (Summary + Items).\nAuth via X-Levcon-Api-Key Header.\nResponse: { date, summaryDe, summaryEn, items[] }"
     },
@@ -48,78 +46,74 @@
       "parameters": {
         "jsCode": "// Format LinkedIn post text per template in templates/linkedin-post-template.md\n// Input: item.json = { date, summaryDe, summaryEn, items[] }\n// Output: { postText: string, dateDe: string, dateEn: string }\n\nconst input = items[0].json;\nconst today = input.date || new Date().toISOString().substring(0, 10);\n\n// German date format: \"DD. MMMM YYYY\" (z.B. \"25. Juni 2025\")\nconst DE_MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];\nconst d = new Date(today + 'T00:00:00Z');\nconst dateDe = `${d.getUTCDate()}. ${DE_MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;\n\n// English date format: \"MMMM D, YYYY\"\nconst EN_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\nconst dateEn = `${EN_MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;\n\nconst summaryDe = (input.summaryDe || '').trim();\nconst rawItems = Array.isArray(input.items) ? input.items : [];\n\n// Take max 5 headlines (LinkedIn best practice)\nconst MAX_HEADLINES = 5;\nconst top = rawItems.slice(0, MAX_HEADLINES);\n\nfunction cleanUrl(u) {\n  try {\n    const parsed = new URL(u);\n    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid'].forEach(p => parsed.searchParams.delete(p));\n    let clean = parsed.origin + parsed.pathname;\n    if (parsed.search) clean += parsed.search;\n    return clean;\n  } catch (e) {\n    return u || '';\n  }\n}\n\nfunction truncate(s, maxLen) {\n  if (!s) return '';\n  s = s.trim();\n  if (s.length <= maxLen) return s;\n  return s.substring(0, maxLen - 1).trimEnd() + '…';\n}\n\nconst lines = [];\nlines.push(`KI-News des Tages · ${dateDe}`);\nlines.push('');\nlines.push(summaryDe || 'Heute ein ruhiger Tag in der KI-Welt.');\nlines.push('');\n\nif (top.length === 0) {\n  lines.push('Heute keine nennenswerten Meldungen.');\n} else {\n  top.forEach((item, idx) => {\n    const headline = truncate(item.headline || item.title || '', 200);\n    const source = (item.source || '').trim();\n    const url = cleanUrl(item.sourceUrl || item.url || item.link || '');\n    lines.push(`▸ ${headline}${source ? ' — ' + source : ''}`);\n    if (url) lines.push(`  ${url}`);\n    lines.push('');\n  });\n}\n\nconst siteUrl = ($env && $env.NEXT_PUBLIC_SITE_URL) || 'https://levcon.ai';\nlines.push(`Vollständige Ausgabe mit Kurzzusammenfassungen: ${siteUrl}/#news`);\nlines.push('');\nlines.push('#KI #AI #KünstlicheIntelligenz #Levcon');\n\nlet postText = lines.join('\\n');\n\n// LinkedIn hard limit: 3000 chars for standard posts\nif (postText.length > 3000) {\n  postText = postText.substring(0, 2997) + '...';\n}\n\nreturn [{\n  json: {\n    postText,\n    dateDe,\n    dateEn,\n    headlineCount: top.length,\n    charCount: postText.length\n  }\n}];"
       },
-      "id": "b2c3d4e5-0002-4000-8000-000000000003",
+      "id": "28da6abf-6973-4be7-aefc-c16984d3a01e",
       "name": "Format LinkedIn Post",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        220,
-        400
+        624,
+        0
       ],
       "notes": "Formatiert Post-Text gemäß templates/linkedin-post-template.md.\n- Datum DE: 'DD. MMMM YYYY' (z.B. '25. Juni 2025')\n- Max 5 Headlines (LinkedIn-Best-Practice)\n- Hashtags: #KI #AI #KünstlicheIntelligenz #Levcon\n- Tracking-Parameter werden von URLs entfernt\n- LinkedIn-Limit 3000 Zeichen wird erzwungen"
     },
     {
-      "parameters": {
-        "resource": "post",
-        "operation": "create",
-        "author": "={{ $env.LINKEDIN_AUTHOR_URN }}",
-        "text": "={{ $json.postText }}",
-        "visibility": "PUBLIC",
-        "options": {}
-      },
-      "id": "b2c3d4e5-0002-4000-8000-000000000004",
-      "name": "Create LinkedIn Post",
-      "type": "n8n-nodes-base.linkedIns",
-      "typeVersion": 1,
-      "position": [
-        540,
-        400
-      ],
-      "notes": "LinkedIn Post erstellen.\n- Resource: Post\n- Operation: Create\n- Visibility: PUBLIC\n- Author URN via $env.LINKEDIN_AUTHOR_URN (Person: 'urn:li:person:XXX' oder Organization: 'urn:li:organization:XXX')\nCredential: 'LinkedIn Levcon' (OAuth2, Scope w_member_social oder w_organization_social)",
-      "credentials": {
-        "linkedInOAuth2Api": {
-          "id": "PLACEHOLDER_REPLACE_WITH_LINKEDIN_CREDENTIAL_ID",
-          "name": "LinkedIn Levcon"
-        }
-      }
-    },
-    {
       "parameters": {},
-      "id": "b2c3d4e5-0002-4000-8000-000000000005",
+      "id": "5bf5fe1c-5483-4c96-8aea-bd49a60f07a7",
       "name": "On Workflow Error",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
       "position": [
-        -400,
-        1000
+        0,
+        608
       ],
       "notes": "Error-Trigger: wird aktiviert, wenn der Hauptflow fehlschlägt."
     },
     {
       "parameters": {
-        "fromEmail": "ops@levcon.ai",
-        "toEmail": "={{ $env.ALERT_EMAIL }}",
+        "fromEmail": "admin@levcon.at",
+        "toEmail": "=admin@levcon.at",
         "subject": "=ALERT: n8n Workflow '02 LinkedIn Post' failed at {{ $now.toISO() }}",
-        "text": "=Workflow 'AI News — 02 LinkedIn Post' failed.\n\nExecution ID: {{ $json.execution.id }}\nError message: {{ $json.execution.error.message }}\nError node: {{ $json.execution.lastNodeExecuted }}\nTimestamp: {{ $json.execution.stoppedAt }}\n\nPlease check n8n UI for details:\n{{ $env.N8N_BASE_URL }}/workflow/executions/{{ $json.execution.id }}",
         "options": {}
       },
-      "id": "b2c3d4e5-0002-4000-8000-000000000006",
+      "id": "1668ded1-d9a9-4a0d-b9a6-7bf588c8e96b",
       "name": "Send Alert Email",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -100,
-        1000
+        304,
+        608
       ],
-      "notes": "Sendet Alert-Mail an ALERT_EMAIL.\nSMTP-Credential: 'SMTP Levcon'",
+      "webhookId": "ef490585-62d5-4433-a467-c83714b1e977",
       "credentials": {
         "smtp": {
-          "id": "PLACEHOLDER_REPLACE_WITH_SMTP_CREDENTIAL_ID",
-          "name": "SMTP Levcon"
+          "id": "YLKV9546oq7fWeXi",
+          "name": "SMTP account"
+        }
+      },
+      "notes": "Sendet Alert-Mail an ALERT_EMAIL.\nSMTP-Credential: 'SMTP Levcon'"
+    },
+    {
+      "parameters": {
+        "person": "0vG8r30IG0",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        848,
+        0
+      ],
+      "id": "cb8d7350-c7dd-4c95-ae56-50e8d3f8b172",
+      "name": "Create a post",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "NI55ppvN6Gx0VKg3",
+          "name": "LinkedIn account"
         }
       }
     }
   ],
+  "pinData": {},
   "connections": {
     "Webhook: LinkedIn Post": {
       "main": [
@@ -143,17 +137,6 @@
         ]
       ]
     },
-    "Format LinkedIn Post": {
-      "main": [
-        [
-          {
-            "node": "Create LinkedIn Post",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "On Workflow Error": {
       "main": [
         [
@@ -164,13 +147,30 @@
           }
         ]
       ]
+    },
+    "Format LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "timezone": "Europe/Vienna"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
-  "pinData": {},
+  "versionId": "b5afc3cd-6375-4bac-946a-db51c75ba726",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b2d1feb950fa85b8badf7148ff879f99d71c58371428240be6f7a49573bef211"
+  },
+  "id": "AJJu0Us33ZePfm0N",
   "tags": []
 }

@@ -366,3 +366,30 @@ Jede Sprint-Datei in `/sprints/` folgt diesem Template:
 ## Nächste Schritte
 - ...
 ```
+
+---
+
+## Sprint 14-15 — Newsletter Polish & Compliance (Juli 2026) ✅
+
+### Sprint 14: Frontend + Archiv
+- Sprachfilter default = Locale (DE/EN statt "Alle")
+- Kategorie-Symbole ausgeblendet
+- Translate-Link für beide Richtungen (DE→EN, EN→DE)
+- Archiv: 3-stufige Hierarchie (Archiv → Monat → Tag)
+- Archiv-Suche: filtert Editions + Items innerhalb von Editions
+
+### Sprint 15: Newsletter + Bestätigungsmail
+- Footer: Levcon.ai · Einstellungen · Datenschutz · Impressum
+- Bestätigungsmail als Template ausgelagert (confirmation-html-de/en.html)
+- Confirm-Seite statt /api/ URL (Sophos Fix)
+- Abmeldung in Einstellungen (3-State UI: idle → confirming → success)
+- Schriftfarbe #464644 (Website-konform)
+- INTERNATIONAL Header: gleiche Schriftart wie "KI-News des Tages" Label
+- Padding-Fixes (symmetrisch, 32px Summary)
+
+### Workflow v5 (Juli 2026)
+- 2 serielle Ollama-Läufe (DE dann EN) statt 1 Lauf mit 20 Items
+- format: json_object (verhindert Early-Abort)
+- Enrichment: LLM-Items mit Originaldaten anreichern
+- HTML-Entity-Dekodierung im RSS-Fetch
+- UTF-8 Encoding im RSS-Fetch

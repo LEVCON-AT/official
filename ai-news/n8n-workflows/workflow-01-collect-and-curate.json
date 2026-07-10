@@ -1,5 +1,5 @@
 {
-  "name": "AI News — 01 Collect & Curate",
+  "name": "AI News — 01 Collect & Curate (Local LLM) - Refined",
   "nodes": [
     {
       "parameters": {
@@ -12,218 +12,26 @@
           ]
         }
       },
-      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "id": "129bed07-5999-4420-809c-c7908de56293",
       "name": "Cron Daily 06:00 Vienna",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
       "position": [
-        -400,
-        600
+        -288,
+        1056
       ],
-      "notes": "Täglich 06:00 Europe/Vienna.\nStartet den Curation-Workflow.\nZeitzone wird über Workflow-Settings executionTimezone gesetzt.",
-      "notesInFlow": true
+      "notesInFlow": true,
+      "notes": "Täglich 06:00 Europe/Vienna.\nStartet den Curation-Workflow.\nZeitzone wird über Workflow-Settings executionTimezone gesetzt."
     },
     {
-      "parameters": {
-        "method": "GET",
-        "url": "https://heise.de/rss/heise.rdf",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000002",
-      "name": "Fetch Heise RSS",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        -300
-      ],
-      "notes": "DACH-Quelle: Heise — IT, KI, Security"
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "url": "https://rss.golem.de/rss.php?feed=RSS2.0",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000003",
-      "name": "Fetch Golem RSS",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        -100
-      ],
-      "notes": "DACH-Quelle: Golem — IT, KI"
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "url": "https://www.tagesschau.de/xml/rss2",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000004",
-      "name": "Fetch Tagesschau RSS",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        100
-      ],
-      "notes": "DACH-Quelle: Tagesschau — Allgemein, auch KI"
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "url": "https://rss.sueddeutsche.de/rss/wissen",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000005",
-      "name": "Fetch SZ Wissen RSS",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        300
-      ],
-      "notes": "DACH-Quelle: Süddeutsche Wissen — Wissenschaft, KI"
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "url": "https://www.technologyreview.com/feed/",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000006",
-      "name": "Fetch MIT Tech Review RSS",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        500
-      ],
-      "notes": "International: MIT Tech Review — KI, Tech (sehr hohe Qualität)"
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "url": "https://feeds.arstechnica.com/arstechnica/features",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000007",
-      "name": "Fetch Ars Technica RSS",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        700
-      ],
-      "notes": "International: Ars Technica — Tech, KI"
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000008",
-      "name": "Fetch The Verge AI RSS",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        900
-      ],
-      "notes": "International: The Verge AI — KI-Fokus"
-    },
-    {
-      "parameters": {
-        "method": "GET",
-        "url": "https://www.anthropic.com/news/rss.xml",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000009",
-      "name": "Fetch Anthropic Blog RSS",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        1100
-      ],
-      "notes": "International: Anthropic Blog — KI-Anbieter"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Normalize RSS items to {title, link, source, pubDate, summary}\n// Input: items from RSS HTTP Request nodes (raw XML in item.json.data or item.json.body)\n// Output: flat list of normalized items\n\nconst AI_KEYWORDS = /\\b(AI|KI|ML|LLM|GPT|Claude|neural|model|machine learning|deep learning|generative|transformer|Anthropic|OpenAI|Gemini|Llama)\\b/i;\n\nfunction stripCdata(s) {\n  return s.replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1');\n}\n\nfunction stripTags(s) {\n  return s.replace(/<[^>]+>/g, '').replace(/\\s+/g, ' ').trim();\n}\n\nfunction sourceFromUrl(rawUrl) {\n  try {\n    const u = new URL(rawUrl);\n    const host = u.hostname.replace(/^www\\./, '');\n    const map = {\n      'heise.de': 'Heise',\n      'rss.golem.de': 'Golem',\n      'golem.de': 'Golem',\n      'tagesschau.de': 'Tagesschau',\n      'sueddeutsche.de': 'Süddeutsche Zeitung',\n      'technologyreview.com': 'MIT Tech Review',\n      'arstechnica.com': 'Ars Technica',\n      'theverge.com': 'The Verge',\n      'anthropic.com': 'Anthropic',\n      'venturebeat.com': 'VentureBeat',\n      'techcrunch.com': 'TechCrunch',\n      'wired.com': 'Wired',\n      'nature.com': 'Nature',\n      'openai.com': 'OpenAI',\n      'huggingface.co': 'Hugging Face',\n      'zdnet.de': 'ZDNet',\n      'derstandard.at': 'Der Standard',\n      'science.apa.at': 'APA Wissenschaft'\n    };\n    return map[host] || host;\n  } catch (e) {\n    return 'Unknown';\n  }\n}\n\nconst normalized = [];\n\nfor (const item of items) {\n  const xml = (typeof item.json === 'string') ? item.json\n    : (item.json.data || item.json.body || item.json.content || '');\n\n  // Track source from request URL if available\n  const requestUrl = item.json.url || item.json.requestUrl || '';\n  const fallbackSource = sourceFromUrl(requestUrl);\n\n  // Match <item>...</item> (RSS/RDF) or <entry>...</entry> (Atom)\n  const itemRegex = /<(?:item|entry)[\\s\\S]*?>([\\s\\S]*?)<\\/(?:item|entry)>/g;\n  let match;\n  while ((match = itemRegex.exec(xml)) !== null) {\n    const block = match[1];\n\n    const titleM = block.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/);\n    const title = titleM ? stripTags(stripCdata(titleM[1])) : '';\n\n    const linkM = block.match(/<link[^>]*?href=\"([^\"]+)\"[^>]*\\/?\\s*>/) || block.match(/<link[^>]*>([\\s\\S]*?)<\\/link>/);\n    const link = linkM ? (linkM[1] || '').trim() : '';\n\n    const pubM = block.match(/<pubDate[^>]*>([\\s\\S]*?)<\\/pubDate>/) || block.match(/<published[^>]*>([\\s\\S]*?)<\\/published>/) || block.match(/<updated[^>]*>([\\s\\S]*?)<\\/updated>/);\n    const pubDate = pubM ? pubM[1].trim() : new Date().toISOString();\n\n    const descM = block.match(/<description[^>]*>([\\s\\S]*?)<\\/description>/) || block.match(/<summary[^>]*>([\\s\\S]*?)<\\/summary>/);\n    let summary = descM ? stripTags(stripCdata(descM[1])) : '';\n    if (summary.length > 300) summary = summary.substring(0, 297) + '...';\n\n    const source = sourceFromUrl(link) === 'Unknown' ? fallbackSource : sourceFromUrl(link);\n\n    // Filter: KI/AI relevance (title or summary must contain a keyword)\n    if (title && link && (AI_KEYWORDS.test(title) || AI_KEYWORDS.test(summary))) {\n      normalized.push({\n        json: {\n          title,\n          link,\n          source,\n          pubDate,\n          summary,\n          origin: 'rss'\n        }\n      });\n    }\n  }\n}\n\nreturn normalized;"
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000010",
-      "name": "Normalize RSS Items",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        220,
-        400
-      ],
-      "notes": "Erwartet alle Items der 8 RSS-Fetch-Nodes als kombinierten Input.\nParst XML, filtert nach KI-Relevanz (Keywords), normalisiert Struktur."
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "={{ $env.ZAI_API_ENDPOINT }}/ai_news/web_search",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "Bearer {{ $env.ZAI_API_KEY }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"query\": \"latest AI KI news today {{ $today.toFormat('yyyy-MM-dd') }}\",\n  \"num_results\": 15,\n  \"freshness\": \"one_day\"\n}",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000011",
-      "name": "AI Web Search (z-ai)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -100,
-        1500
-      ],
-      "notes": "Ruft z-ai Web Search API auf.\nAPI-Key via $env.ZAI_API_KEY (Header Authorization: Bearer ...).\nErgänzt RSS-Feeds um tagesaktuelle Themen."
-    },
-    {
-      "parameters": {
-        "jsCode": "// Normalize z-ai web search results to same schema as RSS items\n// Expected input: item.json.data.results[] (or item.json.results[])\n\nconst out = [];\n\nfor (const item of items) {\n  const results = (item.json && (item.json.data || item.json)).results || (item.json && item.json.data && item.json.data.results) || [];\n  for (const r of results) {\n    const title = r.title || r.name || '';\n    const link = r.url || r.link || '';\n    const summary = (r.snippet || r.description || r.content || '').substring(0, 300);\n    const pubDate = r.published_at || r.date || new Date().toISOString();\n    let source = 'Unknown';\n    try {\n      const u = new URL(link);\n      source = u.hostname.replace(/^www\\./, '');\n    } catch (e) {}\n    if (title && link) {\n      out.push({\n        json: {\n          title,\n          link,\n          source,\n          pubDate,\n          summary,\n          origin: 'websearch'\n        }\n      });\n    }\n  }\n}\n\nreturn out;"
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000012",
-      "name": "Normalize Search Results",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        220,
-        1500
-      ],
-      "notes": "Normalisiert z-ai Web-Search-Ergebnisse auf gleiche Struktur wie RSS-Items."
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000013",
+      "parameters": {},
+      "id": "67bbe5ca-bdb6-4a26-baa4-cc9245f1efb4",
       "name": "Merge RSS + Search",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2.1,
       "position": [
-        520,
-        800
+        368,
+        1056
       ],
       "notes": "Kombiniert normalisierte RSS-Items (Input 1) mit normalisierten Web-Search-Items (Input 2)."
     },
@@ -231,68 +39,25 @@
       "parameters": {
         "jsCode": "// Dedupe items by URL (normalized: strip trailing slash, query params utm_*, fbclid, gclid)\n// Also dedupe by title-similarity (lowercase, trim, first 80 chars)\n\nfunction normalizeUrl(u) {\n  try {\n    const parsed = new URL(u);\n    // Strip tracking params\n    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid', 'mc_cid', 'mc_eid'].forEach(p => parsed.searchParams.delete(p));\n    let clean = parsed.origin + parsed.pathname;\n    if (parsed.search) clean += parsed.search;\n    return clean.replace(/\\/$/, '').toLowerCase();\n  } catch (e) {\n    return (u || '').toLowerCase().trim();\n  }\n}\n\nconst seenUrl = new Set();\nconst seenTitle = new Set();\nconst deduped = [];\n\nfor (const item of items) {\n  const url = normalizeUrl(item.json.link);\n  const titleKey = (item.json.title || '').toLowerCase().replace(/[^a-z0-9\\s]/g, '').trim().substring(0, 80);\n\n  if (seenUrl.has(url) || seenTitle.has(titleKey)) continue;\n  seenUrl.add(url);\n  seenTitle.add(titleKey);\n  deduped.push(item);\n}\n\nreturn deduped;"
       },
-      "id": "a1b2c3d4-0001-4000-8000-000000000014",
+      "id": "07a4af87-8633-446e-ba4a-5164a7ad79c9",
       "name": "Dedupe by URL",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        780,
-        800
+        592,
+        1056
       ],
       "notes": "Dedupliziert Items nach normalisierter URL und Titel-Ähnlichkeit.\nEntfernt Tracking-Parameter (utm_*, fbclid, gclid)."
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.ZAI_API_ENDPOINT }}/chat/completions",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"glm-4-plus\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an AI news curator. Select the top 5-10 most relevant KI/AI news items from the input. Provide a German summary (3-5 sentences) and an English summary. For each item provide: original headline, German description (1-2 sentences), English description, source name, source URL. Return as JSON.\\n\\nReturn strictly JSON in this shape:\\n{\\n  \\\"summaryDe\\\": \\\"...\\\",\\n  \\\"summaryEn\\\": \\\"...\\\",\\n  \\\"items\\\": [\\n    {\\n      \\\"headline\\\": \\\"...\\\",\\n      \\\"descriptionDe\\\": \\\"...\\\",\\n      \\\"descriptionEn\\\": \\\"...\\\",\\n      \\\"source\\\": \\\"...\\\",\\n      \\\"sourceUrl\\\": \\\"...\\\"\\n    }\\n  ]\\n}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify('Today\\'s collected AI news items (JSON array):\\n' + JSON.stringify(items.map(i => ({ title: i.json.title, link: i.json.link, source: i.json.source, pubDate: i.json.pubDate, summary: i.json.summary })), null, 2)) }}\n    }\n  ],\n  \"temperature\": 0.3,\n  \"response_format\": { \"type\": \"json_object\" }\n}",
-        "options": {}
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000015",
-      "name": "LLM Curation (z-ai)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1040,
-        800
-      ],
-      "notes": "Ruft z-ai LLM Chat Completions Endpoint auf.\nCredential 'z-ai LLM' (Header Auth, Authorization: Bearer ...).\nSystem-Prompt: Kuratiere Top 5-10 KI/AI News, gib DE+EN Summary + Items als JSON zurück.",
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "PLACEHOLDER_REPLACE_WITH_z-ai_LLM_CREDENTIAL_ID",
-          "name": "z-ai LLM"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Parse LLM JSON response.\n// Input: item.json (chat completion response) with choices[0].message.content\n// Output: { date, summaryDe, summaryEn, items[] }\n\nfunction extractJson(text) {\n  if (!text) return null;\n  // Try direct parse\n  try { return JSON.parse(text); } catch (e) {}\n  // Strip code fences\n  const fence = text.match(/```(?:json)?\\s*([\\s\\S]*?)```/);\n  if (fence) {\n    try { return JSON.parse(fence[1]); } catch (e) {}\n  }\n  // Find first { ... last }\n  const start = text.indexOf('{');\n  const end = text.lastIndexOf('}');\n  if (start >= 0 && end > start) {\n    try { return JSON.parse(text.substring(start, end + 1)); } catch (e) {}\n  }\n  return null;\n}\n\nconst out = [];\nfor (const item of items) {\n  const content = item.json && item.json.choices && item.json.choices[0] && item.json.choices[0].message && item.json.choices[0].message.content;\n  const parsed = extractJson(content);\n  if (!parsed) {\n    throw new Error('LLM response was not valid JSON. Raw content: ' + (content || '').substring(0, 500));\n  }\n  // Validate shape\n  if (!parsed.summaryDe || !parsed.summaryEn || !Array.isArray(parsed.items)) {\n    throw new Error('LLM response missing required fields. Got keys: ' + Object.keys(parsed).join(', '));\n  }\n  out.push({\n    json: {\n      date: new Date().toISOString().substring(0, 10),\n      summaryDe: parsed.summaryDe,\n      summaryEn: parsed.summaryEn,\n      items: parsed.items.map((it, idx) => ({\n        position: idx + 1,\n        headline: it.headline || '',\n        descriptionDe: it.descriptionDe || '',\n        descriptionEn: it.descriptionEn || '',\n        source: it.source || '',\n        sourceUrl: it.sourceUrl || ''\n      }))\n    }\n  });\n}\nreturn out;"
-      },
-      "id": "a1b2c3d4-0001-4000-8000-000000000016",
-      "name": "Parse LLM JSON",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1300,
-        800
-      ],
-      "notes": "Extrahiert JSON aus LLM-Antwort (auch aus Code-Fences).\nValidiert Shape (summaryDe, summaryEn, items[]).\nFügt Position-Index und aktuelles Datum hinzu."
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "={{ $env.LEVCON_API_BASE }}/api/ai-news/internal/ingest",
+        "url": "=https://levcon.ai/api/ai-news/internal/ingest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "X-Levcon-Api-Key",
-              "value": "={{ $env.LEVCON_INTERNAL_API_KEY }}"
-            },
             {
               "name": "Content-Type",
               "value": "application/json"
@@ -301,17 +66,23 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ date: $json.date, summaryDe: $json.summaryDe, summaryEn: $json.summaryEn, items: $json.items }) }}",
+        "jsonBody": "={\n  \"date\": \"{{ $today.toFormat('yyyy-MM-dd') }}\",\n  \"summaryDe\": {{ JSON.stringify($json.summaryDe) }},\n  \"summaryEn\": {{ JSON.stringify($json.summaryEn) }},\n  \"items\": {{ JSON.stringify($json.items) }}\n}",
         "options": {}
       },
-      "id": "a1b2c3d4-0001-4000-8000-000000000017",
+      "id": "ca694b84-410d-415c-90f2-0694a26ced5f",
       "name": "POST to Levcon Ingest",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1560,
-        800
+        1696,
+        1056
       ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5xSRYjLkoelQeppG",
+          "name": "Levcon Internal API"
+        }
+      },
       "notes": "POST an Levcon Internal Ingest Endpoint.\nAuth via X-Levcon-Api-Key Header (env LEVCON_INTERNAL_API_KEY).\nBody: { date, summaryDe, summaryEn, items[] }"
     },
     {
@@ -323,241 +94,146 @@
         "jsonBody": "={{ JSON.stringify({ date: $json.date, triggeredBy: 'workflow-01-collect-and-curate' }) }}",
         "options": {}
       },
-      "id": "a1b2c3d4-0001-4000-8000-000000000018",
+      "id": "3ebb5b74-39cd-4794-9dbd-937ea550c5bf",
       "name": "Trigger LinkedIn Workflow",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1820,
-        500
+        1920,
+        960
       ],
       "notes": "Triggert Workflow 02 (LinkedIn Post) via Webhook.\nURL-Platzhalter: $env.N8N_BASE_URL + Pfad 'linkedin-post-levcon'"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.N8N_BASE_URL }}/webhook/newsletter-daily",
+        "url": "=https://engine.levcon.at/webhook/newsletter-daily",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ date: $json.date, triggeredBy: 'workflow-01-collect-and-curate' }) }}",
         "options": {}
       },
-      "id": "a1b2c3d4-0001-4000-8000-000000000019",
+      "id": "6a8973f9-f7e7-4ec9-aa6b-7229afa7b5e0",
       "name": "Trigger Newsletter Workflow",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1820,
-        1100
+        1920,
+        1152
       ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "5xSRYjLkoelQeppG",
+          "name": "Levcon Internal API"
+        }
+      },
       "notes": "Triggert Workflow 03 (Newsletter Daily) via Webhook.\nURL-Platzhalter: $env.N8N_BASE_URL + Pfad 'newsletter-daily'"
     },
     {
       "parameters": {},
-      "id": "a1b2c3d4-0001-4000-8000-000000000020",
+      "id": "282364f7-6e76-4020-b2cf-476c4e13cba1",
       "name": "On Workflow Error",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
       "position": [
-        -400,
-        1900
+        -304,
+        1760
       ],
       "notes": "Error-Trigger: wird aktiviert, wenn der Hauptflow fehlschlägt."
     },
     {
       "parameters": {
-        "fromEmail": "ops@levcon.ai",
-        "toEmail": "={{ $env.ALERT_EMAIL }}",
+        "fromEmail": "admin@levcon.at",
+        "toEmail": "=admin@levcon.at",
         "subject": "=ALERT: n8n Workflow '01 Collect & Curate' failed at {{ $now.toISO() }}",
-        "text": "=Workflow 'AI News — 01 Collect & Curate' failed.\n\nExecution ID: {{ $json.execution.id }}\nError message: {{ $json.execution.error.message }}\nError node: {{ $json.execution.lastNodeExecuted }}\nTimestamp: {{ $json.execution.stoppedAt }}\n\nPlease check n8n UI for details:\n{{ $env.N8N_BASE_URL }}/workflow/executions/{{ $json.execution.id }}",
         "options": {}
       },
-      "id": "a1b2c3d4-0001-4000-8000-000000000021",
+      "id": "0b316f89-5eb0-4dd1-9c98-d9788a2fcc26",
       "name": "Send Alert Email",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -100,
-        1900
+        -80,
+        1760
       ],
-      "notes": "Sendet Alert-Mail an ALERT_EMAIL.\nSMTP-Credential: 'SMTP Levcon'",
+      "webhookId": "1a0626d5-7c35-4bf3-8448-6c671af83953",
       "credentials": {
         "smtp": {
-          "id": "PLACEHOLDER_REPLACE_WITH_SMTP_CREDENTIAL_ID",
-          "name": "SMTP Levcon"
+          "id": "YLKV9546oq7fWeXi",
+          "name": "SMTP account"
         }
-      }
+      },
+      "notes": "Sendet Alert-Mail an ALERT_EMAIL.\nSMTP-Credential: 'SMTP Levcon'"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════\n//  BUILD OLLAMA REQUEST (REFINED v5 — 2 SERielle LÄUFE DE + EN)\n//\n//  NEU in v5:\n//   - 2 separate Ollama-Läufe (DE zuerst, dann EN) SERIELL\n//     → entlastet CPU (kein paralleler Ollama-Stress)\n//     → entlastet Qwen (nur 10 Items pro Run statt 20)\n//     → kein Ermüdungseffekt bei letzten Items\n//   - DE-Run schreibt summaryDe + alle DE-Items (headlineEn als Übersetzung)\n//   - EN-Run schreibt summaryEn + alle EN-Items (headlineDe als Übersetzung)\n//   - Merge: kombiniert DE-Result + EN-Result zu einem JSON für Ingest\n//   - Partial-Failure: wenn ein Run failed, wird der andere trotzdem gespeichert\n//\n//  Beibehalten aus v4:\n//   - this.helpers.httpRequest (n8n Expression-Parser Workaround)\n//   - enable_thinking: false (verhindert Token-Verschwendung)\n//   - 600s Timeout pro Run (CPU-Inference)\n//   - Leaner Prompt (nur title, source, language, summary)\n//\n//  Node-Typ: Code (n8n)\n//  Position: nach \"Score & Rank\", vor \"Parse LLM JSON\"\n// ═══════════════════════════════════════════════════════════════\n\nconst allItems = $input.all();\n\n// ── Fallback: Keine Items → Fehler mit Kontext ─────────────────\nif (!allItems || allItems.length === 0) {\n  throw new Error('Build Ollama: Keine Items vom Score&Rank-Node erhalten. Prüfe RSS-Feeds und Score&Rank.');\n}\n\nconst newsItems = allItems.map(function(i) {\n  return {\n    title: i.json.title || '',\n    link: i.json.link || '',\n    source: i.json.source || '',\n    summary: i.json.summary || '',\n    languageOrig: i.json.languageOrig || 'en',\n    bucket: i.json._bucket || 'en'\n  };\n});\n\n// Nach Bucket gruppieren\nconst deItems = newsItems.filter(i => i.bucket === 'de');\nconst enItems = newsItems.filter(i => i.bucket === 'en');\n\nconsole.log(`[Build Ollama v5] ${newsItems.length} Items für 2 Läufe (DE=${deItems.length}, EN=${enItems.length})`);\n\n// ═══════════════════════════════════════════════════════════════\n//  HELPER: Ollama-Call für einen Bucket\n// ═══════════════════════════════════════════════════════════════\n\nasync function callOllama(items, bucket) {\n  if (items.length === 0) {\n    console.log(`[Build Ollama v5] ${bucket}-Run übersprungen (keine Items)`);\n    return null;\n  }\n\n  const isDe = bucket === 'de';\n\n  // ── System Prompt (sprachspezifisch) ────────────────────────\n  // DE-Run: schreibt summaryDe + headlineEn (Übersetzung DE→EN)\n  // EN-Run: schreibt summaryEn + headlineDe (Übersetzung EN→DE)\n  //\n  // WICHTIG: Kleine Modelle (2B) neigen dazu, JSON-Output früh\n  // abzuschließen wenn sie \"denken\" es reicht. Deshalb:\n  // 1. Explizite Ansage: \"Process ALL N items, do not stop early\"\n  // 2. Item-Nummerierung im User-Prompt (Qwen sieht: \"Item 1 von 10\")\n  // 3. \"format: json_object\" in Ollama-Options (erzwingt JSON-Mode)\n  const systemPrompt = isDe\n    ? `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.\n\nYour task: Process ALL ${items.length} GERMAN AI news items from DACH sources. You MUST process every single item — do NOT stop early, do NOT skip items, do NOT truncate the output.\n\nFor each item, write:\n- headline: Original German headline (keep as-is)\n- headlineDe: Same as headline (it's already German)\n- headlineEn: English translation of the headline (natural, not literal)\n- descriptionDe: 1-2 sentence German summary (analytical)\n- descriptionEn: 1-2 sentence English summary (independent, not just translation)\n- source, sourceUrl, thumbnailUrl, languageOrig, category (research|business|regulation|tools|society)\n\nAlso write summaryDe: Analytische Zusammenfassung der heutigen  KI-News (3-4 Sätze).\n\nSummary tone: Professional, insightful, concise. Like a McKinsey briefing.\n\nReturn JSON:\n{\n  \"summaryDe\": \"...\",\n  \"items\": [\n    { \"headline\": \"...\", \"headlineDe\": \"...\", \"headlineEn\": \"...\", \"descriptionDe\": \"...\", \"descriptionEn\": \"...\", \"source\": \"...\", \"sourceUrl\": \"...\", \"thumbnailUrl\": null, \"languageOrig\": \"de\", \"category\": \"...\" }\n  ]\n}\n\nCRITICAL: You MUST return ALL ${items.length} items in the items array. If you return fewer, the workflow will fail. Process every item, then close the JSON with } and ].`\n    : `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.\n\nYour task: Process ALL ${items.length} ENGLISH AI news items from international sources. You MUST process every single item — do NOT stop early, do NOT skip items, do NOT truncate the output.\n\nFor each item, write:\n- headline: Original English headline (keep as-is)\n- headlineDe: German translation of the headline (natural, not literal)\n- headlineEn: Same as headline (it's already English)\n- descriptionDe: 1-2 sentence German summary (analytical, not just translation)\n- descriptionEn: 1-2 sentence English summary (independent)\n- source, sourceUrl, thumbnailUrl, languageOrig, category (research|business|regulation|tools|society)\n\nAlso write summaryEn: Analytical summary of today's international AI news (3-4 sentences).\n\nSummary tone: Professional, insightful, concise. Like a McKinsey briefing.\n\nReturn JSON:\n{\n  \"summaryEn\": \"...\",\n  \"items\": [\n    { \"headline\": \"...\", \"headlineDe\": \"...\", \"headlineEn\": \"...\", \"descriptionDe\": \"...\", \"descriptionEn\": \"...\", \"source\": \"...\", \"sourceUrl\": \"...\", \"thumbnailUrl\": null, \"languageOrig\": \"en\", \"category\": \"...\" }\n  ]\n}\n\nCRITICAL: You MUST return ALL ${items.length} items in the items array. If you return fewer, the workflow will fail. Process every item, then close the JSON with } and ].`;\n\n  // ── User Prompt (mit Item-Nummerierung für bessere Vollständigkeit) ──\n  // Item 1/N, 2/N, ... — das hilft Qwen zu sehen wie viele Items kommen\n  // und nicht mittendrin abzubrechen.\n  const itemsNumbered = items.map((i, idx) => ({\n    [`Item ${idx + 1} of ${items.length}`]: {\n      title: i.title,\n      link: i.link,\n      source: i.source,\n      language: i.languageOrig,\n      summary: i.summary.substring(0, 120)\n    }\n  }));\n\n  const userPrompt = `${bucket} ITEMS (${items.length} total — process ALL ${items.length}):\n${JSON.stringify(itemsNumbered, null, 2)}\n\nProcess EVERY item from 1 to ${items.length}. Do not stop after item 6 or 7. Output ALL ${items.length} items in the JSON array.`;\n\n  // ── Request Body (v5.1: format=json_object erzwingt JSON-Output) ──\n  // format: \"json_object\" zwingt Ollama/Qwen zu validem JSON — verhindert\n  // dass Qwen mittendrin abbricht und invalides JSON zurückgibt.\n  // num_predict: 6144 als Sicherheitspuffer (10 Items × 5 Felder ≈ 3.200 Tokens\n  // + summary ~200 + JSON-Overhead ~300 = ~3.700, Puffer bis 6144)\n  const requestBody = {\n    model: \"qwen3.5:2b\",\n    stream: false,\n    format: \"json_object\",   // NEU: erzwingt JSON-Mode (verhindert early abort)\n    options: {\n      temperature: 0.3,\n      num_predict: 6144,      // v5.1: erhöht von 4096 (Sicherheitspuffer)\n      num_ctx: 32768,\n      enable_thinking: false\n    },\n    messages: [\n      { role: \"system\", content: systemPrompt },\n      { role: \"user\", content: userPrompt }\n    ],\n    \"think\": false\n  };\n\n  console.log(`[Build Ollama v5] ${bucket}-Run startet (${items.length} Items, num_predict=6144, format=json_object)`);\n  const runStart = Date.now();\n\n  const response = await this.helpers.httpRequest({\n    method: 'POST',\n    url: 'http://127.0.0.1:11434/api/chat',\n    headers: { 'Content-Type': 'application/json' },\n    body: requestBody,\n    json: true,\n    timeout: 600000  // 10min für CPU-Inference\n  });\n\n  const duration = ((Date.now() - runStart) / 1000).toFixed(1);\n  console.log(`[Build Ollama v5] ${bucket}-Run fertig in ${duration}s (${response.message?.content?.length || 0} chars)`);\n\n  return response;\n}\n\n// ═══════════════════════════════════════════════════════════════\n//  MAIN: 2 SERIELLE LÄUFE (DE zuerst, dann EN)\n// ═══════════════════════════════════════════════════════════════\n//  Seriell weil:\n//  - Ollama auf CPU nicht gut parallel kann (RLY belastet)\n//  - Qwen-Modell wird beim 2. Run aus RAM geladen (schneller)\n//  - Einfacher zu debuggen, klare Reihenfolge im Log\n\nlet deResult = null;\nlet enResult = null;\nconst errors = [];\n\n// 1. DE-Run\ntry {\n  deResult = await callOllama(deItems, 'de');\n} catch (err) {\n  console.error(`[Build Ollama v5] ❌ DE-Run failed: ${err.message}`);\n  errors.push({ run: 'de', error: err.message });\n}\n\n// 2. EN-Run (nur starten wenn DE fertig — seriell)\ntry {\n  enResult = await callOllama(enItems, 'en');\n} catch (err) {\n  console.error(`[Build Ollama v5] ❌ EN-Run failed: ${err.message}`);\n  errors.push({ run: 'en', error: err.message });\n}\n\n// 3. Beide Runs failed → harter Fehler\nif (!deResult && !enResult) {\n  throw new Error(`Build Ollama v5: Beide Läufe failed. Errors: ${JSON.stringify(errors)}`);\n}\n\n// 4. Parse + Merge: kombiniere DE-Result + EN-Result\n//    Der Parse LLM JSON Node weiter unten erwartet { message: { content: \"...\" } }\n//    Wir bauen hier ein synthetisches Response-Objekt das beide Runs merged.\n\nfunction extractContent(resp) {\n  if (!resp) return null;\n  if (resp.message && resp.message.content) return resp.message.content;\n  if (resp.choices && resp.choices[0] && resp.choices[0].message) return resp.choices[0].message.content;\n  if (resp.response) return resp.response;\n  return null;\n}\n\nfunction parseJson(content) {\n  if (!content) return null;\n  // Clean markdown\n  let cleaned = content.replace(/```json\\n/g, '').replace(/```\\n/g, '').replace(/```/g, '').trim();\n  // Auto-Repair: fehlende Kommas\n  cleaned = cleaned.replace(/\"\\s*\\n\\s*\"/g, '\",\\n\"');\n  try {\n    return JSON.parse(cleaned);\n  } catch (e) {\n    const match = cleaned.match(/\\{[\\s\\S]*\\}/);\n    if (match) {\n      try { return JSON.parse(match[0]); } catch (e2) { return null; }\n    }\n    return null;\n  }\n}\n\nconst deJson = parseJson(extractContent(deResult));\nconst enJson = parseJson(extractContent(enResult));\n\nconsole.log(`[Build Ollama v5] Parse: DE=${deJson ? 'OK' : 'FAIL'}, EN=${enJson ? 'OK' : 'FAIL'}`);\n\n// ═══════════════════════════════════════════════════════════════\n//  5. ENRICHMENT: LLM-Items mit Originaldaten anreichern\n// ═══════════════════════════════════════════════════════════════\n//  Qwen3.5:2b vergisst manchmal Felder (source, sourceUrl, languageOrig)\n//  besonders bei den letzten Items (Ermüdungseffekt). Wir reichern\n//  jedes LLM-Item mit den Originaldaten an, damit Prisma nie\n//  \"Argument source is missing\" wirft.\n//\n//  Matching: LLM-Item.sourceUrl === Original-Item.link\n//  Falls kein Match (LLM hat URL vergessen): versuche Match via headline.\n//  Falls immer noch kein Match: behalte LLM-Daten, fülle Pflichtfelder\n//  mit Fallbacks.\n\nfunction enrichItems(llmItems, originalItems, defaultLang) {\n  if (!llmItems || !Array.isArray(llmItems)) return [];\n\n  // Lookup-Map: sourceUrl → originalItem (für schnelles Matchen)\n  const byUrl = new Map();\n  const byTitle = new Map();\n  for (const orig of originalItems) {\n    if (orig.link) byUrl.set(orig.link, orig);\n    if (orig.title) byTitle.set(orig.title.toLowerCase().trim(), orig);\n  }\n\n  const enriched = [];\n  const dropped = [];\n\n  for (const item of llmItems) {\n    // Versuche Match via sourceUrl (bevorzugt) oder headline (Fallback)\n    let original = null;\n    if (item.sourceUrl && byUrl.has(item.sourceUrl)) {\n      original = byUrl.get(item.sourceUrl);\n    } else if (item.headline) {\n      // Versuche exakte Titel-Match\n      const key = (item.headline || '').toLowerCase().trim();\n      if (byTitle.has(key)) {\n        original = byTitle.get(key);\n      } else {\n        // Versuche Titel-Match via erste 50 Zeichen (Qwen might have shortened)\n        for (const [titleKey, origItem] of byTitle) {\n          if (titleKey.includes(key.substring(0, 50)) || key.includes(titleKey.substring(0, 50))) {\n            original = origItem;\n            break;\n          }\n        }\n      }\n    }\n\n    // KEIN Match gefunden → Item verwerfen (verhindert \"Unknown\" Items im Frontend)\n    // Diese Items haben keine verlässliche sourceUrl und würden die Archiv-Suche\n    // und das Frontend verfälschen. Besser weglassen als Müll zeigen.\n    if (!original) {\n      dropped.push({\n        headline: (item.headline || '').substring(0, 60),\n        reason: 'no match to original input'\n      });\n      continue;\n    }\n\n    // Enrichment: LLM-Daten haben Vorrang, aber wenn Feld fehlt → Original\n    enriched.push({\n      headline: item.headline || original.title,\n      headlineDe: item.headlineDe || item.headline || original.title || null,\n      headlineEn: item.headlineEn || item.headline || original.title || null,\n      descriptionDe: item.descriptionDe || 'Keine Zusammenfassung verfügbar.',\n      descriptionEn: item.descriptionEn || 'No summary available.',\n      source: item.source || original.source,\n      sourceUrl: item.sourceUrl || original.link,\n      thumbnailUrl: item.thumbnailUrl || null,\n      languageOrig: item.languageOrig || original.languageOrig || defaultLang,\n      category: item.category || null,\n    });\n  }\n\n  if (dropped.length > 0) {\n    console.log(`[Build Ollama v5] ⚠️ ${dropped.length} Items verworfen (kein Match zu Original-Input):`);\n    dropped.forEach(d => console.log(`   - \"${d.headline}...\" (${d.reason})`));\n  }\n\n  return enriched;\n}\n\nconst deItemsEnriched = enrichItems(deJson?.items, deItems, 'de');\nconst enItemsEnriched = enrichItems(enJson?.items, enItems, 'en');\n\n// Logging: Item-Count-Check (Qwen könnte Items vergessen haben)\nconsole.log(`[Build Ollama v5] Item-Count: DE-Input=${deItems.length}, DE-Output=${deItemsEnriched.length}${deItems.length !== deItemsEnriched.length ? ' ⚠️ MISMATCH' : ''}`);\nconsole.log(`[Build Ollama v5] Item-Count: EN-Input=${enItems.length}, EN-Output=${enItemsEnriched.length}${enItems.length !== enItemsEnriched.length ? ' ⚠️ MISMATCH' : ''}`);\n\n// 6. Merge zu kombiniertem JSON\nconst mergedJson = {\n  summaryDe: deJson?.summaryDe || '',\n  summaryEn: enJson?.summaryEn || '',\n  items: [\n    ...deItemsEnriched,\n    ...enItemsEnriched\n  ]\n};\n\nconsole.log(`[Build Ollama v5] Merge: ${mergedJson.items.length} Items (DE=${deItemsEnriched.length}, EN=${enItemsEnriched.length})`);\nconsole.log(`[Build Ollama v5] summaryDe: ${mergedJson.summaryDe ? '✓' : '✗'}, summaryEn: ${mergedJson.summaryEn ? '✓' : '✗'}`);\n\n// Validierung: jedes Item muss source und sourceUrl haben\nconst missingSource = mergedJson.items.filter(i => !i.source);\nconst missingUrl = mergedJson.items.filter(i => !i.sourceUrl);\nif (missingSource.length > 0 || missingUrl.length > 0) {\n  console.log(`[Build Ollama v5] ⚠️ Validierung: ${missingSource.length} Items ohne source, ${missingUrl.length} ohne sourceUrl`);\n}\n\nif (errors.length > 0) {\n  console.log(`[Build Ollama v5] ⚠️ Partial failure: ${errors.map(e => e.run).join(', ')} failed but other run succeeded`);\n}\n\n// 7. Return: direkt das geparste JSON-Objekt zurückgeben.\n//    WICHTIG: Der Build Ollama v5 Node hat bereits:\n//    - Ollama-Call gemacht\n//    - JSON geparst (mit Auto-Repair)\n//    - Items mit Originaldaten angereichert (Enrichment)\n//    - Zu einem gemergeden JSON kombiniert\n//\n//    Ein separater \"Parse LLM JSON\" Node ist NICHT MEHR NÖTIG.\n//    Dieser Node gibt direkt das fertige Objekt zurück, das die Ingest-API\n//    erwartet: { summaryDe, summaryEn, items[] }\n//\n//    Falls der alte \"Parse LLM JSON\" Node noch in der Workflow-Canvas\n//    existiert, kann er GELÖSCHT werden. Die Ingest-API direkt nach\n//    Build Ollama verbinden.\n//\n//    Alternativ: Falls der Parse Node als Validierungs-Passthrough\n//    erhalten bleiben soll, muss sein Code angepasst werden auf:\n//    return items;  (einfach durchreichen)\nreturn [{ json: mergedJson }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        1056
+      ],
+      "id": "27655a6e-5bc4-4859-b9e6-da69e2a15ef5",
+      "name": "Build Ollama Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════\n//  FETCH ALL RSS FEEDS (REFINED v2)\n//\n//  Verfeinerungen vs. Vorschlag v1:\n//   1. Max-Items-per-Feed-Cap: Ein Feed darf max. MAX_ITEMS_PER_FEED\n//      Items beisteuern (sortiert nach pubDate, neueste zuerst).\n//      Verhindert, dass ein prolifischer Feed (z.B. arXiv) dominierst.\n//   2. Promise.allSettled statt Promise.all: Ein abgestürzter Feed\n//      killt nie den gesamten Run (self-healing).\n//   3. Sanity-Report erweitert um Per-Feed-Item-Count.\n//   4. Heise-URL korrigiert (Atom statt RDF).\n//\n//  Node-Typ: Code (n8n)\n//  Position im Workflow: nach Schedule Trigger, vor \"Dedupe by URL\"\n// ═══════════════════════════════════════════════════════════════\n\n// ── KONFIGURATION ──────────────────────────────────────────────\nconst MAX_ITEMS_PER_FEED = 30;   // Cap pro Feed nach Keyword-Filter\nconst FETCH_TIMEOUT_MS   = 30000;\nconst FETCH_RETRIES      = 2;\n// ─────────────────────────────────────────────────────────────────\n\nconst RSS_FEEDS = [\n  // 🇩🇪 Deutsch (10)\n  { url: 'https://www.heise.de/rss/heise-atom.xml', source: 'Heise', lang: 'de' },\n  { url: 'https://rss.golem.de/rss.php?feed=RSS2.0', source: 'Golem', lang: 'de' },\n  { url: 'https://www.tagesschau.de/xml/rss2', source: 'Tagesschau', lang: 'de' },\n  { url: 'https://rss.sueddeutsche.de/rss/wissen', source: 'Süddeutsche Zeitung', lang: 'de' },\n  { url: 'https://mixed.de/feed/', source: 'Mixed.de', lang: 'de' },\n  { url: 'https://ainauten.com/feed/', source: 'AInauten', lang: 'de' },\n  { url: 'https://www.derstandard.at/rss/web/tech', source: 'Der Standard', lang: 'de' },\n  { url: 'https://www.zdnet.de/feed/', source: 'ZDNet', lang: 'de' },\n  { url: 'https://www.netzwelt.de/feed/', source: 'Netzwelt', lang: 'de' },\n  { url: 'https://www.ki-campus.org/rss', source: 'KI-Campus', lang: 'de' },\n\n  // 🇺🇸 Englisch (12)\n  { url: 'https://www.technologyreview.com/feed/', source: 'MIT Tech Review', lang: 'en' },\n  { url: 'https://feeds.arstechnica.com/arstechnica/features', source: 'Ars Technica', lang: 'en' },\n  { url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', source: 'The Verge', lang: 'en' },\n  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/', source: 'TechCrunch', lang: 'en' },\n  { url: 'https://venturebeat.com/category/ai/feed/', source: 'VentureBeat', lang: 'en' },\n  { url: 'https://www.marktechpost.com/feed/', source: 'MarkTechPost', lang: 'en' },\n  { url: 'https://huggingface.co/blog/feed.xml', source: 'Hugging Face', lang: 'en' },\n  { url: 'https://www.anthropic.com/news/rss.xml', source: 'Anthropic', lang: 'en' },\n  { url: 'https://openai.com/blog/rss.xml', source: 'OpenAI', lang: 'en' },\n  { url: 'https://www.wired.com/feed/tag/ai/latest/rss', source: 'Wired', lang: 'en' },\n  { url: 'https://towardsdatascience.com/feed', source: 'Towards Data Science', lang: 'en' },\n  { url: 'https://www.theinformation.com/feed', source: 'The Information', lang: 'en' },\n\n  // 🇨🇳 Chinesisch (4)\n  { url: 'https://syncedreview.com/feed/', source: 'Synced', lang: 'zh' },\n  { url: 'https://www.caixinglobal.com/feed/', source: 'Caixin Global', lang: 'zh' },\n  { url: 'https://pandaily.com/feed/', source: 'Pandaily', lang: 'zh' },\n  { url: 'https://technode.com/feed/', source: 'TechNode', lang: 'zh' },\n\n  // 🇯🇵 Japanisch (3)\n  { url: 'https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml', source: 'ITmedia', lang: 'ja' },\n  { url: 'https://tech.nikkeibp.co.jp/rss/index.rdf', source: 'Nikkei Tech', lang: 'ja' },\n  { url: 'https://ascii.jp/rss.xml', source: 'ASCII.jp', lang: 'ja' },\n\n  // 🇫🇷 Französisch (3)\n  { url: 'https://www.usine-digitale.fr/rss/index.xml', source: \"L'Usine Digitale\", lang: 'fr' },\n  { url: 'https://www.journaldunet.com/rss/', source: 'Le Journal du Net', lang: 'fr' },\n  { url: 'https://actuia.com/feed/', source: 'ActuIA', lang: 'fr' },\n\n  // 🌐 Research (3)\n  { url: 'https://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submittedDate&sortOrder=descending&max_results=10', source: 'arXiv cs.AI', lang: 'en' },\n  { url: 'https://export.arxiv.org/api/query?search_query=cat:cs.LG&sortBy=submittedDate&sortOrder=descending&max_results=10', source: 'arXiv cs.LG', lang: 'en' },\n  { url: 'https://export.arxiv.org/api/query?search_query=cat:cs.CL&sortBy=submittedDate&sortOrder=descending&max_results=10', source: 'arXiv cs.CL', lang: 'en' }\n];\n\n// ── KEYWORDS ───────────────────────────────────────────────────\n// Breite KI-Keyword-Liste (gleiche wie v1 — bewährt)\nconst AI_KEYWORDS = /\\b(AI|KI|ML|LLM|GPT|Claude|neural|model|machine learning|deep learning|generative|transformer|Anthropic|OpenAI|Gemini|Llama|SLM|diffusion|chatbot|AGI|multimodal|embedding|RAG|agent|reasoning|inference|training|fine-tuning|quantization|guardrail|alignment|safety|hallucination|prompt|tokenization|MoE|mixture of experts|instruction tuning|RLHF|DPO|LoRA|benchmark|MMLU|HellaSwag|HumanEval|GSM8K|Eleuther|Hugging Face|LangChain|LlamaIndex|vLLM|Ollama|llama\\.cpp|GGUF|GGML|ONNX|TensorRT|CUDA|TPU|GPU|Nvidia|AMD|Intel|Groq|Cerebras|SambaNova|together\\.ai|replicate|modal|runpod|vast\\.ai|Lambda Labs|CoreWeave|Google AI|Mistral AI|Cohere|AI21|Stability AI|Midjourney|DALL-E|Stable Diffusion|SDXL|FLUX|Ideogram|Leonardo AI|Runway ML|Pika Labs|Suno AI|ElevenLabs|Descript|HeyGen|Synthesia|DeepBrain|AI Act|EU AI Act|regulation|governance|compliance|ethics|bias|fairness|transparency|explainability|XAI|responsible AI|trustworthy AI|AI safety|existential risk|alignment problem|AGI safety|AI alignment|interpretability|mechanistic interpretability|probing|activation steering|representation engineering|circuit analysis|induction heads|attention heads|transformer circuits|sparse autoencoders|dictionary learning|superposition|monosemanticity|polysemanticity|scaling laws|Chinchilla|compute-optimal|emergent abilities|grokking|double descent|scaling hypothesis|bitter lesson|DeepSeek|Qwen)\\b/i;\n\n// ── HELPER ─────────────────────────────────────────────────────\nfunction stripCdata(s) {\n  return s.replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1');\n}\n\nfunction stripTags(s) {\n  return s.replace(/<[^>]+>/g, '').replace(/\\s+/g, ' ').trim();\n}\n\n// HTML-Entities dekodieren: &#8217; → ', &amp; → &, &quot; → \", etc.\n// RSS-Feeds enthalten oft HTML-Entities die wir sauber als UTF-8 wollen.\nfunction decodeHtmlEntities(s) {\n  if (!s) return s;\n  return s\n    // Numeric entities: &#8217; → '\n    .replace(/&#(\\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)))\n    // Hex entities: &#x2019; → '\n    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))\n    // Named entities (common ones)\n    .replace(/&amp;/g, '&')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&quot;/g, '\"')\n    .replace(/&apos;/g, \"'\")\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&copy;/g, '©')\n    .replace(/&reg;/g, '®')\n    .replace(/&trade;/g, '™')\n    .replace(/&mdash;/g, '—')\n    .replace(/&ndash;/g, '–')\n    .replace(/&hellip;/g, '…')\n    .replace(/&laquo;/g, '«')\n    .replace(/&raquo;/g, '»')\n    .replace(/&lsquo;/g, '\\'')\n    .replace(/&rsquo;/g, '\\'')\n    .replace(/&ldquo;/g, '\"')\n    .replace(/&rdquo;/g, '\"');\n}\n\nfunction parseDate(dateStr) {\n  if (!dateStr) return 0;\n  const d = new Date(dateStr);\n  return isNaN(d.getTime()) ? 0 : d.getTime();\n}\n\n// ═══════════════════════════════════════════════════════════════\n//  FEED FETCHER (mit Max-Items-per-Feed-Cap)\n// ═══════════════════════════════════════════════════════════════\n\nconst feedStats = [];\n\nconst fetchPromises = RSS_FEEDS.map(async (feed) => {\n  const startTime = Date.now();\n  try {\n    const response = await this.helpers.httpRequest({\n      method: 'GET',\n      url: feed.url,\n      timeout: FETCH_TIMEOUT_MS,\n      retry: FETCH_RETRIES,\n      encoding: 'utf-8',        // NEU: UTF-8 erzwingen (verhindert Latin-1 Fehlinterpretation)\n      responseType: 'text'      // NEU: immer als Text zurückgeben (nicht auto-detect JSON)\n    });\n\n    const xml = typeof response === 'string' ? response : String(response);\n    const items = [];\n\n    const itemRegex = /<(?:item|entry)[\\s\\S]*?>([\\s\\S]*?)<\\/(?:item|entry)>/g;\n    let match;\n    while ((match = itemRegex.exec(xml)) !== null) {\n      const block = match[1];\n\n      const titleM = block.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/);\n      const title = titleM ? decodeHtmlEntities(stripTags(stripCdata(titleM[1]))) : '';\n\n      const linkM = block.match(/<link[^>]*?href=\"([^\"]+)\"[^>]*\\/?\\s*>/) || block.match(/<link[^>]*>([\\s\\S]*?)<\\/link>/);\n      const link = linkM ? (linkM[1] || '').trim() : '';\n\n      const pubM = block.match(/<pubDate[^>]*>([\\s\\S]*?)<\\/pubDate>/) || block.match(/<published[^>]*>([\\s\\S]*?)<\\/published>/) || block.match(/<updated[^>]*>([\\s\\S]*?)<\\/updated>/);\n      const pubDate = pubM ? pubM[1].trim() : new Date().toISOString();\n\n      const descM = block.match(/<description[^>]*>([\\s\\S]*?)<\\/description>/) || block.match(/<summary[^>]*>([\\s\\S]*?)<\\/summary>/);\n      let summary = descM ? decodeHtmlEntities(stripTags(stripCdata(descM[1]))) : '';\n      if (summary.length > 300) summary = summary.substring(0, 297) + '...';\n\n      if (title && link && (AI_KEYWORDS.test(title) || AI_KEYWORDS.test(summary))) {\n        items.push({\n          title,\n          link,\n          source: feed.source,\n          pubDate,\n          _pubDateMs: parseDate(pubDate),  // für Sortierung\n          summary,\n          languageOrig: feed.lang,\n          origin: 'rss'\n        });\n      }\n    }\n\n    // ── NEU: Max-Items-per-Feed-Cap ───────────────────────────\n    // Sortiere nach pubDate (neueste zuerst) und cappe auf MAX_ITEMS_PER_FEED.\n    // Verhindert, dass ein prolifischer Feed (z.B. arXiv mit 10 Items,\n    // oder ein Blog mit 50 Posts) die Kuration dominiert.\n    items.sort((a, b) => (b._pubDateMs || 0) - (a._pubDateMs || 0));\n    const cappedItems = items.slice(0, MAX_ITEMS_PER_FEED);\n\n    const duration = Date.now() - startTime;\n    feedStats.push({\n      source: feed.source,\n      rawCount: (xml.match(/<(?:item|entry)[\\s>]/g) || []).length,\n      kiCountBeforeCap: items.length,\n      kiCountAfterCap: cappedItems.length,\n      durationMs: duration,\n      status: 'ok'\n    });\n    return cappedItems;\n\n  } catch (error) {\n    const duration = Date.now() - startTime;\n    feedStats.push({\n      source: feed.source,\n      rawCount: 0,\n      kiCountBeforeCap: 0,\n      kiCountAfterCap: 0,\n      durationMs: duration,\n      status: 'error',\n      error: error.message\n    });\n    console.log(`⚠️ Feed-Fehler ${feed.source}: ${error.message}`);\n    return [];  // Dead Feed killt nicht den Run\n  }\n});\n\n// ── Promise.allSettled: self-healing, ein Crash killt nie alles ──\nconst settled = await Promise.allSettled(fetchPromises);\nconst results = settled\n  .filter(r => r.status === 'fulfilled')\n  .map(r => r.value);\nconst rejected = settled.filter(r => r.status === 'rejected');\n\nconst allItems = results.flat();\n\n// _pubDateMs Cleanup (wird in Score&Rank nicht benötigt)\nallItems.forEach(item => { delete item._pubDateMs; });\n\n// ── SANITY-REPORT (erweitert) ──────────────────────────────────\nconst okFeeds = feedStats.filter(f => f.status === 'ok');\nconst deadFeeds = feedStats.filter(f => f.status === 'error');\nconst emptyFeeds = feedStats.filter(f => f.status === 'ok' && f.kiCountAfterCap === 0);\nconst cappedFeeds = feedStats.filter(f => f.status === 'ok' && f.kiCountBeforeCap > f.kiCountAfterCap);\n\nconsole.log(`\\n═══ RSS SANITY REPORT ═══`);\nconsole.log(`Total feeds:         ${RSS_FEEDS.length}`);\nconsole.log(`✅ OK & KI-Items:     ${okFeeds.filter(f => f.kiCountAfterCap > 0).length}`);\nconsole.log(`⚠️  OK aber 0 Items:  ${emptyFeeds.length} → ${emptyFeeds.map(f => f.source).join(', ') || 'keine'}`);\nconsole.log(`❌ Fehler/Dead:       ${deadFeeds.length} → ${deadFeeds.map(f => `${f.source} (${f.error})`).join(', ') || 'keine'}`);\nconsole.log(`✂️  Gecapped:          ${cappedFeeds.length} → ${cappedFeeds.map(f => `${f.source} (${f.kiCountBeforeCap}→${f.kiCountAfterCap})`).join(', ') || 'keine'}`);\nconsole.log(`📊 Total KI-Items:    ${allItems.length} (nach Cap)`);\nconsole.log(`⏱️  Langsamster Feed:  ${Math.max(...feedStats.map(f => f.durationMs))}ms`);\nconsole.log(`══════════════════════════\\n`);\n\nreturn allItems.map(item => ({ json: item }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        848
+      ],
+      "id": "bd16f1d4-b35f-4caa-b7cf-544cc80c85e6",
+      "name": "Fetch All RSS Feeds"
+    },
+    {
+      "parameters": {
+        "jsCode": "// SearXNG Multi-Search — 6 parallele Queries in DE, EN, ZH, FR\n// Ersetzt den einzelnen SearXNG HTTP-Request Node\n\nconst QUERIES = [\n  { query: 'KI künstliche Intelligenz', lang: 'de' },\n  { query: 'artificial intelligence AI', lang: 'en' },\n  { query: 'LLM breakthrough research', lang: 'en' },\n  { query: 'AI regulation policy EU', lang: 'en' },\n  { query: '人工智能新闻', lang: 'zh' },\n  { query: 'intelligence artificielle', lang: 'fr' }\n];\n\nconst fetchPromises = QUERIES.map(async (q) => {\n  try {\n    const response = await this.helpers.httpRequest({\n      method: 'GET',\n      url: 'http://127.0.0.1:8888/search',\n      qs: {\n        q: q.query,\n        format: 'json',\n        categories: 'news,it',\n        time_range: 'day',\n        results_on_page: '15'\n      },\n      timeout: 30000,\n      retry: 2\n    });\n\n    const results = response.results || [];\n\n    return results.map(r => {\n      let source = 'Unknown';\n      let url = r.url || '';\n\n      try {\n        if (url) {\n          const urlObj = new URL(url);\n          const host = urlObj.hostname.replace(/^www\\./, '');\n          const map = {\n            'heise.de': 'Heise',\n            'golem.de': 'Golem',\n            'tagesschau.de': 'Tagesschau',\n            'sueddeutsche.de': 'Süddeutsche Zeitung',\n            'technologyreview.com': 'MIT Tech Review',\n            'arstechnica.com': 'Ars Technica',\n            'theverge.com': 'The Verge',\n            'techcrunch.com': 'TechCrunch',\n            'venturebeat.com': 'VentureBeat',\n            'wired.com': 'Wired',\n            'nature.com': 'Nature',\n            'openai.com': 'OpenAI',\n            'huggingface.co': 'Hugging Face',\n            'zdnet.de': 'ZDNet',\n            'derstandard.at': 'Der Standard',\n            'syncedreview.com': 'Synced',\n            'pandaily.com': 'Pandaily',\n            'technode.com': 'TechNode',\n            'marktechpost.com': 'MarkTechPost'\n          };\n          source = map[host] || host;\n        }\n      } catch (e) {\n        if (url) {\n          const match = url.match(/^https?:\\/\\/([^\\/]+)/);\n          if (match) source = match[1].replace('www.', '');\n        }\n      }\n\n      return {\n        title: r.title || '',\n        link: url,\n        source: source,\n        pubDate: r.pubDate || new Date().toISOString(),\n        summary: r.content || '',\n        languageOrig: q.lang,\n        origin: 'search'\n      };\n    });\n  } catch (error) {\n    console.log(`SearXNG error for query \"${q.query}\": ${error.message}`);\n    return [];\n  }\n});\n\nconst results = await Promise.all(fetchPromises);\nconst allItems = results.flat();\n\nconsole.log(`SearXNG: ${allItems.length} items from ${QUERIES.length} queries`);\n\nreturn allItems.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        1264
+      ],
+      "id": "5779e10f-4b3e-4b08-80a7-7a5d8e1c4619",
+      "name": "SearXNG Multi-Search"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════\n//  SCORE & RANK (REFINED v4 — DE/EN ONLY + SOURCE DIVERSITY)\n//\n//  NEU in v4:\n//   - 10 DE + 10 EN, keine INTL (entlastet Qwen, klarerer Fokus)\n//   - Max-Items-per-Source-Cap: max 2 Items pro Quelle pro Sprache\n//     (verhindert Heise-Dominanz im DE-Bucket, sorgt für Diversität)\n//   - Keine INTL-Umverteilungs-Logik mehr nötig\n//   - Total: 20 Items (statt 30 in v3)\n//\n//  Beibehalten aus v3:\n//   - 6-Faktor-Scoring (Source, Keywords, Frische, Länge, Klickbait, URL)\n//   - Semantic Dedup (Jaccard >60% → höchstes Score gewinnt)\n//   - Min-Score-Threshold (ruhiger Tag = weniger Items)\n//   - Score-Distribution-Logging\n//\n//  Node-Typ: Code (n8n)\n//  Position: nach \"Dedupe by URL\", vor \"Build Ollama Request\"\n// ═══════════════════════════════════════════════════════════════\n\n// ── KONFIGURATION ──────────────────────────────────────────────\nconst QUOTA_DE           = 10;    // Top 10 deutsche Items\nconst QUOTA_EN           = 10;    // Top 10 englische Items\nconst TOTAL_QUOTA        = QUOTA_DE + QUOTA_EN;  // 20\n\nconst MAX_ITEMS_PER_SOURCE = 2;   // Max Items pro Quelle pro Sprache\n                                  // (verhindert dass Heise 8 von 10 DE-Slots belegt)\n\nconst MAX_AGE_HOURS       = 48;   // Items älter als X Std. werden bestraft\nconst MIN_SCORE_THRESHOLD = 20;   // Min Score für Top-N (ruhiger Tag)\nconst DEDUP_SIMILARITY    = 0.60; // Jaccard-Threshold für Titel-Dedup\n// ─────────────────────────────────────────────────────────────────\n\n// ── 1. QUELLEN-GEWICHTUNG ──────────────────────────────────────\nconst SOURCE_WEIGHTS = {\n  // Sehr hoch (1.0)\n  'MIT Tech Review': 1.0,\n  'Ars Technica': 1.0,\n  'Tagesschau': 1.0,\n  'Süddeutsche Zeitung': 1.0,\n  'arXiv cs.AI': 1.0,\n  'arXiv cs.LG': 1.0,\n  'arXiv cs.CL': 1.0,\n  'Nature': 1.0,\n  // Hoch (0.85)\n  'Heise': 0.85,\n  'Golem': 0.85,\n  'The Verge': 0.85,\n  'Anthropic': 0.85,\n  'OpenAI': 0.85,\n  'Hugging Face': 0.85,\n  'Der Standard': 0.85,\n  'ZDNet': 0.85,\n  'TechCrunch': 0.85,\n  'VentureBeat': 0.85,\n  'Wired': 0.85,\n  // Mittel (0.7)\n  'MarkTechPost': 0.7,\n  'Towards Data Science': 0.7,\n  'The Information': 0.7,\n  // Niedrig (0.5)\n  'Mixed.de': 0.5,\n  'AInauten': 0.5,\n  'Netzwelt': 0.5,\n  'KI-Campus': 0.5,\n};\n\n// ── 2. KEYWORD-KATEGORIEN ──────────────────────────────────────\nconst HIGH_VALUE_KEYWORDS = /\\b(LLM|GPT|Claude|Gemini|Llama|transformer|diffusion|multimodal|AGI|MoE|RLHF|alignment|EU AI Act|AI Act|regulation|OpenAI|Anthropic|Google AI|Mistral|DeepSeek|Qwen|Nvidia|multimodal)\\b/i;\nconst GENERAL_KI_KEYWORDS = /\\b(AI|KI|ML|neural|machine learning|deep learning|generative|model|chatbot|inference|training)\\b/i;\n\n// ── 3. KLICKBAIT / SPAM-PATTERNS ───────────────────────────────\nconst CLICKBAIT_PATTERNS = /\\b(you won't believe|shocking|amazing|incredible|mind-blowing|\\d+ (best|top|amazing) (ai|tools)|click here|read more|sponsored|advertisement)\\b/i;\n\n// ═══════════════════════════════════════════════════════════════\n//  SCORING-FUNKTION (unverändert aus v3)\n// ═══════════════════════════════════════════════════════════════\n\nfunction scoreItem(item) {\n  const title = (item.title || '').trim();\n  const summary = (item.summary || '').trim();\n  const source = item.source || 'Unknown';\n  const pubDateStr = item.pubDate || '';\n  const link = item.link || '';\n\n  let score = 0;\n  const reasons = [];\n\n  // Faktor 1: Quellen-Gewichtung (max 40)\n  const sourceWeight = SOURCE_WEIGHTS[source] !== undefined ? SOURCE_WEIGHTS[source] : 0.5;\n  score += sourceWeight * 40;\n  if (sourceWeight >= 1.0) reasons.push(`Top-Quelle (${source})`);\n  else if (sourceWeight < 0.6) reasons.push(`Schwache Quelle (${source})`);\n\n  // Faktor 2: Keyword-Qualität (max 25)\n  const titleHasHighValue = HIGH_VALUE_KEYWORDS.test(title);\n  const titleHasGeneral = GENERAL_KI_KEYWORDS.test(title);\n  const summaryHasHighValue = HIGH_VALUE_KEYWORDS.test(summary);\n\n  if (titleHasHighValue) {\n    score += 25;\n    reasons.push('Hochwertiges Keyword im Titel');\n  } else if (titleHasGeneral) {\n    score += 12;\n    reasons.push('KI-Erwähnung im Titel');\n  } else if (summaryHasHighValue) {\n    score += 8;\n    reasons.push('Hochwertiges Keyword in Summary');\n  } else {\n    score -= 10;\n  }\n\n  // Faktor 3: Frische-Bonus (max 20)\n  let ageHours = 24;\n  try {\n    const pubDate = new Date(pubDateStr);\n    if (!isNaN(pubDate.getTime())) {\n      ageHours = (Date.now() - pubDate.getTime()) / (1000 * 60 * 60);\n    }\n  } catch (e) { /* Default behalten */ }\n\n  if (ageHours <= 6) {\n    score += 20;\n    reasons.push('Sehr frisch (<6h)');\n  } else if (ageHours <= 12) {\n    score += 14;\n    reasons.push('Frisch (<12h)');\n  } else if (ageHours <= 24) {\n    score += 8;\n    reasons.push('Aktuell (<24h)');\n  } else if (ageHours <= MAX_AGE_HOURS) {\n    score += 2;\n  } else {\n    score -= 15;\n    reasons.push(`Alt (${Math.round(ageHours)}h)`);\n  }\n\n  // Faktor 4: Längen-Qualität (±6)\n  const summaryLen = summary.length;\n  if (summaryLen < 30) {\n    score -= 8;\n    reasons.push('Sehr kurze Summary');\n  } else if (summaryLen > 80 && summaryLen < 300) {\n    score += 6;\n    reasons.push('Substantielle Summary');\n  } else if (summaryLen > 500) {\n    score -= 3;\n  }\n\n  // Faktor 5: Klickbait-Penalty (−25)\n  if (CLICKBAIT_PATTERNS.test(title) || CLICKBAIT_PATTERNS.test(summary)) {\n    score -= 25;\n    reasons.push('Klickbait-Verdacht');\n  }\n\n  // Faktor 6: URL-Tiefe (±4)\n  if (link) {\n    const pathSegments = link.split('/').filter(s => s.length > 0).length;\n    if (pathSegments >= 4) score += 4;\n    else if (pathSegments <= 2) score -= 5;\n  }\n\n  score = Math.max(0, Math.round(score));\n\n  return {\n    ...item,\n    _score: score,\n    _scoreReasons: reasons.join('; '),\n    _ageHours: Math.round(ageHours),\n  };\n}\n\n// ═══════════════════════════════════════════════════════════════\n//  SEMANTIC DEDUP (unverändert aus v3)\n// ═══════════════════════════════════════════════════════════════\n\nfunction tokenize(text) {\n  return new Set(\n    (text || '')\n      .toLowerCase()\n      .split(/\\W+/)\n      .filter(w => w.length > 2)\n  );\n}\n\nfunction jaccardSimilarity(setA, setB) {\n  if (setA.size === 0 || setB.size === 0) return 0;\n  let intersection = 0;\n  for (const t of setA) {\n    if (setB.has(t)) intersection++;\n  }\n  const union = setA.size + setB.size - intersection;\n  return intersection / union;\n}\n\nfunction semanticDedup(scoredItems) {\n  const kept = [];\n  const keptTokens = [];\n\n  for (const item of scoredItems) {\n    const itemTokens = tokenize(item.title);\n    let isDuplicate = false;\n\n    for (let i = 0; i < kept.length; i++) {\n      const sim = jaccardSimilarity(itemTokens, keptTokens[i]);\n      if (sim >= DEDUP_SIMILARITY) {\n        isDuplicate = true;\n        if (item._score > kept[i]._score) {\n          kept[i] = item;\n          keptTokens[i] = itemTokens;\n        }\n        break;\n      }\n    }\n\n    if (!isDuplicate) {\n      kept.push(item);\n      keptTokens.push(itemTokens);\n    }\n  }\n\n  return kept;\n}\n\n// ═══════════════════════════════════════════════════════════════\n//  NEU in v4: APPLY SOURCE DIVERSITY CAP\n// ═══════════════════════════════════════════════════════════════\n//  Limitiert wieviele Items eine einzelne Quelle beisteuern darf.\n//  Verhindert dass Heise ( prolifisch) 8 von 10 DE-Slots belegt.\n//  Nach Score sortiert — die besten Items einer Quelle gewinnen.\n// ═══════════════════════════════════════════════════════════════\n\nfunction applySourceDiversity(items, maxPerSource) {\n  const sourceCounts = {};\n  const result = [];\n\n  for (const item of items) {\n    const src = item.source || 'Unknown';\n    if ((sourceCounts[src] || 0) < maxPerSource) {\n      sourceCounts[src] = (sourceCounts[src] || 0) + 1;\n      result.push(item);\n    }\n  }\n\n  return result;\n}\n\n// ═══════════════════════════════════════════════════════════════\n//  MAIN\n// ═══════════════════════════════════════════════════════════════\n\nconst allItems = $input.all().map(i => i.json);\nconsole.log(`[Score&Rank] Input: ${allItems.length} deduplizierte Items`);\n\n// 1. Alle Items scorren\nconst scored = allItems.map(scoreItem);\n\n// 2. Nach Score sortieren (für Semantic Dedup)\nscored.sort((a, b) => b._score - a._score);\n\n// 3. Semantic Dedup (vor Bucketing — Story-Dominanz verhindern)\nconst beforeDedupCount = scored.length;\nconst dedupedScored = semanticDedup(scored);\nconsole.log(`[Score&Rank] Semantic Dedup: ${beforeDedupCount} → ${dedupedScored.length} (entfernt ${beforeDedupCount - dedupedScored.length} ähnliche)`);\n\n// 4. In DE und EN Buckets spalten (INTL wird ignoriert)\nconst deBucket = dedupedScored.filter(i => (i.languageOrig || 'en').toLowerCase() === 'de');\nconst enBucket = dedupedScored.filter(i => (i.languageOrig || 'en').toLowerCase() === 'en');\n\nconsole.log(`[Quota] Bucket-Größen: DE=${deBucket.length}, EN=${enBucket.length}`);\n\n// 5. Beide Buckets nach Score sortieren (absteigend)\ndeBucket.sort((a, b) => b._score - a._score);\nenBucket.sort((a, b) => b._score - a._score);\n\n// 6. NEU: Source-Diversity-Cap anwenden (max 2 pro Quelle)\n//    Behält die Reihenfolge nach Score bei, limitiert aber pro Quelle.\nconst deDiverse = applySourceDiversity(deBucket, MAX_ITEMS_PER_SOURCE);\nconst enDiverse = applySourceDiversity(enBucket, MAX_ITEMS_PER_SOURCE);\n\nconsole.log(`[Quota] Nach Source-Diversity (max ${MAX_ITEMS_PER_SOURCE}/Quelle): DE=${deDiverse.length}, EN=${enDiverse.length}`);\n\n// 7. Top N aus jedem Bucket nehmen\nlet deSelected = deDiverse.slice(0, QUOTA_DE);\nlet enSelected = enDiverse.slice(0, QUOTA_EN);\n\n// 8. Umverteilung freier Slots (DE ↔ EN)\n//    Wenn ein Bucket weniger als sein Quota hat, wird der andere Bucket\n//    aufgefüllt — ABER mit Source-Diversity-Cap, damit nicht eine Quelle\n//    alle freien Slots bekommt.\nconst deFree = QUOTA_DE - deSelected.length;\nconst enFree = QUOTA_EN - enSelected.length;\n\nif (deFree > 0) {\n  // DE hat freie Slots → EN mit zusätzlichen Items auffüllen\n  // Nimmt die nächsten EN-Items (nach Source-Diversity-Cap) die noch nicht\n  // selected sind. Respektiert MAX_ITEMS_PER_SOURCE auch bei Umverteilung.\n  const enExtraPool = enDiverse.filter(i => !enSelected.includes(i));\n  const enExtra = enExtraPool.slice(0, deFree);\n  enSelected = enSelected.concat(enExtra);\n  console.log(`[Quota] DE-Freiplätze (${deFree}) → EN: +${enExtra.length}`);\n}\n\nif (enFree > 0) {\n  const deExtraPool = deDiverse.filter(i => !deSelected.includes(i));\n  const deExtra = deExtraPool.slice(0, enFree);\n  deSelected = deSelected.concat(deExtra);\n  console.log(`[Quota] EN-Freiplätze (${enFree}) → DE: +${deExtra.length}`);\n}\n\n// 9. Kombinieren\nlet finalItems = [...deSelected, ...enSelected];\n\n// 10. Minimum-Score-Threshold (ruhiger News-Tag)\nconst lowScoreCount = finalItems.filter(i => i._score < MIN_SCORE_THRESHOLD).length;\nif (lowScoreCount === finalItems.length && finalItems.length > 10) {\n  const keepDe = Math.min(5, deSelected.length);\n  const keepEn = Math.min(5, enSelected.length);\n  finalItems = [...deSelected.slice(0, keepDe), ...enSelected.slice(0, keepEn)];\n  console.log(`[Score&Rank] ⚠️ Ruhiger News-Tag: Alle unter ${MIN_SCORE_THRESHOLD}P → reduziere auf ${finalItems.length} Items`);\n}\n\n// 11. Score-Distribution-Logging\nconst scores = finalItems.map(i => i._score);\nconst avgScore = scores.length > 0 ? Math.round(scores.reduce((s, i) => s + i, 0) / scores.length) : 0;\nconst allScores = scored.map(i => i._score).sort((a, b) => b - a);\n\nconsole.log(`\\n═══ SCORE DISTRIBUTION REPORT ═══`);\nconsole.log(`Input (nach URL-Dedup):     ${allItems.length}`);\nconsole.log(`Nach Semantic Dedup:        ${dedupedScored.length}`);\nconsole.log(`Bucket-Größen (verfügbar):  DE=${deBucket.length}, EN=${enBucket.length}`);\nconsole.log(`Nach Source-Diversity:      DE=${deDiverse.length} (max ${MAX_ITEMS_PER_SOURCE}/Quelle), EN=${enDiverse.length}`);\nconsole.log(`Final Output:               ${finalItems.length} (Quota: DE=${deSelected.length}, EN=${enSelected.length})`);\nconsole.log(`Avg Score (Final):          ${avgScore}`);\nconsole.log(`Highest Score:              ${scores[0] || 0}`);\nconsole.log(`Lowest Score (Final):       ${scores[scores.length - 1] || 0}`);\nconsole.log(`════════════════════════════════\\n`);\n\n// 12. Sprach- + Source-Verteilung im Final-Output\nconst langCounts = {};\nconst sourceCounts = {};\nconst sourceByLang = {};  // source → { de: N, en: N }\nfinalItems.forEach(i => {\n  const lang = i.languageOrig || 'en';\n  langCounts[lang] = (langCounts[lang] || 0) + 1;\n  sourceCounts[i.source] = (sourceCounts[i.source] || 0) + 1;\n  if (!sourceByLang[i.source]) sourceByLang[i.source] = { de: 0, en: 0 };\n  sourceByLang[i.source][lang] = (sourceByLang[i.source][lang] || 0) + 1;\n});\nconsole.log('[Score&Rank] Sprach-Verteilung im Output:');\nObject.entries(langCounts).sort((a, b) => b[1] - a[1]).forEach(([lang, count]) => {\n  console.log(`  ${lang.toUpperCase()}: ${count}x`);\n});\nconsole.log('[Score&Rank] Source-Verteilung im Output (Cap ist pro Sprache, daher kann eine Quelle in DE+EN je 2x vorkommen):');\nObject.entries(sourceCounts).sort((a, b) => b[1] - a[1]).forEach(([src, count]) => {\n  const split = sourceByLang[src];\n  console.log(`  ${src}: ${count}x (DE: ${split.de}, EN: ${split.en})`);\n});\n\nconsole.log('\\n[Score&Rank] Top 3 pro Bucket:');\nconsole.log('  DE:', deSelected.slice(0, 3).map(i => `[${i._score}P] ${i.source} — \"${(i.title||'').substring(0,50)}...\"`).join('\\n      '));\nconsole.log('  EN:', enSelected.slice(0, 3).map(i => `[${i._score}P] ${i.source} — \"${(i.title||'').substring(0,50)}...\"`).join('\\n      '));\n\n// 13. Cleanup-Felder vor Rückgabe\nconst cleanOutput = finalItems.map(item => ({\n  json: {\n    title: item.title,\n    link: item.link,\n    source: item.source,\n    pubDate: item.pubDate,\n    summary: item.summary,\n    languageOrig: item.languageOrig || 'en',\n    _score: item._score,\n    _scoreReasons: item._scoreReasons,\n    _bucket: item.languageOrig === 'de' ? 'de' : 'en',\n  }\n}));\n\nreturn cleanOutput;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        1056
+      ],
+      "id": "66243166-98fd-4345-8ce8-22afef929a9a",
+      "name": "Score and Rank"
     }
   ],
+  "pinData": {},
   "connections": {
     "Cron Daily 06:00 Vienna": {
       "main": [
         [
           {
-            "node": "Fetch Heise RSS",
+            "node": "Fetch All RSS Feeds",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Fetch Golem RSS",
+            "node": "SearXNG Multi-Search",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Fetch Tagesschau RSS",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch SZ Wissen RSS",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch MIT Tech Review RSS",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch Ars Technica RSS",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch The Verge AI RSS",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch Anthropic Blog RSS",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "AI Web Search (z-ai)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch Heise RSS": {
-      "main": [
-        [
-          {
-            "node": "Normalize RSS Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch Golem RSS": {
-      "main": [
-        [
-          {
-            "node": "Normalize RSS Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch Tagesschau RSS": {
-      "main": [
-        [
-          {
-            "node": "Normalize RSS Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch SZ Wissen RSS": {
-      "main": [
-        [
-          {
-            "node": "Normalize RSS Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch MIT Tech Review RSS": {
-      "main": [
-        [
-          {
-            "node": "Normalize RSS Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch Ars Technica RSS": {
-      "main": [
-        [
-          {
-            "node": "Normalize RSS Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch The Verge AI RSS": {
-      "main": [
-        [
-          {
-            "node": "Normalize RSS Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch Anthropic Blog RSS": {
-      "main": [
-        [
-          {
-            "node": "Normalize RSS Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalize RSS Items": {
-      "main": [
-        [
-          {
-            "node": "Merge RSS + Search",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Web Search (z-ai)": {
-      "main": [
-        [
-          {
-            "node": "Normalize Search Results",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalize Search Results": {
-      "main": [
-        [
-          {
-            "node": "Merge RSS + Search",
-            "type": "main",
-            "index": 1
           }
         ]
       ]
@@ -567,39 +243,6 @@
         [
           {
             "node": "Dedupe by URL",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Dedupe by URL": {
-      "main": [
-        [
-          {
-            "node": "LLM Curation (z-ai)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "LLM Curation (z-ai)": {
-      "main": [
-        [
-          {
-            "node": "Parse LLM JSON",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse LLM JSON": {
-      "main": [
-        [
-          {
-            "node": "POST to Levcon Ingest",
             "type": "main",
             "index": 0
           }
@@ -632,13 +275,74 @@
           }
         ]
       ]
+    },
+    "Dedupe by URL": {
+      "main": [
+        [
+          {
+            "node": "Score and Rank",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Ollama Request": {
+      "main": [
+        [
+          {
+            "node": "POST to Levcon Ingest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All RSS Feeds": {
+      "main": [
+        [
+          {
+            "node": "Merge RSS + Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SearXNG Multi-Search": {
+      "main": [
+        [
+          {
+            "node": "Merge RSS + Search",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Score and Rank": {
+      "main": [
+        [
+          {
+            "node": "Build Ollama Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "timezone": "Europe/Vienna"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
-  "pinData": {},
+  "versionId": "eeb72c26-f9e2-4be9-8e68-06e0552edccd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b2d1feb950fa85b8badf7148ff879f99d71c58371428240be6f7a49573bef211"
+  },
+  "id": "xkA2dbp6hXqy1PlO",
   "tags": []
 }

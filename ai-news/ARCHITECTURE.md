@@ -55,8 +55,8 @@
 | **Next.js** | Frontend (News-Panel, Signup, Archiv), API-Routes (Confirm/Unsubscribe) | Code |
 | **Prisma** | ORM, Schema-Migration, Query-Layer | Code |
 | **SQLite** | Persistenz (News-Items, Summaries, Subscribers) | Code + VPS |
-| **n8n** | Cron-Trigger, RSS/Suche sammeln, LLM-Kuration, LinkedIn-Post, Newsletter-Versand | Workflows |
-| **z-ai-web-dev-sdk** | LLM (Curation, Zusammenfassung) + Web-Search | API-Key |
+| **n8n** | Cron-Trigger, RSS sammeln, LLM-Kuration, LinkedIn-Post, Newsletter-Versand | Workflows |
+| **Ollama (Qwen3.5:2b)** | Lokales LLM: Headline-Übersetzung, DE+EN Summaries, Kategorisierung | localhost:11434 |
 | **LinkedIn API** | Auto-Post des Daily AI Update | Credentials |
 | **SMTP** | Newsletter-Versand | Credentials |
 
@@ -64,54 +64,48 @@
 
 ## 2. Datenfluss
 
-### 2.1 Täglicher Curation-Flow
+### 2.1 Täglicher Curation-Flow (v5 — Juli 2026)
 
 ```
-06:00 CET
+06:00 Europe/Vienna
    │
    ↓
-[n8n Cron Trigger]
+[n8n Schedule Trigger]
    │
    ↓
-[Fetch RSS Feeds] ─── Heise, Golem, MIT TR, Ars Technica, The Verge AI, Tagesschau, APA-Wiss
-   │
+[Fetch All RSS] ─── 35 Feeds (DE/EN), max 30/Feed, UTF-8 + HTML-Entities dekodiert
+   │                 ~200-400 KI-relevante Items
    ↓
-[Normalize RSS] ─── Einheitliche Struktur: {title, link, source, pubDate, summary}
-   │
+[Dedupe by URL] ─── URL + Titel-Ähnlichkeit, Tracking-Params entfernt
+   │                 ~150-250 Items
    ↓
-[Web Search via z-ai SDK] ─── Ergänzt RSS um tagesaktuelle Themen
-   │
+[Score & Rank] ─── 6-Faktor-Scoring + Semantic Dedup + Source-Diversity-Cap
+   │                 2-Bucket Quota: 10 DE + 10 EN (max 2 pro Quelle pro Sprache)
+   │                 Umverteilung bei knappen Buckets (DE → EN Priorität)
    ↓
-[Merge & Dedupe] ─── Nach URL + Titel
-   │
+[Build Ollama Request] ─── 2 SERIELLE Läufe (entlastet CPU, vermeidet Ermüdung)
+   │  ├── DE-Run: 10 DE-Items → Qwen3.5:2b → summaryDe + Items mit headlineEn
+   │  └── EN-Run: 10 EN-Items → Qwen3.5:2b → summaryEn + Items mit headlineDe
+   │      Ollama: format=json_object, num_predict=6144, enable_thinking=false
+   │      Enrichment: LLM-Items mit Originaldaten anreichern (keine fehlenden Felder)
    ↓
-[LLM Curation via z-ai SDK]
-   │  Input: 20-30 Items
-   │  Output: 5-10 kuratierte Items + DE-Summary + EN-Summary
+[POST /api/ai-news/internal/ingest] ─── SQLite via Prisma
+   │  - AiNewsSummary (1x pro Tag, DE + EN Summary)
+   │  - AiNewsItem (20x pro Tag, mit headlineDe + headlineEn + descriptionDe + descriptionEn)
    ↓
-[Save to SQLite via Prisma API]
-   │  - AiNewsSummary (1x pro Tag, DE + EN)
-   │  - AiNewsItem (5-10x pro Tag, mit Position)
-   ↓
-[Parallel]
-   ├── [LinkedIn Post DE]  ─── 07:30 via LinkedIn API
-   └── [Newsletter Versand] ─── 08:00 via SMTP
-                                (Subscriber je Sprache & Frequenz)
+[Parallel Trigger]
+   ├── [Workflow 02: LinkedIn Post]
+   └── [Workflow 03: Newsletter Versand]
 ```
 
-### 2.2 Newsletter-Frequenz-Logik
+### 2.2 Newsletter-Frequenz-Logik (vereinfacht — Sprint 14b)
 
 **Subscriber wählt bei Signup:**
-- `daily` — erhält jeden Tag die aktuelle Ausgabe
-- `weekly` — erhält sonntags die Wochen-Zusammenfassung (7 Tage gebündelt)
-- `digest` — erhält immer am 1. des Monats die Monats-Zusammenfassung
+- `daily` — erhält jeden Tag die aktuelle Tagesausgabe
+- `weekly` — erhält sonntags die aktuelle Tagesausgabe (falls nicht schon gesendet)
+- `digest` — erhält am 1. des Monats die aktuelle Tagesausgabe (falls nicht schon gesendet)
 
-**Wichtig:** Inhalte gehen **niemals** verloren. Jeder Subscriber erhält jede News genau einmal — nur das Versand-Intervall variiert.
-
-**Implementierung:**
-- Pro Subscriber wird `lastSentDate` gespeichert
-- Beim Versand: alle Items mit `date > lastSentDate` werden versendet
-- Nach Versand: `lastSentDate = today`
+**Wichtig:** Daily/Weekly/Digest senden alle die gleichen **Tagesnews** (keine Aggregation). `lastSentDate` verhindert Doppelversand wenn Daily und Digest am selben Tag feuern.
 
 ### 2.3 Signup-Flow (DSGVO Double-Opt-In)
 
@@ -270,12 +264,15 @@ LevconPage (bestehend)
 
 ## 5. Externe Dienste
 
-### 5.1 z-ai-web-dev-sdk
+### 5.1 Ollama (Qwen3.5:2b)
 - **Use Cases:**
-  - Web Search (für RSS-Ergänzung)
-  - LLM (Curation + Zusammenfassung DE/EN)
-- **Integration:** via n8n HTTP-Node mit z-ai-Endpoint
-- **Rate-Limits:** gemäß z-ai-Doku
+  - Headline-Übersetzung (DE↔EN) für jedes Item
+  - DE+EN Summaries für jedes Item
+  - Tageszusammenfassung (summaryDe + summaryEn)
+  - Kategorisierung (research|business|regulation|tools|society)
+- **Integration:** via n8n Code-Node mit `this.helpers.httpRequest` (POST localhost:11434/api/chat)
+- **Modell:** qwen3.5:2b (2B Parameter, CPU-Inference, ~1.2GB RAM)
+- **2 serielle Läufe:** DE-Run (10 Items) dann EN-Run (10 Items)
 
 ### 5.2 LinkedIn API
 - **Use Case:** 1× täglich Auto-Post
