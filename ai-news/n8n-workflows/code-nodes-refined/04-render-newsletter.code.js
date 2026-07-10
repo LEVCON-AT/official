@@ -172,7 +172,11 @@ function renderEn(news, unsubUrl, dateEn) {
   </body></html>`;
 }
 
-const siteUrl = ($env && $env.NEXT_PUBLIC_SITE_URL) || 'https://levcon.ai';
+// WICHTIG: In n8n Code-Nodes ist der Zugriff auf $env standardmäßig
+// GESPERRT (Sicherheitsfeature). Deshalb hardcoden wir die URL hier.
+// Falls die URL sich ändert, hier anpassen — oder in n8n Settings
+// "Allow Environment Variables in Code Node" aktivieren.
+const siteUrl = 'https://levcon.ai';
 const out = [];
 
 for (const sub of items) {
