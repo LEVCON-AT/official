@@ -143,9 +143,8 @@ function renderItem(it, lang) {
 // Gleiche Schriftart wie "KI-News des Tages" Label: Arial 11px,
 // letter-spacing 0.32em, uppercase, muted color #8A8A85.
 // Mehr Abstand (32px oben, 16px unten), keine Hintergrundfarbe.
-// Dünne Trennlinie oberhalb (gleiche wie zwischen Artikeln: #D8D7D3).
 function blockSeparator(labelText) {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #D8D7D3;">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="padding:32px 0 16px 0;text-align:center;">
                     <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#8A8A85;font-weight:400;">
@@ -239,11 +238,13 @@ function renderDe(news, unsubUrl, settingsUrl, dateDe) {
                 Sie erhalten diese E-Mail, weil Sie Levcon AI News abonniert haben.
               </p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
+                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Levcon.ai</a>
+                <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
                 <a href="${escapeHtml(settingsUrl)}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Einstellungen</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">levcon.ai</a>
-                <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
                 <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Datenschutz</a>
+                <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
+                <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Impressum</a>
               </p>
             </td>
           </tr>
@@ -340,11 +341,13 @@ function renderEn(news, unsubUrl, settingsUrl, dateEn) {
                 You are receiving this email because you subscribed to Levcon AI News.
               </p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
+                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Levcon.ai</a>
+                <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
                 <a href="${escapeHtml(settingsUrl)}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Settings</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
-                <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">levcon.ai</a>
-                <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
                 <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Privacy</a>
+                <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
+                <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Legal Notice</a>
               </p>
             </td>
           </tr>
