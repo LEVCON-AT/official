@@ -154,7 +154,7 @@ function blockSeparator(labelText) {
 
 // ── RENDER DE NEWSLETTER ───────────────────────────────────────
 // 2 Blöcke: DE-Items (DACH) zuerst, dann EN-Items (International)
-function renderDe(news, unsubUrl, dateDe, subscriberEmail) {
+function renderDe(news, unsubUrl, settingsUrl, dateDe) {
   const allItems = news.items || [];
   const deItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'de');
   const enItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'en');
@@ -230,19 +230,16 @@ function renderDe(news, unsubUrl, dateDe, subscriberEmail) {
           </tr>
 
           <tr>
-            <td class="lc-pad-h" style="padding:32px 32px 36px 32px;border-top:1px solid #D8D7D3;background-color:#F0EFEC;">
+            <td class="lc-pad-h" style="padding:32px 32px 36px 32px;border-top:1px solid #D8D7D3;">
               <p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#8A8A85;font-weight:300;">
-                Diese E-Mail wurde von Levcon.ai an <a href="mailto:${escapeHtml(subscriberEmail)}" style="color:#1C1C1A;text-decoration:underline;">${escapeHtml(subscriberEmail)}</a> versendet.
+                Sie erhalten diese E-Mail, weil Sie Levcon AI News abonniert haben.
               </p>
-              <p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
-                <a href="${escapeHtml(unsubUrl)}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Abbestellen</a>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
+                <a href="${escapeHtml(settingsUrl)}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Einstellungen</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
                 <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">levcon.ai</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
                 <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Datenschutz</a>
-              </p>
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#8A8A85;font-weight:300;letter-spacing:0.02em;">
-                Mst. Enric-Bernard Sep-Albi · Pfalzgasse 37/2/4 · 1220 Wien
               </p>
             </td>
           </tr>
@@ -258,7 +255,7 @@ function renderDe(news, unsubUrl, dateDe, subscriberEmail) {
 }
 
 // ── RENDER EN NEWSLETTER ───────────────────────────────────────
-function renderEn(news, unsubUrl, dateEn, subscriberEmail) {
+function renderEn(news, unsubUrl, settingsUrl, dateEn) {
   const allItems = news.items || [];
   const deItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'de');
   const enItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'en');
@@ -334,19 +331,16 @@ function renderEn(news, unsubUrl, dateEn, subscriberEmail) {
           </tr>
 
           <tr>
-            <td class="lc-pad-h" style="padding:32px 32px 36px 32px;border-top:1px solid #D8D7D3;background-color:#F0EFEC;">
+            <td class="lc-pad-h" style="padding:32px 32px 36px 32px;border-top:1px solid #D8D7D3;">
               <p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#8A8A85;font-weight:300;">
-                This email was sent by Levcon.ai to <a href="mailto:${escapeHtml(subscriberEmail)}" style="color:#1C1C1A;text-decoration:underline;">${escapeHtml(subscriberEmail)}</a>.
+                You are receiving this email because you subscribed to Levcon AI News.
               </p>
-              <p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
-                <a href="${escapeHtml(unsubUrl)}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Unsubscribe</a>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8A8A85;font-weight:300;">
+                <a href="${escapeHtml(settingsUrl)}" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Settings</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
                 <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">levcon.ai</a>
                 <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
                 <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Privacy</a>
-              </p>
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#8A8A85;font-weight:300;letter-spacing:0.02em;">
-                Mst. Enric-Bernard Sep-Albi · Pfalzgasse 37/2/4 · 1220 Wien
               </p>
             </td>
           </tr>
@@ -385,6 +379,9 @@ for (const s of subscribers) {
   const lang = (s.language || 'de').toLowerCase();
   const unsubToken = s.unsubscribeToken || s.confirmToken || s.id;
   const unsubUrl = `${siteUrl}/api/ai-news/unsubscribe?token=${encodeURIComponent(unsubToken)}`;
+  // Settings-URL: öffnet /ai-news?settings=<token> — User kann dort
+  // Sprache, Frequenz, News-Sprachen ändern ODER abbestellen.
+  const settingsUrl = `${siteUrl}/ai-news?settings=${encodeURIComponent(unsubToken)}`;
 
   // Skip wenn heute schon gesendet
   if (s.lastSentDate) {
@@ -398,10 +395,10 @@ for (const s of subscribers) {
 
   let html, subject;
   if (lang === 'en') {
-    html = renderEn(news, unsubUrl, dateEn, s.email);
+    html = renderEn(news, unsubUrl, settingsUrl, dateEn);
     subject = `AI News · ${dateEn}`;
   } else {
-    html = renderDe(news, unsubUrl, dateDe, s.email);
+    html = renderDe(news, unsubUrl, settingsUrl, dateDe);
     subject = `KI-News · ${dateDe}`;
   }
 
