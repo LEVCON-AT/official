@@ -79,7 +79,7 @@
 
   /* ── Levcon Design Tokens ──────────────────── */
   --lc-bg:      #F0EFEC;
-  --lc-ink:     #464644;
+  --lc-ink:     #464644; /* war #1C1C1A (reines Schwarz) — auf #464644 geändert für Konsistenz mit .logo-wordmark */
   --lc-muted:   #8A8A85;
   --lc-red:     #C8102E;
   --lc-rule:    #D8D7D3;
