@@ -68,3 +68,6 @@ db/*.db-journal
 
 # Agent-browser cache directory (created by Chrome refs like @e8)
 /e8/
+
+# Production env files (never commit)
+deploy/.env*
