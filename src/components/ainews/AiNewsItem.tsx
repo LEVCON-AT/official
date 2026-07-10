@@ -91,10 +91,18 @@ export default function AiNewsItem({ item, locale }: Props) {
 
   const showThumbnails = process.env.NEXT_PUBLIC_SHOW_THUMBNAILS === 'true';
   const langLabel = LANG_LABELS[item.languageOrig] || item.languageOrig.toUpperCase();
-  const isNonDe = item.languageOrig !== 'de';
-  const translateUrl = isNonDe
+
+  // Translate-Link: zeigen wenn Original-Sprache ≠ Locale-Sprache.
+  // - DE-User sieht EN-Item → "Auf Deutsch lesen →" (Google Translate EN→DE)
+  // - EN-User sieht DE-Item → "Read in English →" (Google Translate DE→EN)
+  // - DE-User sieht DE-Item → kein Link nötig
+  // - EN-User sieht EN-Item → kein Link nötig
+  const itemLang = (item.languageOrig || 'en').toLowerCase();
+  const needsTranslate = itemLang !== locale;
+  const translateUrl = needsTranslate
     ? `https://translate.google.com/translate?sl=auto&tl=${locale === 'en' ? 'en' : 'de'}&u=${encodeURIComponent(item.sourceUrl)}`
     : null;
+  const translateLabel = locale === 'en' ? 'Read in English →' : 'Auf Deutsch lesen →';
 
   return (
     <article className="ainews-item">
@@ -115,7 +123,6 @@ export default function AiNewsItem({ item, locale }: Props) {
           {langLabel !== 'DE' && langLabel !== 'EN' && (
             <span className="ainews-lang-tag-inline" aria-label={`Original language: ${item.languageOrig}`}>{langLabel}</span>
           )}
-          <CategoryIcon category={item.category} />
           <span className="ainews-item-headline">{headline}</span>
         </button>
         <div className="ainews-item-meta">
@@ -169,7 +176,7 @@ export default function AiNewsItem({ item, locale }: Props) {
                     rel="noopener noreferrer nofollow"
                     className="ainews-item-translate"
                   >
-                    {locale === 'en' ? 'Translate to English →' : 'Auf Deutsch lesen →'}
+                    {translateLabel}
                   </a>
                 </>
               )}

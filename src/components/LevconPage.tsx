@@ -39,8 +39,9 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
   // News status (from URL params: ?news=confirmed|unsubscribed|already|error)
   const [newsStatus, setNewsStatus] = useState<'confirmed' | 'unsubscribed' | 'already' | 'error' | null>(null);
 
-  // Language filter for AI News
-  const [newsLangFilter, setNewsLangFilter] = useState<string>('all');
+  // Language filter for AI News — default = active locale (DE/EN, nicht "Alle")
+  // User kann dann auf "Alle" umschalten wenn er beide Sprachen sehen will.
+  const [newsLangFilter, setNewsLangFilter] = useState<string>(locale === 'en' ? 'en' : 'de');
 
   // Settings token (from URL: ?settings=<token>)
   const [settingsToken, setSettingsToken] = useState<string | null>(null);
