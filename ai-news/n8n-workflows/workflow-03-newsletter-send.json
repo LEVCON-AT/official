@@ -37,7 +37,6 @@
         304,
         0
       ],
-      "disabled": true,
       "notes": "Markiert diesen Lauf als 'daily'. Wird im Fetch Subscribers als Query-Param verwendet."
     },
     {
@@ -73,7 +72,6 @@
         304,
         304
       ],
-      "disabled": true,
       "notes": "Markiert diesen Lauf als 'weekly'."
     },
     {
@@ -109,7 +107,6 @@
         304,
         608
       ],
-      "disabled": true,
       "notes": "Markiert diesen Lauf als 'digest' (monatlich)."
     },
     {
@@ -378,7 +375,7 @@
     "binaryMode": "separate",
     "availableInMCP": true
   },
-  "versionId": "a445027e-2c1b-4b9d-a0f4-9d8783805ba1",
+  "versionId": "4273450b-392e-49b9-a511-36431aaa5b5c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "b2d1feb950fa85b8badf7148ff879f99d71c58371428240be6f7a49573bef211"
