@@ -93,8 +93,14 @@ function buildConfirmationEmail(
           <p style="margin:0 0 16px;word-break:break-all;"><a href="${confirmUrl}" style="color:#1C1C1A;">${confirmUrl}</a></p>
           <p style="margin:0;">If you didn't sign up, you can safely ignore this email.</p>
         </td></tr>
-        <tr><td style="padding-top:32px;border-top:1px solid #D8D7D3;font-size:11px;color:#8A8A85;">
-          <p style="margin:0;">Levcon.ai · Pfalzgasse 37/2/4 · 1220 Vienna, Austria</p>
+        <tr><td style="padding-top:32px;border-top:1px solid #D8D7D3;font-size:12px;color:#8A8A85;">
+          <p style="margin:0;">
+            <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Levcon.ai</a>
+            <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
+            <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Privacy</a>
+            <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
+            <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Legal Notice</a>
+          </p>
         </td></tr>
       </table>
     </td></tr>
@@ -130,8 +136,14 @@ function buildConfirmationEmail(
           <p style="margin:0 0 16px;word-break:break-all;"><a href="${confirmUrl}" style="color:#1C1C1A;">${confirmUrl}</a></p>
           <p style="margin:0;">Falls Sie sich nicht angemeldet haben, können Sie diese E-Mail ignorieren.</p>
         </td></tr>
-        <tr><td style="padding-top:32px;border-top:1px solid #D8D7D3;font-size:11px;color:#8A8A85;">
-          <p style="margin:0;">Levcon.ai · Pfalzgasse 37/2/4 · 1220 Wien, Österreich</p>
+        <tr><td style="padding-top:32px;border-top:1px solid #D8D7D3;font-size:12px;color:#8A8A85;">
+          <p style="margin:0;">
+            <a href="https://levcon.ai" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Levcon.ai</a>
+            <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
+            <a href="https://levcon.ai/datenschutz" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Datenschutz</a>
+            <span style="color:#D8D7D3;margin:0 6px;" aria-hidden="true">·</span>
+            <a href="https://levcon.ai/impressum" rel="noopener noreferrer" style="color:#1C1C1A;text-decoration:underline;">Impressum</a>
+          </p>
         </td></tr>
       </table>
     </td></tr>
