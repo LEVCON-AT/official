@@ -298,6 +298,28 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
 
   return (
     <div className="levcon-body">
+      {/* eslint-disable-next-line react/no-danger */}
+      <div dangerouslySetInnerHTML={{ __html: `
+<!--
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║   You're reading the source code. We appreciate that.            ║
+║                                                                  ║
+║   This website was crafted with care — and with the help of AI.  ║
+║   Every line was reviewed, refined, and approved by a human      ║
+║   who cares deeply about quality, accessibility and craft.       ║
+║                                                                  ║
+║   If you're the kind of person who inspects source code,         ║
+║   you're exactly the kind of person we'd love to work with.      ║
+║                                                                  ║
+║   Want a website like this — clean, fast, and built with         ║
+║   intention? Let's talk.                                         ║
+║                                                                  ║
+║   hello@levcon.ai · levcon.ai                                    ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+-->
+` }} />
       {/* Skip Navigation */}
       <a href="#main-content" className="skip-nav">
         {locale === 'de' ? 'Zum Inhalt springen' : 'Skip to content'}
