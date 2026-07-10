@@ -185,10 +185,35 @@ function renderEn(news, unsubUrl, dateEn) {
 const siteUrl = 'https://levcon.ai';
 const out = [];
 
-for (const sub of items) {
-  const s = sub.json;
+// ═══════════════════════════════════════════════════════════════
+//  Subscriber-Daten vom "Fetch Subscribers" Node holen.
+//
+//  Die Levcon API liefert: { count: N, subscribers: [...] }
+//  n8n wrapt das als: [{ json: { count: N, subscribers: [...] } }]
+//
+//  Wir müssen die subscribers-Liste extrahieren und pro Subscriber
+//  ein Output-Item generieren.
+// ═══════════════════════════════════════════════════════════════
+let subscribers = [];
+
+// Versuche verschiedene Formate (robust gegen API-Änderungen)
+if (items.length === 1 && items[0].json?.subscribers) {
+  // Format 1: [{ json: { count, subscribers: [...] } }]
+  subscribers = items[0].json.subscribers;
+} else if (items.length > 0 && items[0].json?.email) {
+  // Format 2: [{ json: { email, ... } }, ...] (bereits geflacht)
+  subscribers = items.map(i => i.json);
+} else {
+  console.log('[Newsletter] ⚠️ Fetch Subscribers Output:', JSON.stringify(items[0]?.json).substring(0, 500));
+  throw new Error('No subscribers found. Check Fetch Subscribers node output.');
+}
+
+console.log(`[Newsletter] ${subscribers.length} Subscriber vom API erhalten`);
+
+for (const s of subscribers) {
   const lang = (s.language || 'de').toLowerCase();
-  const unsubToken = s.unsubscribeToken || s.id;
+  // Unsubscribe-Token: API liefert confirmToken (nicht unsubscribeToken)
+  const unsubToken = s.unsubscribeToken || s.confirmToken || s.id;
   const unsubUrl = `${siteUrl}/api/ai-news/unsubscribe?token=${encodeURIComponent(unsubToken)}`;
 
   // Skip wenn heute schon gesendet (verhindert Doppelversand bei Weekly/Digest)
@@ -224,5 +249,10 @@ for (const sub of items) {
   });
 }
 
-console.log(`[Newsletter] ${out.length} E-Mails gerendert (${items.length - out.length} skipped wegen lastSentDate)`);
+console.log(`[Newsletter] ${out.length} E-Mails gerendert (${subscribers.length - out.length} skipped wegen lastSentDate)`);
+
+if (out.length === 0) {
+  console.log('[Newsletter] ⚠️ Keine E-Mails zu senden — alle Subscriber skipped oder keine vorhanden');
+}
+
 return out;
