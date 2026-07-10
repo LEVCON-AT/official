@@ -139,12 +139,16 @@ function renderItem(it, lang) {
               </table>`;
 }
 
-// ── BLOCK SEPARATOR (dezente Trennung zwischen DE und EN) ──────
+// ── BLOCK SEPARATOR (Sprint 15b — elegante Trennung) ──────────
+// Gleiche Schriftart wie "KI-News des Tages" Label: Arial 11px,
+// letter-spacing 0.32em, uppercase, muted color #8A8A85.
+// Mehr Abstand (32px oben, 16px unten), keine Hintergrundfarbe.
+// Dünne Trennlinie oberhalb (gleiche wie zwischen Artikeln: #D8D7D3).
 function blockSeparator(labelText) {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #D8D7D3;background-color:#F0EFEC;">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #D8D7D3;">
                 <tr>
-                  <td style="padding:20px 0 14px 0;text-align:center;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#8A8A85;font-weight:400;">
+                  <td style="padding:32px 0 16px 0;text-align:center;">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#8A8A85;font-weight:400;">
                       ${escapeHtml(labelText)}
                     </span>
                   </td>
@@ -380,7 +384,7 @@ for (const s of subscribers) {
   const unsubToken = s.unsubscribeToken || s.confirmToken || s.id;
   const unsubUrl = `${siteUrl}/api/ai-news/unsubscribe?token=${encodeURIComponent(unsubToken)}`;
   // Settings-URL: öffnet /ai-news?settings=<token> — User kann dort
-  // Sprache, Frequenz, News-Sprachen ändern ODER abbestellen.
+  // Sprache, Frequenz, News-Sprachen ändern ODER abbesteln.
   const settingsUrl = `${siteUrl}/ai-news?settings=${encodeURIComponent(unsubToken)}`;
 
   // Skip wenn heute schon gesendet
