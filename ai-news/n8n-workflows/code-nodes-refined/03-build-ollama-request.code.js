@@ -69,8 +69,7 @@ async function callOllama(items, bucket) {
   const systemPrompt = isDe
     ? `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.
 
-Your task: Process ALL ${items.length} GERMAN AI news items from DACH sources. You MUST process every single item — do NOT stop early, do NOT skip items, do NOT truncate the output.
-
+Your task: Process ALL ${items.length} GERMAN AI news items from DACH sources. You MUST process every single item — do NOT stop early, do NOT skip items, do NOT truncate the output. Use standard Latin script. Do not use Chinese, Japanese, Korean, Cyrillic, or any other non-Latin characters under any circumstances.
 For each item, write:
 - headline: Original German headline (keep as-is)
 - headlineDe: Same as headline (it's already German)
@@ -79,9 +78,9 @@ For each item, write:
 - descriptionEn: 1-2 sentence English summary (independent, not just translation)
 - source, sourceUrl, thumbnailUrl, languageOrig, category (research|business|regulation|tools|society)
 
-Also write summaryDe: Analytische Zusammenfassung der heutigen DACH KI-News (3-4 Sätze).
+Also write summaryDe: Analytische Zusammenfassung der heutigen  KI-News (3-4 Sätze).
 
-Summary tone: Professional, insightful, concise. Like a McKinsey briefing.
+Summary tone: Professional, concise.
 
 Return JSON:
 {
@@ -94,7 +93,7 @@ Return JSON:
 CRITICAL: You MUST return ALL ${items.length} items in the items array. If you return fewer, the workflow will fail. Process every item, then close the JSON with } and ].`
     : `You are an expert AI news curator for Levcon.ai, a Vienna-based AI consulting firm.
 
-Your task: Process ALL ${items.length} ENGLISH AI news items from international sources. You MUST process every single item — do NOT stop early, do NOT skip items, do NOT truncate the output.
+Your task: Process ALL ${items.length} ENGLISH AI news items from international sources. You MUST process every single item — do NOT stop early, do NOT skip items, do NOT truncate the output. Use standard Latin script. Do not use Chinese, Japanese, Korean, Cyrillic, or any other non-Latin characters under any circumstances.
 
 For each item, write:
 - headline: Original English headline (keep as-is)
@@ -106,7 +105,7 @@ For each item, write:
 
 Also write summaryEn: Analytical summary of today's international AI news (3-4 sentences).
 
-Summary tone: Professional, insightful, concise. Like a McKinsey briefing.
+Summary tone: Professional, concise.
 
 Return JSON:
 {
