@@ -34,22 +34,11 @@ Die eigentliche Code-Generierung — Next.js-Komponenten, API-Routes, Prisma-Sch
 
 Das Herzstück der Website — die tägliche KI-News-Kuration — läuft vollständig lokal. Ein 2-Milliarden-Parameter-Modell auf einer CPU übersetzt Headlines, schreibt Zusammenfassungen und kategorisiert Artikel. Keine Cloud-API, keine Daten verlassen den VPS.
 
-### Der Mensch dahinter
-
-**Enric-Bernard Sep-Albi** (Owner, Levcon.ai)
-
-KI ist ein Werkzeug, kein Ersatz. Ohne menschliche Steuerung hätte das Ergebnis keinen Wert:
-- Strategische Entscheidungen (welche Quellen, welche Sprachen, welche Features)
-- Design-Vorgaben ("schlicht, elegant, österreichisch")
-- Qualitätssicherung (jeder Commit wurde reviewt)
-- Content-Review (Newsletter-Inhalte, DSGVO-Texte)
-- Richtungskorrekturen ("das sieht scheiße aus — nochmal")
-
 ---
 
 ## Was Sie hier sehen
 
-Die Website [levcon.ai](https://levcon.ai) ist die digitale Visitenkarte von **Enric-Bernard Sep-Albi**, KI-Trainer und Organisationsentwickler aus Wien. Das Herzstück ist der Bereich **AI News**: Täglich kuratierte KI-News aus internationalen Quellen — vollständig automatisiert durch ein lokales LLM auf einem kleinen VPS.
+Die Website [levcon.ai](https://levcon.ai) ist die digitale Visitenkarte von **Levcon.ai**, KI-Beratung und Schulungen aus Wien. Das Herzstück ist der Bereich **AI News**: Täglich kuratierte KI-News aus internationalen Quellen — vollständig automatisiert durch ein lokales LLM auf einem kleinen VPS.
 
 ### Die Herausforderung
 
@@ -127,7 +116,7 @@ n8n Workflow 03: Newsletter
 
 ## Lektionen
 
-1. **KI ist ein Werkzeug, kein Ersatz.** Die KI hat Stunden Arbeit gespart, aber ohne menschliche Steuerung hätte das Ergebnis keinen Wert.
+1. **KI ist ein Werkzeug, kein Ersatz.** Ohne menschliche Steuerung — Strategie, Design-Vorgaben, Qualitätssicherung und iterative Korrektur — hätte das Ergebnis keinen Wert.
 2. **Kleine Modelle reichen oft.** Qwen3.5:2b auf einer CPU ist nicht schnell, aber wenn man die Aufgabe richtig strukturiert (2 Läufe à 10 Items statt 1 Lauf mit 20), liefert es brauchbare Ergebnisse.
 3. **Lokal ist möglich.** DSGVO-Konformität bedeutet nicht Verzicht auf KI — es bedeutet, die KI auf den eigenen Server zu holen.
 4. **Iterativ gewinnt.** Kein Sprint war beim ersten Versuch perfekt. Jede Iteration brachte Verbesserungen — Bug-Fixes, UI-Polish, Performance-Tuning.
