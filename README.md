@@ -6,6 +6,47 @@ Diese Website ist ein reales Beispiel dafür, wie künstliche Intelligenz nicht 
 
 ---
 
+## Die KI-Story: Wie diese Website entstand
+
+Dieses Projekt ist nicht das Werk eines einzigen KI-Modells. Es ist das Ergebnis einer **multilateralen KI-Zusammenarbeit**, bei der verschiedene Modelle unterschiedliche Stärken eingebracht haben — orchestriert von einem Menschen, der die Richtung vorgegeben hat.
+
+### Phase 1: Konzept & Design-Sparring
+
+**Modell:** Claude Sonnet 4.6
+
+Die anfängliche Design-Sprache und Architektur wurden in einem iterativen Sparring-Prozess erarbeitet. Der Prototyp wurde als ausführliche Markdown-Dateien exportiert — mit Design-Tokens, Komponenten-Struktur und User-Flow-Dokumentation. Diese Markdown-Files dienten als Bauplan für alles, was folgte.
+
+### Phase 2: Technische Analyse
+
+**Modell:** Google Gemini 3.1
+
+Die Entscheidung, ein lokales LLM auf einem kleinen VPS einzusetzen, war nicht trivial. Welche Modelle laufen auf 3,8 GB RAM? Wie hält man DSGVO-Konformität ohne Cloud-APIs? Diese technische Machbarkeitsanalyse — Vergleich von Ollama-Modellen, RAM-Berechnungen, VPS-Kapazitätsplanung — kam von Gemini.
+
+### Phase 3: Umsetzung & Deployment
+
+**Modell:** GLM 5.2 (via Z.ai Code, mit SSH-Desktop-Client)
+
+Die eigentliche Code-Generierung — Next.js-Komponenten, API-Routes, Prisma-Schema, n8n-Workflows, nginx-Konfiguration, systemd-Service, GitHub Actions — wurde von GLM geschrieben. Mit direktem SSH-Zugriff auf den VPS wurden Konfiguration, Deployment und Hardening durchgeführt.
+
+### Phase 4: Lokale KI-Integration
+
+**Modell:** Qwen3.5:2b (lokal via Ollama)
+
+Das Herzstück der Website — die tägliche KI-News-Kuration — läuft vollständig lokal. Ein 2-Milliarden-Parameter-Modell auf einer CPU übersetzt Headlines, schreibt Zusammenfassungen und kategorisiert Artikel. Keine Cloud-API, keine Daten verlassen den VPS.
+
+### Der Mensch dahinter
+
+**Enric-Bernard Sep-Albi** (Owner, Levcon.ai)
+
+KI ist ein Werkzeug, kein Ersatz. Ohne menschliche Steuerung hätte das Ergebnis keinen Wert:
+- Strategische Entscheidungen (welche Quellen, welche Sprachen, welche Features)
+- Design-Vorgaben ("schlicht, elegant, österreichisch")
+- Qualitätssicherung (jeder Commit wurde reviewt)
+- Content-Review (Newsletter-Inhalte, DSGVO-Texte)
+- Richtungskorrekturen ("das sieht scheiße aus — nochmal")
+
+---
+
 ## Was Sie hier sehen
 
 Die Website [levcon.ai](https://levcon.ai) ist die digitale Visitenkarte von **Enric-Bernard Sep-Albi**, KI-Trainer und Organisationsentwickler aus Wien. Das Herzstück ist der Bereich **AI News**: Täglich kuratierte KI-News aus internationalen Quellen — vollständig automatisiert durch ein lokales LLM auf einem kleinen VPS.
@@ -84,33 +125,14 @@ n8n Workflow 03: Newsletter
 
 ---
 
-## Die KI-Zusammenarbeit
-
-Dieses Repository ist nicht von einer KI "generiert" worden. Es ist das Ergebnis einer monatelangen Zusammenarbeit zwischen einem Menschen (dem Owner) und KI-Assistenten (Z.ai Code). Die KI hat den Code geschrieben, der Mensch hat die Richtung vorgegeben, Entscheidungen getroffen und Qualität kontrolliert.
-
-### Was die KI gemacht hat
-
-- Architektur-Entwürfe und Sprint-Planung
-- Code-Generierung (Next.js, TypeScript, Prisma, n8n Workflows)
-- Bug-Fixes und Refactoring
-- Test-Scripts und Deployment-Automatisierung
-- Dokumentation
-
-### Was der Mensch gemacht hat
-
-- Strategische Entscheidungen (welche Quellen, welche Sprachen, welche Features)
-- Design-Vorgaben ("schlicht, elegant, österreichisch")
-- Qualitätssicherung (jeder Commit wurde reviewt)
-- Content-Review (Newsletter-Inhalte, DSGVO-Texte)
-- Richtungskorrekturen ("das sieht scheiße aus — nochmal")
-
-### Lektionen
+## Lektionen
 
 1. **KI ist ein Werkzeug, kein Ersatz.** Die KI hat Stunden Arbeit gespart, aber ohne menschliche Steuerung hätte das Ergebnis keinen Wert.
 2. **Kleine Modelle reichen oft.** Qwen3.5:2b auf einer CPU ist nicht schnell, aber wenn man die Aufgabe richtig strukturiert (2 Läufe à 10 Items statt 1 Lauf mit 20), liefert es brauchbare Ergebnisse.
 3. **Lokal ist möglich.** DSGVO-Konformität bedeutet nicht Verzicht auf KI — es bedeutet, die KI auf den eigenen Server zu holen.
 4. **Iterativ gewinnt.** Kein Sprint war beim ersten Versuch perfekt. Jede Iteration brachte Verbesserungen — Bug-Fixes, UI-Polish, Performance-Tuning.
 5. **Transparenz schafft Vertrauen.** Wenn Kunden sehen, wie KI eingesetzt wird (und welche Herausforderungen es gibt), entsteht Vertrauen in die Beratung.
+6. **Verschiedene Modelle für verschiedene Aufgaben.** Design-Sparring, technische Analyse und Code-Generierung erfordern unterschiedliche Stärken. Das beste Projekt nutzt das richtige Modell für die richtige Aufgabe.
 
 ---
 
@@ -201,10 +223,11 @@ ollama run qwen3.5:2b "Hello"
 Dieses Projekt zeigt, was möglich ist, wenn man KI nicht als Black Box betrachtet, sondern als Werkzeug in der Hand eines Menschen, der weiß, was er will.
 
 **Danke an:**
-- **Qwen** für das 2B-Modell, das auf einer CPU läuft
+- **Claude Sonnet 4.6** für Design-Sparring und Architektur-Konzept
+- **Google Gemini 3.1** für technische Machbarkeitsanalyse
+- **GLM 5.2** für Code-Generierung und VPS-Deployment
 - **n8n** für die Automatisierung
 - **Next.js** für das Framework
-- **Z.ai** für den KI-Assistenten, der den Code geschrieben hat
 - **Allen Open-Source-Entwicklern**, deren Bibliotheken hier genutzt werden
 
 ---
