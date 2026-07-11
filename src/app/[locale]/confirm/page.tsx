@@ -79,7 +79,7 @@ function ConfirmResult({ status, locale }: { status: 'confirmed' | 'already' | '
 
   const content = {
     confirmed: {
-      title: isEn ? 'Subscription confirmed' : 'Abonnement bestätigt',
+      title: isEn ? 'Subscription confirmed' : 'Anmeldung bestätigt',
       message: isEn
         ? 'Welcome to Levcon AI News. You will receive your first newsletter with the next daily edition.'
         : 'Willkommen bei Levcon AI News. Sie erhalten Ihren ersten Newsletter mit der nächsten täglichen Ausgabe.',

@@ -2065,7 +2065,7 @@ a.contact-row:hover { opacity: 0.5; }
 
 .confirm-title {
   margin: 0 0 1.5rem 0;
-  font-family: var(--lc-ff-d);
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(1.75rem, 5vw, 2.25rem);
   font-weight: 400;
   font-style: italic;
