@@ -2,13 +2,20 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations, useMessages } from 'next-intl';
+import { ArrowUp } from 'lucide-react';
 import AiNewsItem, { type AiNewsItemType } from '@/components/ainews/AiNewsItem';
 import AiNewsSignup from '@/components/ainews/AiNewsSignup';
 import AiNewsArchive from '@/components/ainews/AiNewsArchive';
 import AiNewsSettings from '@/components/ainews/AiNewsSettings';
+import AiNewsAdminPanel from '@/components/ainews/AiNewsAdminPanel';
+import StagingBanner from '@/components/StagingBanner';
 import { LANG_CODE_TO_SHORT } from '@/components/ainews/languages';
 import { getPanelSlug, getPanelFromSlug, PANEL_META, type PanelId } from '@/components/panel-routing';
 import type { AiNewsData } from '@/components/ainews/data';
+
+// Available AI News categories (matches the n8n workflow categories)
+const NEWS_CATEGORIES = ['research', 'business', 'regulation', 'tools', 'society'] as const;
+type NewsCategory = typeof NEWS_CATEGORIES[number];
 
 const FADE_MS = 320;
 
@@ -43,8 +50,43 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
   // User kann dann auf "Alle" umschalten wenn er beide Sprachen sehen will.
   const [newsLangFilter, setNewsLangFilter] = useState<string>(locale === 'en' ? 'en' : 'de');
 
+  // Category filter for AI News — default = "all"
+  const [newsCatFilter, setNewsCatFilter] = useState<'all' | NewsCategory>('all');
+
+  // Ref to the signup section (for "subscribe" CTA scroll from empty state)
+  const signupRef = useRef<HTMLDivElement>(null);
+
+  // Back-to-top button visibility (shows after scrolling past 600px)
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
   // Settings token (from URL: ?settings=<token>)
   const [settingsToken, setSettingsToken] = useState<string | null>(null);
+
+  // Admin token (from URL: ?admin=<token>) — for Quality Monitoring Panel
+  const [adminToken, setAdminToken] = useState<string | null>(null);
+
+  // Scroll listener for back-to-top button
+  useEffect(() => {
+    const onScroll = () => {
+      setShowBackToTop(window.scrollY > 600);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const scrollToSignup = useCallback(() => {
+    signupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Focus the email field after scroll for accessibility
+    setTimeout(() => {
+      const emailInput = signupRef.current?.querySelector<HTMLInputElement>('#ainews-email');
+      emailInput?.focus();
+    }, 400);
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const t = useTranslations();
   const messages = useMessages() as Record<string, unknown>;
@@ -159,6 +201,16 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
         // Don't scroll to top — AiNewsSettings component will scroll to itself
         const newUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({}, document.title, newUrl);
+      }
+
+      // Check for admin token (Quality Monitoring Panel)
+      // Token is the same as LEVCON_INTERNAL_API_KEY — owner-only access
+      const admin = params.get('admin');
+      if (admin && admin.length >= 32) {
+        setAdminToken(admin);
+        setActivePanel('ainews');
+        setIntroGone(true);
+        // Don't strip from URL — allows refresh to keep admin context
       }
     }
   }, []);
@@ -324,6 +376,9 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
       <a href="#main-content" className="skip-nav">
         {locale === 'de' ? 'Zum Inhalt springen' : 'Skip to content'}
       </a>
+
+      {/* ── STAGING BANNER (nur sichtbar wenn NEXT_PUBLIC_ENVIRONMENT=staging) ── */}
+      <StagingBanner locale={locale} />
 
       {/* ── HEADER ────────────────────────────── */}
       <header className="levcon-header">
@@ -567,29 +622,111 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
                   );
                 })()}
 
+                {/* Category filter (only if items have categories) */}
+                {(() => {
+                  const catSet = new Set(
+                    todaysNews.items
+                      .map((i: AiNewsItemType) => i.category)
+                      .filter((c: string | null): c is string => Boolean(c))
+                  );
+                  const cats = NEWS_CATEGORIES.filter(c => catSet.has(c));
+                  if (cats.length <= 1) return null;
+                  return (
+                    <div className="ainews-cat-filter" role="group" aria-label={t('ainews.category_filter_label')}>
+                      <button
+                        type="button"
+                        className={`ainews-cat-tag${newsCatFilter === 'all' ? ' active' : ''}`}
+                        onClick={() => setNewsCatFilter('all')}
+                      >
+                        {t('ainews.category_all')}
+                      </button>
+                      {cats.map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          className={`ainews-cat-tag${newsCatFilter === cat ? ' active' : ''}`}
+                          onClick={() => setNewsCatFilter(cat)}
+                          data-cat={cat}
+                        >
+                          {t(`ainews.category_${cat}`)}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
+
                 <div className="ainews-list">
-                  {todaysNews.items
-                    .filter((item: AiNewsItemType) => newsLangFilter === 'all' || item.languageOrig === newsLangFilter)
-                    .map((item: AiNewsItemType) => (
-                    <AiNewsItem key={item.id} item={item} locale={locale} />
-                  ))}
+                  {(() => {
+                    const filtered = todaysNews.items.filter((item: AiNewsItemType) => {
+                      const langOk = newsLangFilter === 'all' || item.languageOrig === newsLangFilter;
+                      const catOk = newsCatFilter === 'all' || item.category === newsCatFilter;
+                      return langOk && catOk;
+                    });
+                    if (filtered.length === 0) {
+                      return (
+                        <p className="ainews-empty ainews-empty-filtered">
+                          {locale === 'en'
+                            ? 'No items match the current filters.'
+                            : 'Keine Einträge passen zu den gewählten Filtern.'}
+                        </p>
+                      );
+                    }
+                    return filtered.map((item: AiNewsItemType, idx: number) => (
+                      <AiNewsItem key={item.id} item={item} locale={locale} index={idx} />
+                    ));
+                  })()}
                 </div>
               </>
             ) : (
-              <p className="ainews-empty">{t('ainews.no_news_today')}</p>
+              <div className="ainews-empty-card" role="status">
+                <div className="ainews-empty-icon" aria-hidden="true">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+                    <path d="M18 14h-8" />
+                    <path d="M15 18h-5" />
+                    <path d="M10 6h8v4h-8V6z" />
+                  </svg>
+                </div>
+                <h3 className="ainews-empty-title">{t('ainews.empty_title')}</h3>
+                <p className="ainews-empty-body">{t('ainews.empty_body')}</p>
+                <dl className="ainews-empty-meta">
+                  <div className="ainews-empty-meta-row">
+                    <dt>{t('ainews.empty_next_label')}</dt>
+                    <dd>{t('ainews.empty_next_value')}</dd>
+                  </div>
+                  <div className="ainews-empty-meta-row">
+                    <dt>{t('ainews.empty_method_label')}</dt>
+                    <dd>{t('ainews.empty_method_value')}</dd>
+                  </div>
+                </dl>
+                <button
+                  type="button"
+                  className="ainews-empty-cta"
+                  onClick={scrollToSignup}
+                >
+                  {t('ainews.empty_cta')} →
+                </button>
+              </div>
             )}
 
             <AiNewsArchive archive={archivedNews} locale={locale} />
 
-            {settingsToken ? (
-              <AiNewsSettings
-                token={settingsToken}
-                locale={locale}
-                onUpdated={() => {}}
-              />
-            ) : (
-              <AiNewsSignup locale={locale} onOpenPrivacy={() => openPanel('datenschutz')} />
+            {/* Admin Quality Monitoring Panel — only visible with ?admin=<token> */}
+            {adminToken && (
+              <AiNewsAdminPanel adminToken={adminToken} locale={locale} />
             )}
+
+            <div ref={settingsToken ? undefined : signupRef}>
+              {settingsToken ? (
+                <AiNewsSettings
+                  token={settingsToken}
+                  locale={locale}
+                  onUpdated={() => {}}
+                />
+              ) : (
+                <AiNewsSignup locale={locale} onOpenPrivacy={() => openPanel('datenschutz')} />
+              )}
+            </div>
           </div></div>
         </section>
 
@@ -824,6 +961,17 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
           </div>
         </div>
       </footer>
+
+      {/* Back-to-top floating button */}
+      <button
+        type="button"
+        className={`back-to-top${showBackToTop ? ' is-visible' : ''}`}
+        onClick={scrollToTop}
+        aria-label={t('ainews.back_to_top')}
+        title={t('ainews.back_to_top')}
+      >
+        <ArrowUp size={18} aria-hidden="true" />
+      </button>
     </div>
   );
 }

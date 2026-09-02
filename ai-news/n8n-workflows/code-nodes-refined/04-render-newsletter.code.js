@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  RENDER NEWSLETTER HTML (v4 — Echtes Levcon Template)
+//  RENDER NEWSLETTER HTML (v5 — Quality-Aware Partial Rendering)
 //
 //  Verwendet das original Levcon-Newsletter-Template aus
 //  ai-news/templates/newsletter-html-de.html (+ en.html) mit:
@@ -11,12 +11,28 @@
 //    - Artikel mit border-top Trennlinien (#D8D7D3)
 //    - Footer mit Adresse + Links
 //
-//  NEUE Features (Sprint 14c):
+//  Features:
 //    1. 2 Blöcke: DE-Items (DACH) zuerst, EN-Items (International) danach
 //    2. Translate-Link bei fremdsprachigen Items
 //    3. headlineDe/headlineEn Übersetzungen verwenden
 //
-//  Bug-Fixes:
+//  NEU in v5 (Quality-Gate-Architektur):
+//    4. Partial-Warning Block: wenn EN-Block fehlt (LLM-Fail), wird
+//       ein dezenter Hinweis angezeigt statt stillschweigend wegzulassen.
+//       "Heute liegen leider keine internationalen News vor — DACH-Ausgabe."
+//       Subscriber weiß Bescheid, kein "Wo ist der Rest?"-Effekt.
+//    5. Fallback-Hinweis: wenn Vortages-News verwendet wurden (beide
+//       Buckets failed), wird das im Header-Subtle-Hinweis sichtbar.
+//    6. Quality-Telemetry wird durchgereicht (für WorkflowRun-Logging).
+//
+//  Standards (per QUALITY-GUIDELINES.md):
+//    - HTML5 doctype, charset=UTF-8
+//    - role="presentation" auf Layout-Tabellen (WAI-ARIA 1.2)
+//    - rel="noopener noreferrer" auf externen Links (RFC 3986 security)
+//    - alt-Text auf Bildern (WCAG 2.1 AA)
+//    - Inline-CSS für Email-Client-Kompatibilität
+//
+//  Bug-Fixes (aus v4):
 //    - news.data unwrap (rawNews.news || rawNews)
 //    - Datum robust parsen (kein NaN)
 //    - Subscriber aus API-Wrapper extrahieren
@@ -156,17 +172,90 @@ function blockSeparator(labelText) {
               </table>`;
 }
 
+// ── PARTIAL WARNING BLOCK (v5 — Quality-Gate) ─────────────────
+// Dezenter Hinweis wenn ein Block (DE oder EN) fehlt.
+// Wird AN STELLE des leeren Blocks angezeigt — Subscriber sieht
+// sofort, dass die Ausgabe unvollständig ist, ohne dass der Mail-
+// Client "Wo ist der Rest?" zeigt.
+//
+// Visuell: schmaler Info-Streifen mit ♪ Symbol, dezenter Hintergrund
+// (var(--lc-rule) = #D8D7D3, 10% opacity via background-color #F5F4F1).
+function partialWarningBlock(isDeNewsletter, missingBucket) {
+  // isDeNewsletter: Sprache des Newsletters (DE oder EN)
+  // missingBucket: welcher Bucket fehlt ('de' oder 'en')
+  const isDe = isDeNewsletter === 'de';
+
+  // Texte je nach Newsletter-Sprache UND fehlendem Bucket
+  let message;
+  if (missingBucket === 'en') {
+    // EN-Block fehlt im DE-Newsletter
+    message = isDe
+      ? 'Heute liegen leider keine internationalen News vor — DACH-Ausgabe.'
+      : 'Unfortunately, no international news available today — DACH edition only.';
+  } else {
+    // DE-Block fehlt im EN-Newsletter (oder umgekehrt)
+    message = isDe
+      ? 'Heute liegen leider keine deutschsprachigen News vor — internationale Ausgabe.'
+      : 'Unfortunately, no German-language news available today — international edition only.';
+  }
+
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #D8D7D3;">
+                <tr>
+                  <td style="padding:24px 0 24px 0;background-color:#F5F4F1;text-align:center;">
+                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#8A8A85;font-weight:300;font-style:italic;">
+                      ${escapeHtml(message)}
+                    </p>
+                  </td>
+                </tr>
+              </table>`;
+}
+
+// ── FALLBACK HINT (v5 — Vortages-News Hinweis) ────────────────
+// Wenn Vortages-News als Fallback verwendet wurden, wird ein
+// dezenter Hinweis unter dem Datum eingeblendet.
+// "Heutige Kuration ausgefallen — News vom 21. Juli 2026."
+function fallbackHint(isDe, fallbackDate) {
+  if (!fallbackDate) return '';
+
+  // Datum formatieren (ISO 8601 input → lesbares Datum)
+  let formattedDate = fallbackDate;
+  try {
+    const d = new Date(fallbackDate);
+    if (!isNaN(d.getTime())) {
+      const DE_MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+      const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      formattedDate = isDe
+        ? d.getUTCDate() + '. ' + DE_MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear()
+        : EN_MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+    }
+  } catch (e) { /* Fallback auf ISO-String */ }
+
+  const hintText = isDe
+    ? 'Heutige Kuration ausgefallen — News vom ' + formattedDate + '.'
+    : 'Today\'s curation failed — showing news from ' + formattedDate + '.';
+
+  return `<p style="margin:14px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#8A8A85;font-weight:300;font-style:italic;text-align:center;">
+            ${escapeHtml(hintText)}
+          </p>`;
+}
+
 // ── RENDER DE NEWSLETTER ───────────────────────────────────────
 // 2 Blöcke: DE-Items (DACH) zuerst, dann EN-Items (International)
+// v5: Wenn EN-Block leer → Partial-Warning statt stillschweigend weglassen
+// v5: Wenn _fallback gesetzt → Fallback-Hint unter Datum
 function renderDe(news, unsubUrl, settingsUrl, dateDe) {
   const allItems = news.items || [];
   const deItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'de');
   const enItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'en');
 
   const deBlock = deItems.map(it => renderItem(it, 'de')).join('');
+  // v5: EN-Block leer → Partial-Warning (statt '' wie in v4)
   const enBlock = enItems.length > 0
     ? blockSeparator('International') + enItems.map(it => renderItem(it, 'de')).join('')
-    : '';
+    : partialWarningBlock('de', 'en');
+
+  // v5: Fallback-Hint (nur wenn _fallback gesetzt)
+  const fallbackHtml = news._fallback ? fallbackHint(true, news._fallback.date) : '';
 
   return `<!DOCTYPE html>
 <html lang="de">
@@ -216,6 +305,7 @@ function renderDe(news, unsubUrl, settingsUrl, dateDe) {
               <h1 class="lc-date" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#464644;line-height:1.2;letter-spacing:-0.01em;">
                 ${escapeHtml(dateDe)}
               </h1>
+              ${fallbackHtml}
             </td>
           </tr>
 
@@ -266,10 +356,13 @@ function renderEn(news, unsubUrl, settingsUrl, dateEn) {
   const deItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'de');
   const enItems = allItems.filter(it => (it.languageOrig || 'en').toLowerCase() === 'en');
 
-  const deBlock = deItems.map(it => renderItem(it, 'en')).join('');
-  const enBlock = enItems.length > 0
-    ? blockSeparator('International') + enItems.map(it => renderItem(it, 'en')).join('')
-    : '';
+  const deBlock = deItems.length > 0
+    ? blockSeparator('DACH') + deItems.map(it => renderItem(it, 'en')).join('')
+    : partialWarningBlock('en', 'de');  // v5: Partial-Warning statt ''
+  const enBlock = enItems.map(it => renderItem(it, 'en')).join('');
+
+  // v5: Fallback-Hint (nur wenn _fallback gesetzt)
+  const fallbackHtml = news._fallback ? fallbackHint(false, news._fallback.date) : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -319,6 +412,7 @@ function renderEn(news, unsubUrl, settingsUrl, dateEn) {
               <h1 class="lc-date" style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;font-style:italic;color:#464644;line-height:1.2;letter-spacing:-0.01em;">
                 ${escapeHtml(dateEn)}
               </h1>
+              ${fallbackHtml}
             </td>
           </tr>
 

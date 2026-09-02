@@ -5,6 +5,10 @@ import type { NextRequest } from 'next/server';
 
 const intlMiddleware = createMiddleware(routing);
 
+// Environment detection — Staging gets noindex headers (defense in depth
+// alongside nginx X-Robots-Tag). Production allows indexing normally.
+const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
+
 export default function middleware(request: NextRequest) {
   const response = intlMiddleware(request);
 
@@ -14,6 +18,14 @@ export default function middleware(request: NextRequest) {
   // Dies fixt den Bug wo der DE-Sprachbutton auf levcon.ai nicht
   // "active" war (Cookie=en hat DE-Link auf /en weitergeleitet).
   response.cookies.delete('NEXT_LOCALE');
+
+  // Staging: X-Robots-Tag Header setzen (zusätzlich zu nginx).
+  // Defense in depth — nginx setzt den Header bereits, aber falls
+  // jemand die nginx config überschreibt oder der Header verloren geht,
+  // haben wir hier eine zweite Absicherung auf Application-Ebene.
+  if (isStaging) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+  }
 
   return response;
 }

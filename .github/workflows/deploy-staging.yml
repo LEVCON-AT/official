@@ -1,0 +1,173 @@
+# ═══════════════════════════════════════════════════════════════
+#  LEVCON.AI STAGING — GITHUB ACTIONS DEPLOYMENT WORKFLOW
+#  Datei: .github/workflows/deploy-staging.yml
+# ═══════════════════════════════════════════════════════════════
+#
+#  Trigger: Jeder Push auf `staging` → automatisches Deployment auf VPS (Staging)
+#  Manueller Trigger: GitHub UI → Actions → "Deploy Staging to VPS" → Run workflow
+#
+#  Voraussetzungen (siehe deploy/STAGING.md):
+#  1. Einmaliges Initial-Setup via deploy/staging/vps-setup-staging.sh auf VPS
+#  2. GitHub Secrets konfigriert (gleich wie Production + optional eigene für Staging):
+#     - VPS_HOST (z.B. 87.106.25.91) — gleicher VPS wie Production
+#     - VPS_USER (z.B. root oder deploy-User)
+#     - VPS_SSH_KEY (private SSH-Key)
+#     - VPS_PORT (optional, default 22)
+#
+#  Branch-Strategie:
+#  - main         → Production (deploy.yml)
+#  - staging      → Staging (dieses Workflow)
+#  - feature/*    → PR nach staging, dann staging → main
+#
+#  Staging vs Production:
+#  - Staging läuft auf demselben VPS, aber:
+#    - Eigener Projekt-Pfad: /var/www/levcon-staging
+#    - Eigene DB: levcon-staging.db (getrennt von Production)
+#    - Eigener Port: 3003 (Production: 3002)
+#    - Eigener systemd-Service: levcon-staging
+#    - Eigene Subdomain: staging.levcon.ai
+#    - NEXT_PUBLIC_ENVIRONMENT=staging (aktiviert StagingBanner + noindex)
+#    - SMTP_DISABLED=true (keine echten Mails an Subscriber)
+
+name: Deploy Staging to VPS
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable debug output'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+# Verhindert parallele Staging-Deploys (eigene Gruppe, nicht Production-Konflikt)
+concurrency:
+  group: deploy-staging-vps
+  cancel-in-progress: false
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: staging  # Explicitly checkout staging branch
+
+      - name: Setup SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -e
+          PORT="${VPS_PORT:-22}"
+          echo "Using VPS_HOST=$VPS_HOST PORT=$PORT"
+          
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Write private key
+          echo "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          # Verify key was written
+          if [ ! -s ~/.ssh/deploy_key ]; then
+            echo "ERROR: VPS_SSH_KEY secret is empty or not set"
+            exit 1
+          fi
+          
+          # Key scan (more robust with timeout)
+          echo "Scanning VPS host key on port $PORT..."
+          ssh-keyscan -p "$PORT" -T 30 "$VPS_HOST" >> ~/.ssh/known_hosts 2>&1 || {
+            echo "ERROR: ssh-keyscan failed for $VPS_HOST:$PORT"
+            exit 1
+          }
+          
+          # Test SSH connection
+          echo "Testing SSH connection..."
+          ssh -i ~/.ssh/deploy_key -p "$PORT" -o ConnectTimeout=10 -o StrictHostKeyChecking=yes \
+            "${{ secrets.VPS_USER }}@$VPS_HOST" "echo SSH_OK" || {
+            echo "ERROR: SSH connection failed"
+            exit 1
+          }
+          echo "✓ SSH setup complete"
+
+      - name: Copy staging update script to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          PORT="${VPS_PORT:-22}"
+          scp -i ~/.ssh/deploy_key -P "$PORT" -o StrictHostKeyChecking=yes \
+            deploy/staging/vps-update-staging.sh \
+            "$VPS_USER@$VPS_HOST:/tmp/vps-update-staging.sh"
+
+      - name: Execute staging update script on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            chmod +x /tmp/vps-update-staging.sh
+            bash /tmp/vps-update-staging.sh
+
+      - name: Health Check (Staging)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            sleep 5
+            echo "=== Staging Service Status ==="
+            systemctl is-active levcon-staging
+            echo "=== Staging DB File ==="
+            ls -la /var/www/levcon-staging/db/ 2>&1
+            echo "=== .env DATABASE_URL ==="
+            grep DATABASE_URL /var/www/levcon-staging/.env
+            echo "=== .env NEXT_PUBLIC_ENVIRONMENT ==="
+            grep NEXT_PUBLIC_ENVIRONMENT /var/www/levcon-staging/.env
+            echo "=== Test local (Port 3003) ==="
+            curl -sI http://127.0.0.1:3003/ | head -3
+            echo "=== Test external (staging.levcon.ai) ==="
+            curl -sI https://staging.levcon.ai/ | head -5
+            echo "=== Check X-Robots-Tag header (should be noindex) ==="
+            curl -sI https://staging.levcon.ai/ | grep -i "x-robots-tag" || echo "⚠ X-Robots-Tag header not found"
+            if curl -sf https://staging.levcon.ai/ -o /dev/null; then
+              echo "✅ Staging health check passed — site is up"
+            else
+              echo "❌ Staging health check failed"
+              journalctl -u levcon-staging --no-pager -n 10
+              exit 1
+            fi
+
+      - name: Cleanup
+        if: always()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            rm -f /tmp/vps-update-staging.sh
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Staging deployment failed!"
+          echo "Check logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          exit 1

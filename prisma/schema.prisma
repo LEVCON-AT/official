@@ -94,18 +94,34 @@ model NewsletterSubscriber {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  WORKFLOW-RUNS — n8n-Monitoring (optional)
+//  WORKFLOW-RUNS — n8n-Monitoring + Quality Reports
 // ═══════════════════════════════════════════════════════════
+//  status: 'success' | 'partial' | 'error' | 'skipped'
+//  itemCount: Final item count ingested
+//  itemCountDe / itemCountEn: Per-bucket count (quality monitoring)
+//  retryCount: How many Ollama retries occurred
+//  warningCount: Number of validation warnings
+//  fallbackUsed: 'none' | 'previous_day' | 'empty'
+//  qualityReport: JSON string with detailed validation report
+//  errorMessage: Error message if status = 'error'
 
 model WorkflowRun {
-  id           Int       @id @default(autoincrement())
-  workflowId   String
-  runAt        DateTime
-  status       String
-  itemCount    Int?
-  errorMessage String?
-  createdAt    DateTime  @default(now())
+  id             Int       @id @default(autoincrement())
+  workflowId     String
+  runAt          DateTime
+  status         String
+  itemCount      Int?
+  itemCountDe    Int?
+  itemCountEn    Int?
+  retryCount     Int?      @default(0)
+  warningCount   Int?      @default(0)
+  fallbackUsed   String?   @default("none")
+  qualityReport  String?   // JSON string (Prisma SQLite has no native JSON type)
+  errorMessage   String?
+  createdAt      DateTime  @default(now())
 
   @@index([workflowId, runAt])
+  @@index([status, runAt])
   @@map("workflow_runs")
 }
+
