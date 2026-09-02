@@ -89,6 +89,82 @@
   --lc-chip-px: 0.28rem 0.6rem;
 }
 
+/* ── STAGING BANNER (nur sichtbar wenn NEXT_PUBLIC_ENVIRONMENT=staging) ── */
+.staging-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--lc-red);
+  color: #FFFFFF;
+  font-family: var(--lc-ff-b);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.5rem 1.25rem;
+  text-align: center;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+.staging-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.staging-banner-icon {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.staging-banner-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.staging-banner-text strong {
+  font-weight: 600;
+  letter-spacing: 0.24em;
+}
+
+.staging-banner-sep {
+  opacity: 0.6;
+}
+
+.staging-banner-detail {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.58rem;
+  opacity: 0.95;
+}
+
+.staging-banner-url {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
+  padding-left: 0.5rem;
+  margin-left: 0.25rem;
+}
+
+@media (max-width: 620px) {
+  .staging-banner {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.55rem;
+  }
+  .staging-banner-detail {
+    font-size: 0.52rem;
+  }
+  .staging-banner-url {
+    display: none;
+  }
+}
+
 /* ── NOSCRIPT ──────────────────────────────── */
 .noscript-msg {
   padding: 2rem;
@@ -846,6 +922,755 @@
   font-style: italic;
   color: var(--lc-muted);
   font-size: 1.05rem;
+}
+
+/* Empty state when filters result in 0 items (subtle, italic note) */
+.ainews-empty-filtered {
+  padding: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+/* ── AI NEWS EMPTY CARD (no news today) ──────── */
+.ainews-empty-card {
+  margin-top: 2.5rem;
+  padding: 2.5rem 2rem 2.25rem;
+  border: 1px solid var(--lc-rule);
+  background: var(--lc-panel-bg);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle decorative top accent line in Levcon red */
+.ainews-empty-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 2px;
+  background: var(--lc-red);
+}
+
+.ainews-empty-icon {
+  color: var(--lc-muted);
+  opacity: 0.7;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ainews-empty-title {
+  font-family: var(--lc-ff-d);
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  font-weight: 500;
+  font-style: italic;
+  color: var(--lc-ink);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.ainews-empty-body {
+  font-family: var(--lc-ff-b);
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--lc-ink);
+  opacity: var(--lc-muted-text);
+  max-width: 38ch;
+  margin: 0 0 0.5rem;
+}
+
+.ainews-empty-meta {
+  margin: 0.75rem 0 0.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.ainews-empty-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--lc-bg);
+  border: 1px solid var(--lc-rule);
+}
+
+.ainews-empty-meta-row dt {
+  font-family: var(--lc-ff-b);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+}
+
+.ainews-empty-meta-row dd {
+  font-family: var(--lc-ff-b);
+  font-size: 0.7rem;
+  color: var(--lc-ink);
+  margin: 0;
+  text-align: right;
+}
+
+.ainews-empty-cta {
+  margin-top: 1rem;
+  font-family: var(--lc-ff-b);
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lc-bg);
+  background: var(--lc-ink);
+  border: 1px solid var(--lc-ink);
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.18s;
+  -webkit-appearance: none;
+  min-height: 44px;
+}
+
+.ainews-empty-cta:hover {
+  background: var(--lc-red);
+  border-color: var(--lc-red);
+  transform: translateY(-1px);
+}
+
+.ainews-empty-cta:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 3px;
+}
+
+.ainews-empty-cta:active {
+  transform: translateY(0);
+}
+
+/* ── AI NEWS CATEGORY FILTER ─────────────────── */
+.ainews-cat-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.ainews-cat-tag {
+  font-family: var(--lc-ff-b);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+  background: none;
+  border: 1px solid var(--lc-rule);
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  -webkit-appearance: none;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Subtle category color dot (left of label) */
+.ainews-cat-tag::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lc-muted);
+  opacity: 0.6;
+  transition: background 0.18s, opacity 0.18s;
+}
+
+/* Per-category accent colors (subtle, Levcon-typical muted palette) */
+.ainews-cat-tag[data-cat="research"]::before   { background: #6b7fb3; }
+.ainews-cat-tag[data-cat="business"]::before   { background: #c8a96a; }
+.ainews-cat-tag[data-cat="regulation"]::before { background: #b37b6b; }
+.ainews-cat-tag[data-cat="tools"]::before      { background: #6bb37f; }
+.ainews-cat-tag[data-cat="society"]::before    { background: #b36ba8; }
+
+.ainews-cat-tag:hover {
+  border-color: var(--lc-ink);
+  color: var(--lc-ink);
+}
+
+.ainews-cat-tag:hover::before {
+  opacity: 1;
+}
+
+.ainews-cat-tag.active {
+  border-color: var(--lc-ink);
+  background: var(--lc-ink);
+  color: var(--lc-bg);
+}
+
+.ainews-cat-tag.active::before {
+  opacity: 1;
+}
+
+.ainews-cat-tag:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 2px;
+}
+
+/* ── AI NEWS ITEM ENHANCEMENTS ───────────────── */
+/* Reading time chip (right-aligned in toggle) */
+.ainews-item-readtime {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: var(--lc-ff-b);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--lc-muted);
+  opacity: 0.7;
+  padding-left: 0.5rem;
+  white-space: nowrap;
+}
+
+/* Copy-link button (in item meta row) */
+.ainews-item-copybtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--lc-muted);
+  cursor: pointer;
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
+  -webkit-appearance: none;
+  padding: 0;
+}
+
+.ainews-item-copybtn:hover {
+  color: var(--lc-ink);
+  border-color: var(--lc-rule);
+  background: var(--lc-panel-bg);
+}
+
+.ainews-item-copybtn:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 2px;
+}
+
+.ainews-item-copymsg {
+  margin: 0.5rem 0 0;
+  font-family: var(--lc-ff-b);
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.ainews-item-copymsg.is-ok {
+  color: var(--lc-success);
+}
+
+.ainews-item-copymsg.is-fail {
+  color: var(--lc-red);
+}
+
+/* Category icon in item toggle (subtle, muted) */
+.ainews-category-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lc-muted);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Staggered fade-in for ainews items */
+@keyframes ainews-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ainews-item {
+  animation: ainews-fade-in 0.4s ease-out both;
+  animation-delay: var(--ainews-stagger, 0ms);
+}
+
+/* Refined hover micro-interaction on item head */
+.ainews-item-head {
+  transition: background 0.18s;
+}
+
+.ainews-item-head:hover {
+  background: var(--lc-panel-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ainews-item {
+    animation: none;
+  }
+  .ainews-item-head:hover {
+    background: transparent;
+  }
+  .ainews-empty-cta:hover {
+    transform: none;
+  }
+}
+
+/* ── BACK-TO-TOP FLOATING BUTTON ─────────────── */
+.back-to-top {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lc-ink);
+  color: var(--lc-bg);
+  border: 1px solid var(--lc-ink);
+  border-radius: 0;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.25s, visibility 0.25s, transform 0.25s, background 0.18s, border-color 0.18s;
+  -webkit-appearance: none;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(70, 70, 68, 0.18);
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: var(--lc-red);
+  border-color: var(--lc-red);
+  transform: translateY(-2px);
+}
+
+.back-to-top:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 3px;
+}
+
+.back-to-top:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top {
+    transition: opacity 0.25s, visibility 0.25s, background 0.18s, border-color 0.18s;
+  }
+  .back-to-top:hover {
+    transform: none;
+  }
+}
+
+/* ── AI NEWS ADMIN PANEL (Quality Monitoring) ── */
+.ainews-admin {
+  margin-top: 2.5rem;
+  padding: 1.75rem 1.5rem;
+  border: 1px solid var(--lc-rule);
+  background: var(--lc-panel-bg);
+}
+
+.ainews-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ainews-admin-title {
+  font-family: var(--lc-ff-b);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lc-ink);
+  margin: 0;
+}
+
+.ainews-admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ainews-admin-lastfetch {
+  font-family: var(--lc-ff-b);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--lc-muted);
+  text-transform: uppercase;
+}
+
+.admin-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--lc-rule);
+  color: var(--lc-ink);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  -webkit-appearance: none;
+  padding: 0;
+}
+
+.admin-refresh-btn:hover:not(:disabled) {
+  border-color: var(--lc-ink);
+  background: var(--lc-bg);
+}
+
+.admin-refresh-btn:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: 2px;
+}
+
+.admin-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-spin {
+  animation: admin-spin 1s linear infinite;
+}
+
+@keyframes admin-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-spin {
+    animation: none;
+  }
+}
+
+.ainews-admin-lead {
+  font-family: var(--lc-ff-b);
+  font-size: 0.7rem;
+  line-height: 1.65;
+  color: var(--lc-ink);
+  opacity: var(--lc-muted-text);
+  margin: 0 0 1.5rem;
+}
+
+.ainews-admin-loading {
+  font-family: var(--lc-ff-d);
+  font-style: italic;
+  color: var(--lc-muted);
+  padding: 1.5rem 0;
+  text-align: center;
+}
+
+.ainews-admin-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(200, 16, 46, 0.08);
+  border-left: 2px solid var(--lc-red);
+  color: var(--lc-red);
+  font-family: var(--lc-ff-b);
+  font-size: 0.7rem;
+}
+
+/* ── SUMMARY STAT CARDS ──────────────────────── */
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.admin-stat-card {
+  padding: 0.85rem 0.9rem;
+  background: var(--lc-bg);
+  border: 1px solid var(--lc-rule);
+}
+
+.admin-stat-label {
+  font-family: var(--lc-ff-b);
+  font-size: 0.45rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+  margin-bottom: 0.35rem;
+}
+
+.admin-stat-value {
+  font-family: var(--lc-ff-d);
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--lc-ink);
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.admin-stat-value.is-ok { color: var(--lc-success); }
+.admin-stat-value.is-warn { color: #b37b2c; }
+.admin-stat-value.is-bad { color: var(--lc-red); }
+
+.admin-stat-sub {
+  font-family: var(--lc-ff-b);
+  font-size: 0.55rem;
+  color: var(--lc-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ── PER-DAY LIST ────────────────────────────── */
+.admin-section-title {
+  font-family: var(--lc-ff-b);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+  margin: 0 0 0.75rem;
+}
+
+.admin-empty {
+  font-family: var(--lc-ff-d);
+  font-style: italic;
+  color: var(--lc-muted);
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.admin-day-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--lc-rule);
+}
+
+.admin-day-item {
+  border-bottom: 1px solid var(--lc-rule);
+}
+
+.admin-day-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--lc-ff-b);
+  color: var(--lc-ink);
+  transition: background 0.18s;
+  -webkit-appearance: none;
+  min-height: 44px;
+  flex-wrap: wrap;
+}
+
+.admin-day-toggle:hover:not([aria-disabled="true"]) {
+  background: var(--lc-bg);
+}
+
+.admin-day-toggle:focus-visible {
+  outline: 1.5px solid var(--lc-ink);
+  outline-offset: -1px;
+}
+
+.admin-day-toggle[aria-disabled="true"] {
+  cursor: default;
+}
+
+.admin-status-icon {
+  flex-shrink: 0;
+}
+
+.admin-status-success { color: var(--lc-success); }
+.admin-status-partial { color: #b37b2c; }
+.admin-status-error { color: var(--lc-red); }
+.admin-status-skipped { color: var(--lc-muted); }
+
+.admin-day-date {
+  font-size: 0.7rem;
+  font-weight: 500;
+  min-width: 110px;
+}
+
+.admin-day-time {
+  font-size: 0.6rem;
+  color: var(--lc-muted);
+  min-width: 50px;
+}
+
+.admin-day-status {
+  font-size: 0.5rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lc-muted);
+  min-width: 80px;
+}
+
+.admin-day-counts {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.admin-count-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--lc-rule);
+  background: var(--lc-bg);
+  color: var(--lc-ink);
+  white-space: nowrap;
+}
+
+.admin-count-de { color: #6b7fb3; border-color: rgba(107, 127, 179, 0.3); }
+.admin-count-en { color: #c8a96a; border-color: rgba(200, 169, 106, 0.3); }
+.admin-count-retry { color: #b37b2c; border-color: rgba(179, 123, 44, 0.3); }
+.admin-count-warn { color: #b37b2c; border-color: rgba(179, 123, 44, 0.3); }
+.admin-count-fallback { color: var(--lc-red); border-color: rgba(200, 16, 46, 0.3); }
+
+.admin-day-chevron {
+  display: flex;
+  align-items: center;
+  color: var(--lc-muted);
+  flex-shrink: 0;
+}
+
+/* ── DAY DETAILS (Warnings + Errors) ─────────── */
+.admin-day-details {
+  padding: 0.75rem 1.5rem 1rem;
+  background: var(--lc-bg);
+  border-top: 1px solid var(--lc-rule);
+}
+
+.admin-detail-block {
+  margin-top: 0.5rem;
+  font-family: var(--lc-ff-b);
+  font-size: 0.65rem;
+  line-height: 1.6;
+  color: var(--lc-ink);
+}
+
+.admin-detail-block strong {
+  display: block;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.5rem;
+  color: var(--lc-muted);
+  margin-bottom: 0.35rem;
+}
+
+.admin-detail-block ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-detail-block li {
+  padding: 0.25rem 0 0.25rem 0.75rem;
+  position: relative;
+  color: var(--lc-ink);
+  opacity: var(--lc-muted-text);
+}
+
+.admin-detail-block li::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  color: var(--lc-muted);
+}
+
+.admin-detail-error code {
+  display: block;
+  margin-top: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(200, 16, 46, 0.06);
+  border-left: 2px solid var(--lc-red);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.65rem;
+  color: var(--lc-red);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.admin-detail-errors strong { color: var(--lc-red); }
+.admin-detail-warnings strong { color: #b37b2c; }
+
+.ainews-admin .admin-footer-note {
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--lc-rule);
+  font-family: var(--lc-ff-b);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--lc-muted);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ── ADMIN PANEL MOBILE ──────────────────────── */
+@media (max-width: 620px) {
+  .ainews-admin {
+    padding: 1.25rem 1rem;
+  }
+  .admin-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .admin-stat-card {
+    padding: 0.65rem 0.7rem;
+  }
+  .admin-stat-value {
+    font-size: 1.3rem;
+  }
+  .admin-day-toggle {
+    padding: 0.6rem 0.4rem;
+    gap: 0.5rem;
+  }
+  .admin-day-date { min-width: auto; font-size: 0.65rem; }
+  .admin-day-time { display: none; }
+  .admin-day-status { min-width: auto; }
+  .admin-day-counts {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 0.3rem;
+  }
+  .admin-day-details {
+    padding: 0.6rem 0.75rem 0.85rem;
+  }
 }
 
 /* ── AI NEWS ARCHIVE ─────────────────────────── */
@@ -1999,6 +2824,28 @@ a.contact-row:hover { opacity: 0.5; }
   .ainews-item-body { padding-left: 1.4rem; }
   .ainews-signup { max-width: 100%; }
   .ainews-signup-submit { width: 100%; align-self: stretch; }
+  /* Reading time chip hidden on very small screens to save space */
+  .ainews-item-readtime { display: none; }
+  /* Back-to-top button: smaller + closer to edge on mobile */
+  .back-to-top {
+    bottom: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+  }
+  /* Empty-state card: tighter padding on mobile */
+  .ainews-empty-card {
+    padding: 2rem 1.25rem 1.75rem;
+  }
+  .ainews-empty-title {
+    font-size: 1.25rem;
+  }
+  .ainews-empty-body {
+    font-size: 0.75rem;
+  }
+  .ainews-empty-cta {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {

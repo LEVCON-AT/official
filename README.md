@@ -151,7 +151,14 @@ levcon.ai/
 │   ├── QUALITY-GUIDELINES.md    # Coding-Standards
 │   └── ENV-TEMPLATE.md          # Environment-Variablen Template
 ├── deploy/                      # VPS Deployment (nginx, systemd, scripts)
-└── .github/workflows/deploy.yml # GitHub Actions Auto-Deploy
+│   ├── STAGING.md               # Staging CI/CD Doku (Branch-Strategie, Setup, Test-Workflow)
+│   ├── staging/                 # Staging-spezifische Scripts
+│   │   ├── vps-setup-staging.sh # Einmaliges Staging-Setup auf VPS
+│   │   └── vps-update-staging.sh # Wiederkehrendes Update bei staging-push
+│   └── ...
+├── .github/workflows/
+│   ├── deploy.yml               # GitHub Actions Production (main → VPS)
+│   └── deploy-staging.yml       # GitHub Actions Staging (staging → VPS)
 ```
 
 ---
