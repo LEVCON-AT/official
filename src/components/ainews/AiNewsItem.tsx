@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useId } from 'react';
+import { useState, useId, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronRight, ExternalLink } from 'lucide-react';
+import { ChevronRight, ExternalLink, Link2, Check } from 'lucide-react';
 import { LANG_CODE_TO_SHORT } from './languages';
 
 export type AiNewsItemType = {
@@ -23,7 +23,16 @@ export type AiNewsItemType = {
 type Props = {
   item: AiNewsItemType;
   locale: string;
+  index?: number;
 };
+
+// Estimate reading time based on description length.
+// Average reading speed: ~200 wpm. We approximate words via length / 5.
+function estimateReadingMinutes(text: string): number {
+  const words = text.trim().split(/\s+/).length;
+  const minutes = Math.max(1, Math.round(words / 200));
+  return minutes;
+}
 
 // Category SVG icons — 12×12, currentColor, minimalist
 const CategoryIcon = ({ category }: { category: string | null }) => {
@@ -74,8 +83,9 @@ const CategoryIcon = ({ category }: { category: string | null }) => {
 // Language label mapping (uses centralized config)
 const LANG_LABELS: Record<string, string> = LANG_CODE_TO_SHORT;
 
-export default function AiNewsItem({ item, locale }: Props) {
+export default function AiNewsItem({ item, locale, index = 0 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const t = useTranslations('ainews');
   const contentId = useId();
 
@@ -91,6 +101,30 @@ export default function AiNewsItem({ item, locale }: Props) {
 
   const showThumbnails = process.env.NEXT_PUBLIC_SHOW_THUMBNAILS === 'true';
   const langLabel = LANG_LABELS[item.languageOrig] || item.languageOrig.toUpperCase();
+  const readingMinutes = estimateReadingMinutes(description);
+
+  const handleCopyLink = useCallback(async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(item.sourceUrl);
+      } else {
+        // Fallback for older browsers / non-secure contexts
+        const ta = document.createElement('textarea');
+        ta.value = item.sourceUrl;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      setCopyState('copied');
+      setTimeout(() => setCopyState('idle'), 2000);
+    } catch {
+      setCopyState('failed');
+      setTimeout(() => setCopyState('idle'), 2000);
+    }
+  }, [item.sourceUrl]);
 
   // Translate-Link: zeigen wenn Original-Sprache ≠ Locale-Sprache.
   // - DE-User sieht EN-Item → "Auf Deutsch lesen →" (Google Translate EN→DE)
@@ -105,7 +139,10 @@ export default function AiNewsItem({ item, locale }: Props) {
   const translateLabel = locale === 'en' ? 'Read in English →' : 'Auf Deutsch lesen →';
 
   return (
-    <article className="ainews-item">
+    <article
+      className="ainews-item"
+      style={{ '--ainews-stagger': `${Math.min(index, 8) * 60}ms` } as React.CSSProperties}
+    >
       <div className="ainews-item-head">
         <button
           type="button"
@@ -120,13 +157,26 @@ export default function AiNewsItem({ item, locale }: Props) {
             size={16}
             aria-hidden="true"
           />
+          {item.category && <CategoryIcon category={item.category} />}
           {langLabel !== 'DE' && langLabel !== 'EN' && (
             <span className="ainews-lang-tag-inline" aria-label={`Original language: ${item.languageOrig}`}>{langLabel}</span>
           )}
           <span className="ainews-item-headline">{headline}</span>
+          <span className="ainews-item-readtime" aria-label={`${readingMinutes} ${t('reading_time_min')}`}>
+            {readingMinutes}′
+          </span>
         </button>
         <div className="ainews-item-meta">
           <span className="ainews-item-source">{item.source}</span>
+          <button
+            type="button"
+            className="ainews-item-copybtn"
+            onClick={handleCopyLink}
+            aria-label={t('copy_link')}
+            title={t('copy_link')}
+          >
+            {copyState === 'copied' ? <Check size={13} aria-hidden="true" /> : <Link2 size={13} aria-hidden="true" />}
+          </button>
           <a
             href={item.sourceUrl}
             target="_blank"
@@ -158,6 +208,11 @@ export default function AiNewsItem({ item, locale }: Props) {
           )}
           <div className="ainews-item-text">
             <p className="ainews-item-desc">{description}</p>
+            {copyState !== 'idle' && (
+              <p className={`ainews-item-copymsg${copyState === 'copied' ? ' is-ok' : ' is-fail'}`} role="status">
+                {copyState === 'copied' ? t('copy_link_done') : t('copy_link_failed')}
+              </p>
+            )}
             <div className="ainews-item-links">
               <a
                 href={item.sourceUrl}

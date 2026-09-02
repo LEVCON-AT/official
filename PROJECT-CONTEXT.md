@@ -20,8 +20,16 @@ Levcon.ai ist die Website für Enric-Bernard Sep-Albi (KI-Trainer und Organisati
 - **CI/CD:** GitHub Actions (Auto-Deploy bei Push auf `main`)
 
 ### 1.2 Domains & Routing
-- `levcon.ai` / `www.levcon.ai` → Next.js App (Port 3002)
+- `levcon.ai` / `www.levcon.ai` → Next.js App Production (Port 3002)
+- `staging.levcon.ai` → Next.js App Staging (Port 3003, noindex, eigene DB)
 - `engine.levcon.at` → n8n UI (Port 5678, über Host-Network)
+
+### 1.3 Branch-Strategie & CI/CD
+- `main` → Production (auto-deploy via `.github/workflows/deploy.yml`)
+- `staging` → Staging (auto-deploy via `.github/workflows/deploy-staging.yml`)
+- `feature/*` → PR nach staging, dann staging → main via PR
+
+Siehe `deploy/STAGING.md` für komplette Staging-Doku.
 
 ---
 
@@ -79,7 +87,7 @@ n8n Workflow 01 (06:00 Europe/Vienna)
 ## 4. Offene Aufgaben (Backlog)
 
 ### 4.1 Quality Assurance & Infrastruktur
-- [ ] **Staging-Infrastruktur:** Git-Branch-Strategie definieren. Staging-Subdomain einrichten.
+- [x] **Staging-Infrastruktur:** Git-Branch-Strategie definiert. Staging-Subdomain eingerichtet. Siehe `deploy/STAGING.md`.
 - [ ] **Backup-Strategie:** Cronjob für SQLite DB-Backups prüfen.
 - [ ] **DNS-Records:** SPF, DKIM, DMARC für levcon.ai prüfen (reduziert Spam-Scoring).
 

@@ -71,3 +71,5 @@ db/*.db-journal
 
 # Production env files (never commit)
 deploy/.env*
+# Allow staging env template (contains no secrets, only placeholders)
+!deploy/.env.staging

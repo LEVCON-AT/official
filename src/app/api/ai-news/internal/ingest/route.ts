@@ -108,13 +108,28 @@ export async function POST(request: NextRequest) {
       include: { items: true },
     });
 
-    // Log to WorkflowRun for monitoring
+    // Log to WorkflowRun for monitoring (with enhanced quality fields)
+    // Optional fields come from request body if provided by n8n workflow
+    const itemCountDe = body._telemetry?.deRun?.itemOutput ?? items.filter((i: { languageOrig?: string }) => (i.languageOrig || 'en').toLowerCase() === 'de').length;
+    const itemCountEn = body._telemetry?.enRun?.itemOutput ?? items.filter((i: { languageOrig?: string }) => (i.languageOrig || 'en').toLowerCase() === 'en').length;
+    const retryCount = body._telemetry?.totalRetries ?? 0;
+    const fallbackUsed = body._fallback?.source ?? 'none';
+    const warningCount = body._warnings?.length ?? 0;
+    const qualityReportJson = body.report ? JSON.stringify(body.report) : null;
+    const overallStatus = body._fallback ? 'partial' : (warningCount > 0 ? 'partial' : 'success');
+
     await db.workflowRun.create({
       data: {
         workflowId: 'ingest',
         runAt: new Date(),
-        status: 'success',
+        status: overallStatus,
         itemCount: items.length,
+        itemCountDe,
+        itemCountEn,
+        retryCount,
+        warningCount,
+        fallbackUsed,
+        qualityReport: qualityReportJson,
       },
     });
 
