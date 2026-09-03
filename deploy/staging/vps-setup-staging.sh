@@ -14,7 +14,7 @@
 #  ✅ DNS: staging.levcon.ai → 87.106.25.91 (CHECKED)
 #  ✅ Production läuft unter /var/www/levcon (CHECKED, b08a759)
 #  ✅ /var/www/levcon-staging existiert nicht (CHECKED)
-#  ✅ Port 3004 frei (Preflight zeigte 3003 belegt durch neonfall, 3004 frei)
+#  ✅ Port 3006 frei (Preflight zeigte 3003 belegt durch neonfall, 3006 frei)
 #  ✅ Bun 1.3.14, Node v22.23.1, Git 2.43.0, nginx 1.24.0, certbot 2.9.0
 #  ✅ www-data UID 33 existiert
 #  ✅ UFW: Port 80+443 offen
@@ -27,7 +27,7 @@
 #  4. Dependencies installieren
 #  5. Prisma DB push (erstellt levcon-staging.db)
 #  6. Next.js Build (mit NEXT_PUBLIC_ENVIRONMENT=staging)
-#  7. systemd Service levcon-staging einrichten (Port 3004)
+#  7. systemd Service levcon-staging einrichten (Port 3006)
 #  8. nginx Site für staging.levcon.ai installieren
 #  9. SSL-Zertifikat via certbot --standalone beantragen
 #  10. Services starten
@@ -79,10 +79,10 @@ if [ -d "/var/www/levcon-staging" ]; then
     exit 1
 fi
 
-# Port 3004 muss frei sein
-if ss -tln | grep -q ':3004 '; then
-    echo -e "${RED}Port 3004 ist belegt!${NC}"
-    ss -tln | grep ':3004'
+# Port 3006 muss frei sein
+if ss -tln | grep -q ':3006 '; then
+    echo -e "${RED}Port 3006 ist belegt!${NC}"
+    ss -tln | grep ':3006'
     echo -e "${YELLOW}Bitte anderen Port wählen oder Prozess beenden.${NC}"
     exit 1
 fi
@@ -97,7 +97,7 @@ if [ -z "$STAGING_IP" ] || [ "$STAGING_IP" != "$PUBLIC_IP" ]; then
 fi
 echo -e "${GREEN}  ✅ DNS korrekt: staging.levcon.ai → $PUBLIC_IP${NC}"
 
-echo -e "${GREEN}  ✅ Port 3004 frei${NC}"
+echo -e "${GREEN}  ✅ Port 3006 frei${NC}"
 echo -e "${GREEN}  ✅ Production läuft${NC}"
 echo -e "${GREEN}  ✅ /var/www/levcon-staging existiert nicht${NC}"
 
@@ -179,11 +179,11 @@ sed -i "s|^SMTP_USER=.*|SMTP_USER=\"admin@levcon.at\"|" .env
 # CONTACT_EMAIL für Staging
 sed -i "s|^CONTACT_EMAIL=.*|CONTACT_EMAIL=\"hello@levcon.ai\"|" .env
 
-# Setze PORT (3004, nicht 3003 — 3003 ist neonfall)
+# Setze PORT (3006, andere Ports 3003-3005 sind durch andere Services belegt)
 if grep -q "^PORT=" .env; then
-    sed -i "s|^PORT=.*|PORT=\"3004\"|" .env
+    sed -i "s|^PORT=.*|PORT=\"3006\"|" .env
 else
-    echo 'PORT="3004"' >> .env
+    echo 'PORT="3006"' >> .env
 fi
 
 chmod 600 .env
@@ -261,9 +261,9 @@ chown -R www-data:www-data /var/www/levcon-staging
 echo -e "${GREEN}  ✅ Static files kopiert${NC}"
 
 # ── 9. SYSTEMD SERVICE ────────────────────────────────────────
-echo -e "\n${BLUE}[9] Systemd service (levcon-staging, Port 3004)...${NC}"
+echo -e "\n${BLUE}[9] Systemd service (levcon-staging, Port 3006)...${NC}"
 
-# Service-File anpassen: Port 3004 statt 3003
+# Service-File anpassen: Port 3006 statt 3003
 cat > /etc/systemd/system/levcon-staging.service << 'EOF'
 [Unit]
 Description=Levcon.ai Next.js Application (STAGING)
@@ -278,7 +278,7 @@ WorkingDirectory=/var/www/levcon-staging/.next/standalone
 EnvironmentFile=/var/www/levcon-staging/.env
 
 Environment="HOSTNAME=0.0.0.0"
-Environment="PORT=3004"
+Environment="PORT=3006"
 Environment="NODE_ENV=production"
 
 ExecStart=/usr/bin/node /var/www/levcon-staging/.next/standalone/server.js
@@ -311,17 +311,16 @@ EOF
 systemctl daemon-reload
 systemctl enable levcon-staging
 
-echo -e "${GREEN}  ✅ systemd Service 'levcon-staging' installiert (Port 3004)${NC}"
+echo -e "${GREEN}  ✅ systemd Service 'levcon-staging' installiert (Port 3006)${NC}"
 
 # ── 10. NGINX SITE FÜR STAGING ────────────────────────────────
 echo -e "\n${BLUE}[10] Nginx config für staging.levcon.ai installieren...${NC}"
 
-# Nginx Config aus Repo kopieren (Port 3003 → 3004 anpassen)
+# Nginx Config aus Repo kopieren (bereits mit Port 3006)
 cp deploy/nginx/staging.levcon.ai.conf /etc/nginx/sites-available/staging.levcon.ai
 
-# Ersetze Port 3003 durch 3004 in der nginx config
-sed -i 's/127.0.0.1:3003/127.0.0.1:3004/g' /etc/nginx/sites-available/staging.levcon.ai
-sed -i 's/levcon_staging_nextjs/levcon_staging_nextjs/g' /etc/nginx/sites-available/staging.levcon.ai
+# Sicherheits-Check: Port ist 3006 (falls alte Config im Repo)
+sed -i 's/127.0.0.1:300[0-9]/127.0.0.1:3006/g' /etc/nginx/sites-available/staging.levcon.ai
 
 # Symlink erstellen
 ln -sf /etc/nginx/sites-available/staging.levcon.ai /etc/nginx/sites-enabled/staging.levcon.ai
@@ -380,11 +379,11 @@ else
     exit 1
 fi
 
-# Verify Port 3004 lauscht
-if ss -tln | grep -q ':3004'; then
-    echo -e "${GREEN}  ✅ Port 3004 lauscht${NC}"
+# Verify Port 3006 lauscht
+if ss -tln | grep -q ':3006'; then
+    echo -e "${GREEN}  ✅ Port 3006 lauscht${NC}"
 else
-    echo -e "${RED}  ❌ Port 3004 nicht erreichbar${NC}"
+    echo -e "${RED}  ❌ Port 3006 nicht erreichbar${NC}"
     journalctl -u levcon-staging --no-pager -n 30
     exit 1
 fi
@@ -406,8 +405,8 @@ echo -e "${GREEN}  ✅ Backup-Cron installiert (täglich 03:30, 7 Tage Retention
 echo -e "\n${BLUE}[14] Verifikation...${NC}"
 
 echo ""
-echo -e "${BLUE}Test 1: Lokal (Port 3004)${NC}"
-curl -sSI --max-time 5 http://127.0.0.1:3004/ | head -3
+echo -e "${BLUE}Test 1: Lokal (Port 3006)${NC}"
+curl -sSI --max-time 5 http://127.0.0.1:3006/ | head -3
 
 echo ""
 echo -e "${BLUE}Test 2: Extern (https://staging.levcon.ai)${NC}"
@@ -449,7 +448,7 @@ echo -e "${GREEN}═════════════════════
 echo ""
 echo -e "${BLUE}Services:${NC}"
 echo "  Production: $(systemctl is-active levcon) → https://levcon.ai (Port 3002)"
-echo "  Staging:    $(systemctl is-active levcon-staging) → https://staging.levcon.ai (Port 3004)"
+echo "  Staging:    $(systemctl is-active levcon-staging) → https://staging.levcon.ai (Port 3006)"
 echo "  Nginx:      $(systemctl is-active nginx)"
 
 echo ""

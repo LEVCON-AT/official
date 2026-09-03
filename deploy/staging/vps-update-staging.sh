@@ -88,11 +88,11 @@ if [ -f ".env" ]; then
         echo "DATABASE_URL=\"$VPS_DB_URL\"" >> .env
         echo "  Füge DATABASE_URL hinzu: $VPS_DB_URL"
     fi
-    # PORT sicherstellen (Staging = 3003)
+    # PORT sicherstellen (Staging = 3006, 3003-3005 sind durch andere Services belegt)
     if grep -q "^PORT=" .env; then
-        sed -i "s|^PORT=.*|PORT=\"3003\"|" .env
+        sed -i "s|^PORT=.*|PORT=\"3006\"|" .env
     else
-        echo "PORT=\"3003\"" >> .env
+        echo "PORT=\"3006\"" >> .env
     fi
     # NEXT_PUBLIC_SITE_URL sicherstellen
     if grep -q "^NEXT_PUBLIC_SITE_URL=" .env; then
@@ -111,7 +111,7 @@ else
     cp deploy/.env.staging .env 2>/dev/null || true
     if [ ! -f ".env" ]; then
         echo "DATABASE_URL=\"file:/var/www/levcon-staging/db/levcon-staging.db\"" > .env
-        echo "PORT=\"3003\"" >> .env
+        echo "PORT=\"3006\"" >> .env
         echo "NEXT_PUBLIC_SITE_URL=\"https://staging.levcon.ai\"" >> .env
         echo "NEXT_PUBLIC_ENVIRONMENT=\"staging\"" >> .env
         echo "LEVCON_INTERNAL_API_KEY=\"$(openssl rand -hex 32)\"" >> .env
