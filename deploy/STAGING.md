@@ -346,6 +346,72 @@ Völlig getrennt — Staging-Tests verändern niemals Production-Daten.
 
 Admin-Panel für Staging: `https://staging.levcon.ai/ai-news?admin=<STAGING_API_KEY>`
 
+### 9.7 Access Control (Basic Auth — schützt vor Öffentlichkeit)
+
+Staging ist **nicht öffentlich zugänglich**. Browser-Zugriffe erfordern Basic Auth (Username + Passwort). API-Zugriffe (für n8n, curl, etc.) sind davon ausgenommen — sie nutzen den `LEVCON_INTERNAL_API_KEY` via `X-Levcon-Api-Key` Header.
+
+**Setup:**
+```bash
+# Auf VPS (einmalig):
+ssh root@87.106.25.91
+cd /var/www/levcon
+git pull origin main
+bash deploy/staging/setup-staging-auth.sh
+# Fragt interaktiv nach Username + Passwort
+# Alternativ direkt: bash deploy/staging/setup-staging-auth.sh levcon mein-passwort
+```
+
+**Wie es funktioniert:**
+
+| URL-Typ | Basic Auth? | Schutz |
+|---------|------------|--------|
+| `https://staging.levcon.ai/` | ✅ Ja | nginx Basic Auth (Username/Passwort) |
+| `https://staging.levcon.ai/ai-news` | ✅ Ja | nginx Basic Auth |
+| `https://staging.levcon.ai/api/*` | ❌ Nein | `LEVCON_INTERNAL_API_KEY` (X-Levcon-Api-Key Header) |
+| `https://staging.levcon.ai/_next/static/*` | ❌ Nein | Nicht nötig (nur CSS/JS/Fonts) |
+| `https://staging.levcon.ai/robots.txt` | ❌ Nein | Google muss sehen dass `Disallow: /` |
+| `https://staging.levcon.ai/.well-known/acme-challenge/*` | ❌ Nein | Für certbot Renewal |
+
+**Warum API-Endpunkte ohne Basic Auth?**
+n8n muss von engine.levcon.at aus auf die Staging-API zugreifen können. n8n kann sich nicht durch Basic Auth durchklicken — aber es kann den `X-Levcon-Api-Key` Header mitsenden. Daher sind API-Endpunkte nur via API-Key geschützt.
+
+**User verwalten:**
+
+```bash
+# Neuen User hinzufügen:
+htpasswd -bB /etc/nginx/.htpasswd.levcon-staging <neuer-user> <password>
+systemctl reload nginx
+
+# User entfernen:
+htpasswd -D /etc/nginx/.htpasswd.levcon-staging <user>
+systemctl reload nginx
+
+# Passwort ändern:
+htpasswd -B /etc/nginx/.htpasswd.levcon-staging <user>
+systemctl reload nginx
+
+# Alle User auflisten:
+cut -d: -f1 /etc/nginx/.htpasswd.levcon-staging
+```
+
+**Browser-Erlebnis:**
+- Beim ersten Aufruf: Browser fragt nach Username/Passwort (Basic Auth Dialog)
+- Nach erfolgreichem Login: Session bleibt aktiv (Browser merkt sich Credentials)
+- Bei falschem Passwort: 401 Unauthorized
+- StagingBanner (rot) bleibt sichtbar — zusätzlicher visueller Hinweis
+
+**Verifikation:**
+```bash
+# Ohne Credentials → 401 (Basic Auth aktiv)
+curl -I https://staging.levcon.ai/
+
+# Mit Credentials → 200
+curl -I -u <user>:<password> https://staging.levcon.ai/
+
+# API ohne Basic Auth, aber mit API-Key → 200
+curl -H "X-Levcon-Api-Key: <STAGING_API_KEY>" https://staging.levcon.ai/api/ai-news/quality-report
+```
+
 ---
 
 ## 10. Rollback / Notfall

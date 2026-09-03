@@ -23,11 +23,13 @@
 #  - Staging läuft auf demselben VPS, aber:
 #    - Eigener Projekt-Pfad: /var/www/levcon-staging
 #    - Eigene DB: levcon-staging.db (getrennt von Production)
-#    - Eigener Port: 3003 (Production: 3002)
+#    - Eigener Port: 3006 (Production: 3002, 3003-3005 durch Neonfall belegt)
 #    - Eigener systemd-Service: levcon-staging
 #    - Eigene Subdomain: staging.levcon.ai
 #    - NEXT_PUBLIC_ENVIRONMENT=staging (aktiviert StagingBanner + noindex)
 #    - SMTP_DISABLED=true (keine echten Mails an Subscriber)
+#    - Basic Auth für Browser-Zugriff (siehe deploy/staging/setup-staging-auth.sh)
+#    - API-Endpunkte bleiben ohne Basic Auth (LEVCON_INTERNAL_API_KEY schützt)
 
 name: Deploy Staging to VPS
 
@@ -140,14 +142,25 @@ jobs:
             grep DATABASE_URL /var/www/levcon-staging/.env
             echo "=== .env NEXT_PUBLIC_ENVIRONMENT ==="
             grep NEXT_PUBLIC_ENVIRONMENT /var/www/levcon-staging/.env
-            echo "=== Test local (Port 3003) ==="
-            curl -sI http://127.0.0.1:3003/ | head -3
-            echo "=== Test external (staging.levcon.ai) ==="
-            curl -sI https://staging.levcon.ai/ | head -5
+            echo "=== Test local (Port 3006) ==="
+            curl -sI http://127.0.0.1:3006/ | head -3
+            echo "=== Test local API (Port 3006, sollte 401 = Route existiert) ==="
+            curl -sSI http://127.0.0.1:3006/api/ai-news/quality-report | head -3
+            echo "=== Test external (staging.levcon.ai) — Basic Auth prüfen ==="
+            # Erwarte 401 (Basic Auth required) — das ist das Zeichen dass Auth aktiv ist!
+            EXTERNAL_STATUS=$(curl -sI -o /dev/null -w "%{http_code}" https://staging.levcon.ai/)
+            echo "  Status ohne Credentials: $EXTERNAL_STATUS (erwartet: 401)"
+            if [ "$EXTERNAL_STATUS" = "401" ]; then
+              echo "  ✅ Basic Auth aktiv (401 ohne Credentials)"
+            else
+              echo "  ⚠ Status $EXTERNAL_STATUS — Basic Auth evtl. nicht aktiv?"
+              echo "  Setup: bash /var/www/levcon/deploy/staging/setup-staging-auth.sh"
+            fi
             echo "=== Check X-Robots-Tag header (should be noindex) ==="
             curl -sI https://staging.levcon.ai/ | grep -i "x-robots-tag" || echo "⚠ X-Robots-Tag header not found"
-            if curl -sf https://staging.levcon.ai/ -o /dev/null; then
-              echo "✅ Staging health check passed — site is up"
+            echo "=== Final check: Service aktiv? ==="
+            if systemctl is-active --quiet levcon-staging && ss -tln | grep -q ':3006'; then
+              echo "✅ Staging health check passed — service up + port listening"
             else
               echo "❌ Staging health check failed"
               journalctl -u levcon-staging --no-pager -n 10
