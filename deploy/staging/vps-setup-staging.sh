@@ -28,11 +28,13 @@
 #  5. Prisma DB push (erstellt levcon-staging.db)
 #  6. Next.js Build (mit NEXT_PUBLIC_ENVIRONMENT=staging)
 #  7. systemd Service levcon-staging einrichten (Port 3006)
-#  8. nginx Site für staging.levcon.ai installieren
-#  9. SSL-Zertifikat via certbot --standalone beantragen
-#  10. Services starten
-#  11. Backup-Cron einrichten
-#  12. Verifikation
+#  8. (entfallen — mit Schritt 10 zusammengeführt)
+#  9. (entfallen — mit Schritt 10 zusammengeführt)
+#  10. SSL-Zertifikat via certbot --standalone beantragen (VOR nginx config!)
+#  11. nginx Site für staging.levcon.ai installieren (mit SSL-Zertifikat)
+#  12. Services starten
+#  13. Backup-Cron einrichten
+#  14. Verifikation
 #
 #  WICHTIG: Skript NIEMALS mit sudo ausführen — muss als root laufen!
 #  Es wird keine Prompts geben (DEBIAN_FRONTEND=noninteractive).
@@ -313,28 +315,12 @@ systemctl enable levcon-staging
 
 echo -e "${GREEN}  ✅ systemd Service 'levcon-staging' installiert (Port 3006)${NC}"
 
-# ── 10. NGINX SITE FÜR STAGING ────────────────────────────────
-echo -e "\n${BLUE}[10] Nginx config für staging.levcon.ai installieren...${NC}"
-
-# Nginx Config aus Repo kopieren (bereits mit Port 3006)
-cp deploy/nginx/staging.levcon.ai.conf /etc/nginx/sites-available/staging.levcon.ai
-
-# Sicherheits-Check: Port ist 3006 (falls alte Config im Repo)
-sed -i 's/127.0.0.1:300[0-9]/127.0.0.1:3006/g' /etc/nginx/sites-available/staging.levcon.ai
-
-# Symlink erstellen
-ln -sf /etc/nginx/sites-available/staging.levcon.ai /etc/nginx/sites-enabled/staging.levcon.ai
-
-# Test nginx config
-if nginx -t 2>&1; then
-    echo -e "${GREEN}  ✅ Nginx config OK${NC}"
-else
-    echo -e "${RED}  ❌ Nginx config test fehlgeschlagen!${NC}"
-    exit 1
-fi
-
-# ── 11. SSL-ZERTIFIKAT BEANTRAGEN (certbot --standalone) ──────
-echo -e "\n${BLUE}[11] SSL-Zertifikat für staging.levcon.ai beantragen...${NC}"
+# ── 10. SSL-ZERTIFIKAT BEANTRAGEN (VOR nginx config!) ─────────
+# WICHTIG: certbot --standalone muss PORT 80 frei haben.
+# nginx config für staging.levcon.ai darf NOCH NICHT aktiviert sein
+# (sonst nginx test schlägt fehl weil Zertifikate noch fehlen).
+# Stattdessen: certbot zuerst, dann nginx config installieren.
+echo -e "\n${BLUE}[10] SSL-Zertifikat für staging.levcon.ai beantragen...${NC}"
 
 if [ -f "/etc/letsencrypt/live/staging.levcon.ai/fullchain.pem" ]; then
     echo -e "${YELLOW}  ℹ Zertifikat existiert bereits — überspringe Beantragung${NC}"
@@ -342,8 +328,9 @@ else
     echo -e "${YELLOW}  ⚠ Stoppe nginx kurzfristig für certbot --standalone...${NC}"
     echo -e "${YELLOW}  (Andere Sites sind ~30 Sek nicht erreichbar)${NC}"
 
-    # Nginx stoppen
+    # Nginx stoppen (Port 80 freigeben für certbot --standalone)
     systemctl stop nginx
+    sleep 2
 
     # Certbot standalone
     if certbot certonly --standalone \
@@ -352,21 +339,44 @@ else
         echo -e "${GREEN}  ✅ SSL-Zertifikat beantragt${NC}"
     else
         echo -e "${RED}  ❌ Certbot fehlgeschlagen!${NC}"
-        echo -e "${YELLOW}  Nginx wird wieder gestartet, aber ohne SSL${NC}"
+        echo -e "${YELLOW}  Nginx wird wieder gestartet${NC}"
         systemctl start nginx
         exit 1
     fi
 
-    # Nginx wieder starten
+    # Nginx wieder starten (alte config, ohne staging site)
     systemctl start nginx
     sleep 2
     echo -e "${GREEN}  ✅ Nginx wieder gestartet${NC}"
 fi
 
+# ── 11. NGINX SITE FÜR STAGING INSTALLIEREN ───────────────────
+echo -e "\n${BLUE}[11] Nginx config für staging.levcon.ai installieren...${NC}"
+
+# Nginx Config aus Repo kopieren (bereits mit Port 3006)
+cp deploy/nginx/staging.levcon.ai.conf /etc/nginx/sites-available/staging.levcon.ai
+
+# Sicherheits-Check: Port ist 3006 (falls alte Config im Repo)
+sed -i 's/127.0.0.1:300[0-9]/127.0.0.1:3006/g' /etc/nginx/sites-available/staging.levcon.ai
+
+# Symlink erstellen (aktiviert die Site)
+ln -sf /etc/nginx/sites-available/staging.levcon.ai /etc/nginx/sites-enabled/staging.levcon.ai
+
+# Test nginx config (jetzt mit Zertifikaten vorhanden!)
+if nginx -t 2>&1; then
+    echo -e "${GREEN}  ✅ Nginx config OK${NC}"
+    systemctl reload nginx
+    echo -e "${GREEN}  ✅ Nginx reloaded${NC}"
+else
+    echo -e "${RED}  ❌ Nginx config test fehlgeschlagen!${NC}"
+    echo -e "${YELLOW}  Prüfe ob SSL-Zertifikate existieren:${NC}"
+    ls -la /etc/letsencrypt/live/staging.levcon.ai/
+    exit 1
+fi
+
 # ── 12. SERVICES STARTEN ───────────────────────────────────────
 echo -e "\n${BLUE}[12] Services starten...${NC}"
 
-systemctl restart nginx
 systemctl restart levcon-staging
 sleep 3
 
