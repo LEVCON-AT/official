@@ -9,6 +9,7 @@ import AiNewsArchive from '@/components/ainews/AiNewsArchive';
 import AiNewsSettings from '@/components/ainews/AiNewsSettings';
 import AiNewsAdminPanel from '@/components/ainews/AiNewsAdminPanel';
 import StagingBanner from '@/components/StagingBanner';
+import MobileNav from '@/components/MobileNav';
 import { LANG_CODE_TO_SHORT } from '@/components/ainews/languages';
 import { getPanelSlug, getPanelFromSlug, PANEL_META, type PanelId } from '@/components/panel-routing';
 import type { AiNewsData } from '@/components/ainews/data';
@@ -380,6 +381,13 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
       {/* ── STAGING BANNER (nur sichtbar wenn NEXT_PUBLIC_ENVIRONMENT=staging) ── */}
       <StagingBanner locale={locale} />
 
+      {/* ── MOBILE NAV (nur ≤720px sichtbar, sticky top-bar) ── */}
+      <MobileNav
+        activePanel={activePanel}
+        onNavClick={handleNavClick}
+        locale={locale}
+      />
+
       {/* ── HEADER ────────────────────────────── */}
       <header className="levcon-header">
         <a className="logo-mark" href="/" onClick={handleLogoClick} aria-label={t('header.logo_aria_label')}>
@@ -397,7 +405,7 @@ export default function LevconPage({ locale, todaysNews, archivedNews, initialPa
           <span className="divider-rule" aria-hidden="true" />
         </p>
 
-        <nav aria-label={locale === 'de' ? 'Seitennavigation' : 'Page navigation'}>
+        <nav className="desktop-nav" aria-label={locale === 'de' ? 'Seitennavigation' : 'Page navigation'}>
           <button
             className={`nav-btn${activePanel === null ? ' active' : ''}`}
             onClick={() => handleNavClick('home')}

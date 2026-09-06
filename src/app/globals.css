@@ -391,6 +391,147 @@
   user-select: none;
 }
 
+/* ── MOBILE NAV (Sprint M1: Grundgerüst, ≤720px) ──────────── */
+/* Sticky Top-Bar mit Hamburger + Logo. Bei Klick → Menu togglet. */
+/* Desktop-Nav (.desktop-nav) wird ≤720px ausgeblendet.           */
+
+/* Default: MobileNav ist auf Desktop unsichtbar */
+.mobile-nav-bar,
+.mobile-nav-menu {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  /* Desktop-Nav ausblenden */
+  .desktop-nav {
+    display: none;
+  }
+
+  /* ── STICKY TOP-BAR ──────────────────────────────────────── */
+  .mobile-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 1rem;
+    background: var(--lc-bg);
+    border-bottom: 1px solid var(--lc-rule);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  /* Hamburger-Button (Touch-Target ≥44×44px per WCAG 2.1 AA) */
+  .mobile-nav-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    -webkit-appearance: none;
+    color: var(--lc-ink);
+  }
+
+  .mobile-nav-toggle:focus-visible {
+    outline: 1.5px solid var(--lc-ink);
+    outline-offset: 2px;
+  }
+
+  /* Hamburger-Icon (3 Linien) — Animation folgt in Sprint M2 */
+  .mobile-nav-hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 22px;
+    height: 16px;
+  }
+
+  .mobile-nav-hamburger-line {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background: var(--lc-ink);
+    border-radius: 1px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  /* Logo in Top-Bar (gleiche Schriftart wie Desktop-Logo) */
+  .mobile-nav-logo {
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .mobile-nav-logo .logo-wordmark {
+    font-size: 0.65rem;
+  }
+
+  /* ── MOBILE MENU (noch ohne Slide-Animation — Sprint M3) ─── */
+  .mobile-nav-menu {
+    display: block;
+    background: var(--lc-bg);
+    border-bottom: 1px solid var(--lc-rule);
+    padding: 0.5rem 0 1rem;
+  }
+
+  .mobile-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile-nav-listitem {
+    border-bottom: 1px solid var(--lc-rule);
+  }
+
+  .mobile-nav-listitem:last-child {
+    border-bottom: none;
+  }
+
+  /* Nav-Item: großes Touch-Target (min-height 56px für Mobile) */
+  .mobile-nav-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 1rem 1.5rem;
+    min-height: 56px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    font-family: var(--lc-ff-b);
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--lc-ink);
+    opacity: var(--lc-muted-text);
+    transition: color 0.2s, opacity 0.2s;
+  }
+
+  .mobile-nav-item:hover,
+  .mobile-nav-item:focus-visible {
+    opacity: 1;
+    color: var(--lc-ink);
+  }
+
+  .mobile-nav-item:focus-visible {
+    outline: 1.5px solid var(--lc-ink);
+    outline-offset: -1px;
+  }
+
+  .mobile-nav-item.active {
+    opacity: 1;
+    color: var(--lc-ink);
+    /* Aktives Item: rote Linie links (wie Desktop-Underline, aber vertikal) */
+    box-shadow: inset 3px 0 0 var(--lc-red);
+  }
+}
+
 /* ── MAIN ──────────────────────────────────── */
 .levcon-main { flex: 1; }
 
