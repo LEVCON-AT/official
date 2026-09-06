@@ -441,7 +441,7 @@
     outline-offset: 2px;
   }
 
-  /* Hamburger-Icon (3 Linien) — Animation folgt in Sprint M2 */
+  /* Hamburger-Icon (3 Linien) — animiert zu X beim Öffnen (Sprint M2) */
   .mobile-nav-hamburger {
     display: flex;
     flex-direction: column;
@@ -457,7 +457,26 @@
     width: 100%;
     background: var(--lc-ink);
     border-radius: 1px;
+    transform-origin: center;
     transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  /* ── HAMBURGER → X ANIMATION (Sprint M2) ─────────────────── */
+  /* .is-open Klasse wird via React-State auf .mobile-nav-toggle gesetzt   */
+  /* - Mittlere Linie: fadet aus (opacity 0, scaleX 0)                    */
+  /* - Obere Linie: rotiert 45° und verschiebt sich zur Mitte            */
+  /* - Untere Linie: rotiert -45° und verschiebt sich zur Mitte          */
+  .mobile-nav-toggle.is-open .mobile-nav-hamburger-line-middle {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+
+  .mobile-nav-toggle.is-open .mobile-nav-hamburger-line-top {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .mobile-nav-toggle.is-open .mobile-nav-hamburger-line-bottom {
+    transform: translateY(-7px) rotate(-45deg);
   }
 
   /* Logo in Top-Bar (gleiche Schriftart wie Desktop-Logo) */
@@ -3001,6 +3020,9 @@ a.contact-row:hover { opacity: 0.5; }
   .nav-btn::after { transition: none; }
   .ainews-signup-reveal,
   .ainews-signup-reveal-inner { transition: none; }
+  /* Mobile-Nav Hamburger: State-Änderung sofort (keine Transition),
+     aber X-Form bleibt sichtbar für User-Feedback */
+  .mobile-nav-hamburger-line { transition: none; }
 }
 
 /* ── CONFIRM PAGE (Newsletter Bestätigung) ─── */

@@ -66,16 +66,16 @@ export default function MobileNav({ activePanel, onNavClick, locale }: Props) {
       <div className="mobile-nav-bar" role="banner">
         <button
           type="button"
-          className="mobile-nav-toggle"
+          className={`mobile-nav-toggle${isMenuOpen ? ' is-open' : ''}`}
           aria-label={toggleAriaLabel}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-nav-menu"
           onClick={toggleMenu}
         >
           <span className="mobile-nav-hamburger" aria-hidden="true">
-            <span className="mobile-nav-hamburger-line" />
-            <span className="mobile-nav-hamburger-line" />
-            <span className="mobile-nav-hamburger-line" />
+            <span className="mobile-nav-hamburger-line mobile-nav-hamburger-line-top" />
+            <span className="mobile-nav-hamburger-line mobile-nav-hamburger-line-middle" />
+            <span className="mobile-nav-hamburger-line mobile-nav-hamburger-line-bottom" />
           </span>
         </button>
 
