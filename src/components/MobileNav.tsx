@@ -8,17 +8,21 @@ import type { PanelId } from '@/components/panel-routing';
  * MobileNav — Mobile Navigation mit Hamburger-Toggle
  *
  * Sticky Top-Bar mit Hamburger-Button + Logo.
- * Menu klappt bei Klick auf (noch ohne Animation — kommt in Schritt 3).
+ * Menu slidet von oben rein beim Öffnen (Sprint M3).
  *
  * Sichtbar nur bei ≤720px (via CSS).
  * Desktop-Navigation bleibt bei >720px unverändert.
  *
- * Sprint M1: Grundgerüst mit Toggle-State (keine Animationen).
- * Folgende Sprints: Hamburger→X Animation, Slide-Down, Focus-Trap, Polish.
+ * Sprint-Status:
+ *  - M1: Grundgerüst mit Toggle-State
+ *  - M2: Hamburger → X Animation
+ *  - M3: Slide-Down Overlay + Backdrop + Stagger (dieser Sprint)
+ *  - M4: Body-Scroll-Lock, ESC, Focus-Trap (folgt)
+ *  - M5: Polish (folgt)
  *
  * Standards (per QUALITY-GUIDELINES.md):
  *  - Semantic HTML5 (button, nav, ul/li)
- *  - ARIA 1.2 (aria-expanded, aria-controls, aria-label)
+ *  - ARIA 1.2 (aria-expanded, aria-controls, aria-label, aria-modal)
  *  - WCAG 2.1 AA (Touch-Target ≥44×44px, Focus-Visible)
  *  - Keine Inline-Styles, keine Magic Numbers
  *  - Design-Tokens aus :root (var(--lc-*))
@@ -47,6 +51,10 @@ export default function MobileNav({ activePanel, onNavClick, locale }: Props) {
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
   };
 
   const handleItemClick = (target: string) => {
@@ -88,35 +96,71 @@ export default function MobileNav({ activePanel, onNavClick, locale }: Props) {
         </a>
       </div>
 
-      {/* ── MOBILE MENU (noch ohne Slide-Animation — kommt in Schritt 3) ── */}
-      {isMenuOpen && (
-        <nav
-          id="mobile-nav-menu"
-          className="mobile-nav-menu"
-          aria-label={locale === 'de' ? 'Seitennavigation' : 'Page navigation'}
-        >
-          <ul className="mobile-nav-list" role="list">
-            {NAV_ITEMS.map((item) => {
-              const isActive =
-                (item.target === 'home' && activePanel === null) ||
-                (item.target !== 'home' && activePanel === item.target);
+      {/* ── MOBILE MENU (immer gerendert, Animation via CSS data-state) ── */}
+      {/* Backdrop: halbtransparenter Hintergrund, schließt Menu bei Klick */}
+      <div
+        className={`mobile-nav-backdrop${isMenuOpen ? ' is-open' : ''}`}
+        onClick={closeMenu}
+        aria-hidden="true"
+      />
 
-              return (
-                <li key={item.target} className="mobile-nav-listitem">
-                  <button
-                    type="button"
-                    className={`mobile-nav-item${isActive ? ' active' : ''}`}
-                    onClick={() => handleItemClick(item.target)}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    {t(item.key)}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      )}
+      <nav
+        id="mobile-nav-menu"
+        className={`mobile-nav-menu${isMenuOpen ? ' is-open' : ''}`}
+        aria-label={locale === 'de' ? 'Seitennavigation' : 'Page navigation'}
+        data-state={isMenuOpen ? 'open' : 'closed'}
+      >
+        <ul className="mobile-nav-list" role="list">
+          {NAV_ITEMS.map((item, index) => {
+            const isActive =
+              (item.target === 'home' && activePanel === null) ||
+              (item.target !== 'home' && activePanel === item.target);
+
+            return (
+              <li
+                key={item.target}
+                className="mobile-nav-listitem"
+                style={{ '--stagger-index': index } as React.CSSProperties}
+              >
+                <button
+                  type="button"
+                  className={`mobile-nav-item${isActive ? ' active' : ''}`}
+                  onClick={() => handleItemClick(item.target)}
+                  aria-current={isActive ? 'page' : undefined}
+                  tabIndex={isMenuOpen ? 0 : -1}
+                >
+                  {t(item.key)}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* ── Sprachumschalter unten im Menu (Sprint M3) ── */}
+        <div
+          className="mobile-nav-lang-switch"
+          role="group"
+          aria-label={t('footer.lang_aria_label')}
+        >
+          <a
+            href="/"
+            className={`mobile-nav-lang-btn${locale === 'de' ? ' active' : ''}`}
+            aria-current={locale === 'de' ? 'page' : undefined}
+            tabIndex={isMenuOpen ? 0 : -1}
+          >
+            DE
+          </a>
+          <span className="mobile-nav-lang-divider" aria-hidden="true">/</span>
+          <a
+            href="/en"
+            className={`mobile-nav-lang-btn${locale === 'en' ? ' active' : ''}`}
+            aria-current={locale === 'en' ? 'page' : undefined}
+            tabIndex={isMenuOpen ? 0 : -1}
+          >
+            EN
+          </a>
+        </div>
+      </nav>
     </>
   );
 }
